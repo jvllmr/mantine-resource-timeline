@@ -1,9 +1,9 @@
-import { SchedulerDisplayUnit } from "../../controller";
+import { SchedulerController } from "../../controller";
 
 export function determineSchedulerSubMomentsCount(
-  displayUnit: SchedulerDisplayUnit,
+  controller: SchedulerController,
 ) {
-  switch (displayUnit) {
+  switch (controller.displayUnit) {
     case "year":
       return 12;
     case "month":

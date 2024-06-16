@@ -7,10 +7,7 @@ import { useDateAccessor, useStringAccessor } from "../utils";
 import { NowMarker, NowMarkerController, NowMarkerProps } from "./NowMarker";
 import { ResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 import { SchedulerEntry, SchedulerEntryProps } from "./SchedulerEntry";
-import {
-  SchedulerMoment,
-  SchedulerMomentProps,
-} from "./SchedulerMoment/SchedulerMoment";
+import { SchedulerMoment } from "./SchedulerMoment/SchedulerMoment";
 import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
 
 export interface SchedulerBodyProps<TData, TResource> {
@@ -27,7 +24,9 @@ export interface SchedulerBodyProps<TData, TResource> {
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
   entryComponent?: React.FC<SchedulerEntryProps<TData>>;
   nowMarkerComponent?: React.FC<NowMarkerProps>;
-  customDetermineSchedulerSubMomentsCount?: SchedulerMomentProps["customDetermineSchedulerSubMomentsCount"];
+  customDetermineSchedulerSubMomentsCount?: (
+    controller: SchedulerController,
+  ) => number;
 }
 
 function SchedulerBodyRow<TData, TResource>({
@@ -123,6 +122,10 @@ function SchedulerBodyRow<TData, TResource>({
     { target: rowRef, wheel: { eventOptions: { passive: false } } },
   );
   const CustomSchedulerEntry = useMemo(() => entryComponent, [entryComponent]);
+  const subMomentsCount = useMemo(
+    () => customDetermineSchedulerSubMomentsCount(controller),
+    [controller, customDetermineSchedulerSubMomentsCount],
+  );
   return (
     <Flex pos="relative" ref={rowRef} style={{ touchAction: "none" }}>
       <NowMarkerController
@@ -164,9 +167,7 @@ function SchedulerBodyRow<TData, TResource>({
               isBottom={rowIndex === resources.length - 1}
               isLeft={momentIndex === 0}
               isRight={momentIndex === moments.length - 1}
-              customDetermineSchedulerSubMomentsCount={
-                customDetermineSchedulerSubMomentsCount
-              }
+              subMomentCount={subMomentsCount}
               loss={
                 momentIndex === 0
                   ? firstMomentLoss

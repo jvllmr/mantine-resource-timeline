@@ -14,9 +14,7 @@ export interface SchedulerMomentProps {
   resourceId: string;
   displayUnit: SchedulerDisplayUnit;
   inSub?: boolean;
-  customDetermineSchedulerSubMomentsCount: (
-    displayUnit: SchedulerDisplayUnit,
-  ) => number;
+  subMomentCount: number;
   loss: number;
 }
 
@@ -45,11 +43,7 @@ export const SchedulerMoment = React.memo((props: SchedulerMomentProps) => {
 });
 
 export const SchedulerSubMoments = React.memo((props: SchedulerMomentProps) => {
-  const count = Math.ceil(
-    props.customDetermineSchedulerSubMomentsCount(props.displayUnit) *
-      props.loss,
-  );
-
+  const count = Math.ceil(props.subMomentCount * props.loss);
   if (!count) return null;
   const width = `${100 / count}%`;
   return [...new Array(count).keys()].map((n) => (
