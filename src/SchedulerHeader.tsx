@@ -1,7 +1,11 @@
-import { Box, Flex, Grid, Paper } from "@mantine/core";
+import { Box, Button, Flex, Grid, Paper } from "@mantine/core";
 import { Dayjs } from "dayjs";
-import React from "react";
-import { SchedulerController, SchedulerDisplayUnit } from "./controller";
+import React, { useMemo } from "react";
+import {
+  SchedulerController,
+  SchedulerDisplayUnit,
+  useControllerContext,
+} from "./controller";
 
 export interface SchedulerHeaderProps {
   controller: SchedulerController;
@@ -50,7 +54,10 @@ interface BottomLabelProps {
   displayUnit: SchedulerDisplayUnit;
 }
 
-const BottomLabel = React.memo(({ moment, displayUnit }: BottomLabelProps) => {
+function MomentLabelText({
+  moment,
+  displayUnit,
+}: BottomLabelProps): React.ReactNode {
   switch (displayUnit) {
     case "year":
       return String(moment.year());
@@ -70,7 +77,39 @@ const BottomLabel = React.memo(({ moment, displayUnit }: BottomLabelProps) => {
   }
 
   return null;
-});
+}
+
+const BottomLabel = (props: BottomLabelProps) => {
+  const controller = useControllerContext();
+
+  const onClick = useMemo(() => {
+    if (props.displayUnit === "day") {
+      return () => {
+        controller.setViewStartDate(
+          props.moment.hour(0).minute(0).second(0).millisecond(0),
+        );
+        controller.setViewEndDate(
+          props.moment.hour(23).minute(59).second(59).millisecond(999),
+        );
+      };
+    }
+    return undefined;
+  }, [controller, props.displayUnit, props.moment]);
+  if (!onClick) return <MomentLabelText {...props} />;
+  return (
+    <Button
+      variant="subtle"
+      radius={0}
+      onClick={onClick}
+      p={0}
+      m={0}
+      w="100%"
+      h="100%"
+    >
+      <MomentLabelText {...props} />
+    </Button>
+  );
+};
 
 export function SchedulerHeader({ controller }: SchedulerHeaderProps) {
   return (
@@ -126,7 +165,6 @@ export function SchedulerHeader({ controller }: SchedulerHeaderProps) {
                       overflow: "hidden",
                     }}
                     w={`${momentWidth}%`}
-                    p="xs"
                   >
                     <BottomLabel
                       moment={moment}
