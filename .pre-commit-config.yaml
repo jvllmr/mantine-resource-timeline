@@ -4,4 +4,5 @@ repos:
     hooks:
       - id: prettier
         additional_dependencies:
-          [prettier@latest, prettier-plugin-organize-imports@latest]
+          - prettier@latest
+          - prettier-plugin-organize-imports@latest
