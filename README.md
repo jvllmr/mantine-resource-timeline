@@ -1,4 +1,4 @@
-# mantine-resource-scheduler
+# mantine-resource-timeline
 
 A simple but customizable resource scheduler/timeline built with mantine
 

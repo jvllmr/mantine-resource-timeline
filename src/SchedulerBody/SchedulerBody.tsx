@@ -13,17 +13,6 @@ import {
 } from "./SchedulerMoment/SchedulerMoment";
 import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
 
-export interface SchedulerResource {
-  id: string;
-  label?: React.ReactNode;
-}
-
-export interface SchedulerData {
-  resourceId: string;
-  startDate: Date;
-  endDate: Date;
-}
-
 export interface SchedulerBodyProps<TData, TResource> {
   startDate?: Date;
   endDate?: Date;
