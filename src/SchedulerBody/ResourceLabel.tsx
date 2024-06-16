@@ -1,3 +1,4 @@
+import { Center } from "@mantine/core";
 import { useStringAccessor } from "../utils";
 
 export interface ResourceLabelProps<TResource> {
@@ -11,5 +12,5 @@ export function ResourceLabel<TResource>({
 }: ResourceLabelProps<TResource>) {
   const getResourceId = useStringAccessor(resourceIdField);
 
-  return getResourceId(resource);
+  return <Center>{getResourceId(resource)}</Center>;
 }

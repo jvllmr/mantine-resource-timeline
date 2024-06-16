@@ -1,4 +1,4 @@
-import { Center, Flex, Grid, MantineStyleProps, Paper } from "@mantine/core";
+import { Flex, Grid, MantineStyleProps, Paper } from "@mantine/core";
 import { useGesture } from "@use-gesture/react";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
@@ -253,12 +253,10 @@ export function SchedulerBody<TData, TResource>({
                   borderBottomWidth: 0,
                 }}
               >
-                <Center>
-                  <CustomResourceLabel
-                    resource={resource}
-                    resourceIdField={resourceIdField}
-                  />
-                </Center>
+                <CustomResourceLabel
+                  resource={resource}
+                  resourceIdField={resourceIdField}
+                />
               </Paper>
             </Grid.Col>
             <Grid.Col span={10}>
