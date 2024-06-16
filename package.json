@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "type": "module",
   "repository": {
-    "url": "git+https://github.com/jvllmr/mantine-resource-scheduler.git",
+    "url": "git+https://github.com/jvllmr/mantine-resource-timeline.git",
     "type": "git"
   },
   "main": "./build/index.cjs",
