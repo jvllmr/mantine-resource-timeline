@@ -22,8 +22,8 @@ export function Scheduler<TData, TResource>({
 
   ...props
 }: SchedulerProps<TData, TResource>) {
-  const getEndDate = useDateAccessor(props.endDateField);
-  const getStartDate = useDateAccessor(props.startDateField);
+  const getEndDate = useDateAccessor(props.endDateAccessor);
+  const getStartDate = useDateAccessor(props.startDateAccessor);
   const relevantData = useMemo(
     () =>
       data.filter((item) => {

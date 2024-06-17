@@ -3,7 +3,12 @@ import { useGesture } from "@use-gesture/react";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
 import { SchedulerController, useControllerContext } from "../controller";
-import { useDateAccessor, useStringAccessor } from "../utils";
+import {
+  DataFieldAccessor,
+  useDateAccessor,
+  useStringAccessor,
+  useStringArrayAccessor,
+} from "../utils";
 import { NowMarker, NowMarkerController, NowMarkerProps } from "./NowMarker";
 import { ResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 import { SchedulerEntry, SchedulerEntryProps } from "./SchedulerEntry";
@@ -15,10 +20,10 @@ export interface SchedulerBodyProps<TData, TResource> {
   endDate?: Date;
   data: TData[];
   resources: TResource[];
-  startDateField: keyof TData;
-  endDateField: keyof TData;
-  dataResourceIdField: keyof TData;
-  resourceIdField: keyof TResource;
+  startDateAccessor: DataFieldAccessor<TData, Dayjs>;
+  endDateAccessor: DataFieldAccessor<TData, Dayjs>;
+  dataResourceIdAccessor: DataFieldAccessor<TData, string>;
+  resourceIdAccessor: DataFieldAccessor<TResource, string>;
   controller: SchedulerController;
   rowHeight: NonNullable<MantineStyleProps["h"]>;
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
@@ -54,7 +59,7 @@ function SchedulerBodyRow<TData, TResource>({
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
   >;
   calculateDistancePercentage: SchedulerController["calculateDistancePercentage"];
-  getDataResourceId: (dataItem: TData) => string;
+  getDataResourceId: (dataItem: TData) => string[];
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
   resourceId: string;
@@ -126,6 +131,10 @@ function SchedulerBodyRow<TData, TResource>({
     () => customDetermineSchedulerSubMomentsCount(controller),
     [controller, customDetermineSchedulerSubMomentsCount],
   );
+  const filteredData = useMemo(
+    () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
+    [data, getDataResourceId, resourceId],
+  );
   return (
     <Flex pos="relative" ref={rowRef} style={{ touchAction: "none" }}>
       <NowMarkerController
@@ -133,25 +142,23 @@ function SchedulerBodyRow<TData, TResource>({
         markerComponent={customNowMarker}
       />
 
-      {data
-        .filter((item) => getDataResourceId(item) === resourceId)
-        .map((item) => {
-          const startDate = getStartDate(item);
-          const endDate = getEndDate(item);
-          const startDistance = calculateDistancePercentage(startDate, "left");
-          const endDistance = calculateDistancePercentage(endDate, "right");
+      {filteredData.map((item) => {
+        const startDate = getStartDate(item);
+        const endDate = getEndDate(item);
+        const startDistance = calculateDistancePercentage(startDate, "left");
+        const endDistance = calculateDistancePercentage(endDate, "right");
 
-          return (
-            <CustomSchedulerEntry
-              pos="absolute"
-              data={item}
-              top="10%"
-              left={`${startDistance}%`}
-              h="80%"
-              right={`${endDistance}%`}
-            />
-          );
-        })}
+        return (
+          <CustomSchedulerEntry
+            pos="absolute"
+            data={item}
+            top="10%"
+            left={`${startDistance}%`}
+            h="80%"
+            right={`${endDistance}%`}
+          />
+        );
+      })}
 
       {moments
         .map((moment, index): [Dayjs, number] => [moment, momentWidths[index]])
@@ -184,11 +191,11 @@ function SchedulerBodyRow<TData, TResource>({
 
 export function SchedulerBody<TData, TResource>({
   resources,
-  resourceIdField,
+  resourceIdAccessor: resourceIdField,
   data,
-  dataResourceIdField,
-  endDateField,
-  startDateField,
+  dataResourceIdAccessor: dataResourceIdField,
+  endDateAccessor: endDateField,
+  startDateAccessor: startDateField,
   resourceLabelComponent,
   entryComponent,
   nowMarkerComponent,
@@ -203,7 +210,7 @@ export function SchedulerBody<TData, TResource>({
   rowHeight,
 }: SchedulerBodyProps<TData, TResource>) {
   const getResourceId = useStringAccessor(resourceIdField);
-  const getDataResourceId = useStringAccessor(dataResourceIdField);
+  const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
   const getEndDate = useDateAccessor(endDateField);
   const CustomResourceLabel = useMemo(

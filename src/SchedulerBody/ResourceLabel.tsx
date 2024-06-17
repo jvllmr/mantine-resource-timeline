@@ -1,9 +1,9 @@
 import { Center } from "@mantine/core";
-import { useStringAccessor } from "../utils";
+import { DataFieldAccessor, useStringAccessor } from "../utils";
 
 export interface ResourceLabelProps<TResource> {
   resource: TResource;
-  resourceIdField: keyof TResource;
+  resourceIdField: DataFieldAccessor<TResource, string>;
 }
 
 export function ResourceLabel<TResource>({

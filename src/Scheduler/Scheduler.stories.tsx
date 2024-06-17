@@ -2,6 +2,7 @@ import { Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useSchedulerController } from "../controller";
+
 import { Scheduler } from "./Scheduler";
 export default { title: "Basic Examples" };
 
@@ -60,10 +61,10 @@ export function BasicScheduler() {
         resources={resources}
         width="100%"
         height="95vh"
-        dataResourceIdField="resourceId"
-        endDateField="endDate"
-        startDateField="startDate"
-        resourceIdField="id"
+        dataResourceIdAccessor="resourceId"
+        endDateAccessor="endDate"
+        startDateAccessor={(dataItem) => dataItem.startDate}
+        resourceIdAccessor="id"
         controller={controller}
       />
     </Stack>

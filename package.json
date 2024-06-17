@@ -2,7 +2,7 @@
   "name": "mantine-resource-timeline",
   "description": "A resource timeline component built with Mantine",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.1.3",
   "type": "module",
   "repository": {
     "url": "git+https://github.com/jvllmr/mantine-resource-timeline.git",
