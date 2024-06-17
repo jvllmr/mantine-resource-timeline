@@ -31,8 +31,10 @@ export function Scheduler<TData, TResource>({
         const startDate = getStartDate(item);
 
         return (
-          endDate.isBefore(props.controller.viewEndDate) ||
-          startDate.isAfter(props.controller.viewStartDate) ||
+          (endDate.isBefore(props.controller.viewEndDate) &&
+            endDate.isAfter(props.controller.viewStartDate)) ||
+          (startDate.isAfter(props.controller.viewStartDate) &&
+            startDate.isBefore(props.controller.viewEndDate)) ||
           endDate.isSame(props.controller.viewEndDate) ||
           startDate.isSame(props.controller.viewStartDate)
         );
