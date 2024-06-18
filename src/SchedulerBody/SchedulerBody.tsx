@@ -269,6 +269,7 @@ export function SchedulerBody<TData, TResource>({
             </Grid.Col>
             <Grid.Col span={10}>
               <SchedulerBodyRow
+                key={rowIndex}
                 rowIndex={rowIndex}
                 calculateDistancePercentage={calculateDistancePercentage}
                 customDetermineSchedulerSubMomentsCount={
