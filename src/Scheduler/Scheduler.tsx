@@ -4,7 +4,7 @@ import {
   SchedulerBody,
   SchedulerBodyProps,
 } from "../SchedulerBody/SchedulerBody";
-import { SchedulerHeader } from "../SchedulerHeader";
+import { SchedulerHeader, SchedulerHeaderProps } from "../SchedulerHeader";
 import { controllerContext } from "../controller";
 import { useDateAccessor } from "../utils";
 
@@ -13,13 +13,14 @@ export interface SchedulerProps<TData, TResource>
   width: MantineStyleProps["w"];
   height: MantineStyleProps["h"];
   rowHeight?: SchedulerBodyProps<TData, TResource>["rowHeight"];
+  headerOnClick?: SchedulerHeaderProps["onClick"];
 }
 
 export function Scheduler<TData, TResource>({
   height,
   width,
   data,
-
+  headerOnClick,
   ...props
 }: SchedulerProps<TData, TResource>) {
   const getEndDate = useDateAccessor(props.endDateAccessor);
@@ -53,7 +54,10 @@ export function Scheduler<TData, TResource>({
     <Paper withBorder w={width} mah={height}>
       <controllerContext.Provider value={props.controller}>
         <Grid gutter={0}>
-          <SchedulerHeader controller={props.controller} />
+          <SchedulerHeader
+            controller={props.controller}
+            onClick={headerOnClick}
+          />
 
           <SchedulerBody {...props} data={relevantData} rowHeight={rowHeight} />
         </Grid>

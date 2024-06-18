@@ -3,6 +3,7 @@ import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useSchedulerController } from "../controller";
 
+import { SchedulerHeaderOnClickProp } from "../SchedulerHeader";
 import { Scheduler } from "./Scheduler";
 export default { title: "Basic Examples" };
 
@@ -28,6 +29,17 @@ const data = [
     endDate: dayjs().add(5, "hours"),
   },
 ];
+
+const headerOnClick: SchedulerHeaderOnClickProp = {
+  day: (moment, controller) => {
+    controller.setViewStartDate(
+      moment.hour(9).minute(0).second(0).millisecond(0),
+    );
+    controller.setViewEndDate(
+      moment.hour(17).minute(0).second(0).millisecond(0),
+    );
+  },
+};
 
 export function BasicScheduler() {
   const controller = useSchedulerController({});
@@ -66,6 +78,7 @@ export function BasicScheduler() {
         startDateAccessor={(dataItem) => dataItem.startDate}
         resourceIdAccessor="id"
         controller={controller}
+        headerOnClick={headerOnClick}
       />
     </Stack>
   );

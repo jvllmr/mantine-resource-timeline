@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, Paper } from "@mantine/core";
+import { Box, Button, Center, Flex, Grid, Paper } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import React, { useMemo } from "react";
 import {
@@ -7,8 +7,18 @@ import {
   useControllerContext,
 } from "./controller";
 
+export type SchedulerHeaderOnClickFn = (
+  moment: Dayjs,
+  controller: SchedulerController,
+) => void;
+
+export type SchedulerHeaderOnClickProp = Partial<
+  Record<SchedulerDisplayUnit, SchedulerHeaderOnClickFn>
+>;
+
 export interface SchedulerHeaderProps {
   controller: SchedulerController;
+  onClick?: SchedulerHeaderOnClickProp;
 }
 
 interface TopLabelProps {
@@ -52,6 +62,7 @@ const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
 interface BottomLabelProps {
   moment: Dayjs;
   displayUnit: SchedulerDisplayUnit;
+  onClick?: SchedulerHeaderOnClickFn;
 }
 
 function MomentLabelText({
@@ -79,28 +90,27 @@ function MomentLabelText({
   return null;
 }
 
-const BottomLabel = (props: BottomLabelProps) => {
+const BottomLabel = ({ onClick, ...props }: BottomLabelProps) => {
   const controller = useControllerContext();
 
-  const onClick = useMemo(() => {
-    if (props.displayUnit === "day") {
-      return () => {
-        controller.setViewStartDate(
-          props.moment.hour(0).minute(0).second(0).millisecond(0),
-        );
-        controller.setViewEndDate(
-          props.moment.hour(23).minute(59).second(59).millisecond(999),
-        );
-      };
-    }
-    return undefined;
-  }, [controller, props.displayUnit, props.moment]);
-  if (!onClick) return <MomentLabelText {...props} />;
+  const wrappedOnClick = useMemo(
+    () => (onClick ? () => onClick(props.moment, controller) : undefined),
+    [controller, onClick, props.moment],
+  );
+
+  if (!wrappedOnClick)
+    return (
+      <Box w="100%" h="100%" p={0} m={0}>
+        <Center>
+          <MomentLabelText {...props} />
+        </Center>
+      </Box>
+    );
   return (
     <Button
       variant="subtle"
       radius={0}
-      onClick={onClick}
+      onClick={wrappedOnClick}
       p={0}
       m={0}
       w="100%"
@@ -111,7 +121,12 @@ const BottomLabel = (props: BottomLabelProps) => {
   );
 };
 
-export function SchedulerHeader({ controller }: SchedulerHeaderProps) {
+export function SchedulerHeader({ controller, onClick }: SchedulerHeaderProps) {
+  const resolvedOnClick = useMemo(
+    () => onClick?.[controller.displayUnit],
+    [controller.displayUnit, onClick],
+  );
+
   return (
     <>
       <Grid.Col span={2}>
@@ -169,6 +184,7 @@ export function SchedulerHeader({ controller }: SchedulerHeaderProps) {
                     <BottomLabel
                       moment={moment}
                       displayUnit={controller.displayUnit}
+                      onClick={resolvedOnClick}
                     />
                   </Paper>
                 );
