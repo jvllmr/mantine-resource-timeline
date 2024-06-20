@@ -12,6 +12,10 @@ import {
   SchedulerEntry,
   SchedulerEntryProps,
 } from "./SchedulerBody/SchedulerEntry";
+import type {
+  SchedulerHeaderOnClickFn,
+  SchedulerHeaderOnClickProp,
+} from "./SchedulerHeader";
 import {
   SchedulerController,
   SchedulerControllerParams,
@@ -37,5 +41,7 @@ export type {
   SchedulerControllerParams,
   SchedulerDisplayUnit,
   SchedulerEntryProps,
+  SchedulerHeaderOnClickFn,
+  SchedulerHeaderOnClickProp,
   SchedulerProps,
 };
