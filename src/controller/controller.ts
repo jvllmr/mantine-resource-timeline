@@ -29,6 +29,7 @@ export interface SchedulerControllerParams<TData, TResource> {
   onSelect?: onSelectFn<TData, TResource>;
 }
 
+// @ts-expect-error TData is unused for now
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface SchedulerController<TData, TResource> {
   moments: Dayjs[];
