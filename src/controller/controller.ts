@@ -7,12 +7,18 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
+import {
+  SchedulerMomentOnDragEndFn,
+  SchedulerMomentOnDragStartOverFactory,
+  SelectedMoments,
+  onSelectFn,
+  useSchedulerSelect,
+} from "./selectControls";
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
 
-export interface SchedulerControllerParams {
+export interface SchedulerControllerParams<TData, TResource> {
   initialViewStartDate?: Dayjs;
   initialViewEndDate?: Dayjs;
   clip?: boolean;
@@ -20,15 +26,17 @@ export interface SchedulerControllerParams {
   onViewStartDateChange?: (date: Dayjs) => void;
   onViewEndDateChange?: (date: Dayjs) => void;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
+  onSelect?: onSelectFn<TData, TResource>;
 }
 
-export interface SchedulerController {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface SchedulerController<TData, TResource> {
   moments: Dayjs[];
   momentWidths: number[];
   viewStartDate: Dayjs;
   viewEndDate: Dayjs;
   displayUnit: SchedulerDisplayUnit;
-  bodyRef: React.MutableRefObject<HTMLDivElement | null>;
+
   setViewStartDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   setViewEndDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   calculateDistancePercentage: (
@@ -36,7 +44,12 @@ export interface SchedulerController {
     leftOrRight: "left" | "right",
   ) => number;
   enableGestures: boolean | undefined;
+  momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
+  momentDragStartOver?: SchedulerMomentOnDragStartOverFactory<TResource>;
+  selectedMoments: SelectedMoments;
+  selectedResource: TResource | null;
 }
+export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
 
 export function determineDisplayUnit(daysDiff: number): SchedulerDisplayUnit {
   if (daysDiff > 365) return "year";
@@ -89,15 +102,19 @@ function clipStartViewDate(date: Dayjs, displayUnit: SchedulerDisplayUnit) {
   }
 }
 
-export function useSchedulerController({
+export function useSchedulerController<TData, TResource>({
   initialViewEndDate,
   initialViewStartDate,
   clip,
   onViewEndDateChange,
   onViewStartDateChange,
   enableGestures,
+  onSelect,
   determineDisplayUnit: determineDisplayUnitParam,
-}: SchedulerControllerParams): SchedulerController {
+}: SchedulerControllerParams<TData, TResource>): SchedulerController<
+  TData,
+  TResource
+> {
   useEffect(() => {
     dayjs.extend(weekOfYear);
     dayjs.extend(localizedFormat);
@@ -123,8 +140,6 @@ export function useSchedulerController({
     () => Math.abs(viewStartDate.diff(viewEndDate, "days", true)),
     [viewEndDate, viewStartDate],
   );
-
-  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   const customDetermineDisplayUnit = useMemo(
     () => determineDisplayUnitParam ?? determineDisplayUnit,
@@ -217,34 +232,54 @@ export function useSchedulerController({
     ],
   );
 
-  return useMemo(
+  const selectControls = useSchedulerSelect(onSelect);
+
+  const controller: SchedulerController<TData, TResource> = useMemo(
     () => ({
       moments,
       momentWidths,
       viewEndDate,
       viewStartDate,
       displayUnit,
-      bodyRef,
+
       setViewEndDate,
       setViewStartDate,
       calculateDistancePercentage,
       enableGestures,
+
+      selectedMoments: selectControls.selectedMoments,
+      momentDragEnd: selectControls.onDragEnd,
+      momentDragStartOver: selectControls.onDragStartOverFactory,
+      selectedResource: selectControls.selectedResource,
     }),
     [
-      calculateDistancePercentage,
-      displayUnit,
-      momentWidths,
       moments,
+      momentWidths,
       viewEndDate,
       viewStartDate,
+      displayUnit,
+      calculateDistancePercentage,
       enableGestures,
+      selectControls.selectedMoments,
+      selectControls.onDragEnd,
+      selectControls.onDragStartOverFactory,
+      selectControls.selectedResource,
     ],
   );
+
+  useEffect(() => {
+    selectControls.setController(controller);
+  }, [controller, selectControls]);
+
+  return controller;
 }
 
-export const controllerContext = createContext<SchedulerController | null>(
-  null,
-);
+export const controllerContext = createContext<SchedulerController<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+> | null>(null);
 
 export function useControllerContext() {
   const controller = useContext(controllerContext);

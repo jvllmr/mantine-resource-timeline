@@ -5,7 +5,7 @@ import {
   SchedulerBodyProps,
 } from "../SchedulerBody/SchedulerBody";
 import { SchedulerHeader, SchedulerHeaderProps } from "../SchedulerHeader";
-import { controllerContext } from "../controller";
+import { controllerContext } from "../controller/controller";
 import { useDateAccessor } from "../utils";
 
 export interface SchedulerProps<TData, TResource>
@@ -13,7 +13,7 @@ export interface SchedulerProps<TData, TResource>
   width: MantineStyleProps["w"];
   height: MantineStyleProps["h"];
   rowHeight?: SchedulerBodyProps<TData, TResource>["rowHeight"];
-  headerOnClick?: SchedulerHeaderProps["onClick"];
+  headerOnClick?: SchedulerHeaderProps<TData, TResource>["onClick"];
 }
 
 export function Scheduler<TData, TResource>({

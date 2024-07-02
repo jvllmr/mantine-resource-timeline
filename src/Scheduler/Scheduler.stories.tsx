@@ -1,9 +1,10 @@
 import { Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
-import { useSchedulerController } from "../controller";
+import { useSchedulerController } from "../controller/controller";
 
 import { SchedulerHeaderOnClickProp } from "../SchedulerHeader";
+import { onSelectFn } from "../controller/selectControls";
 import { Scheduler } from "./Scheduler";
 export default { title: "Basic Examples" };
 
@@ -41,8 +42,17 @@ const headerOnClick: SchedulerHeaderOnClickProp = {
   },
 };
 
+const onSelect: onSelectFn<
+  (typeof data)[number],
+  (typeof resources)[number]
+> = ({ firstMoment, lastMoment, resource }) => {
+  alert(
+    `${firstMoment.toISOString()} to ${lastMoment.toISOString()} on ${resource.label} `,
+  );
+};
+
 export function BasicScheduler() {
-  const controller = useSchedulerController({});
+  const controller = useSchedulerController({ onSelect });
 
   return (
     <Stack>

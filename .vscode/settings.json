@@ -8,5 +8,6 @@
     "**/*.sass",
     "**/*.less",
     "node_modules/@mantine/core/styles.css"
-  ]
+  ],
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true
 }

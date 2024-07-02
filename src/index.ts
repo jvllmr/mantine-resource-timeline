@@ -22,7 +22,7 @@ import {
   SchedulerDisplayUnit,
   determineDisplayUnit,
   useSchedulerController,
-} from "./controller";
+} from "./controller/controller";
 
 export {
   NowMarker,

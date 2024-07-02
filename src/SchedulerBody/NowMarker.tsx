@@ -1,14 +1,14 @@
 import { Box, MantineStyleProps, Tooltip } from "@mantine/core";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
-import { SchedulerController } from "../controller";
+import { UnknownSchedulerController } from "../controller/controller";
 
 export function NowMarkerController({
   markerComponent,
   distanceCalculator,
 }: {
   markerComponent: React.FC<NowMarkerProps>;
-  distanceCalculator: SchedulerController["calculateDistancePercentage"];
+  distanceCalculator: UnknownSchedulerController["calculateDistancePercentage"];
 }) {
   const Marker = markerComponent;
   const [now, setNow] = useState(dayjs());

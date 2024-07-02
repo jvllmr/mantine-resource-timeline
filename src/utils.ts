@@ -1,5 +1,6 @@
-import { Dayjs, isDayjs } from "dayjs";
+import { Dayjs, ManipulateType, isDayjs } from "dayjs";
 import { useCallback } from "react";
+import { SchedulerDisplayUnit } from "./controller/controller";
 
 export type DataFieldAccessor<T, TValue> = keyof T | ((data: T) => TValue);
 
@@ -67,4 +68,22 @@ export function useStringArrayAccessor<T>(
     },
     [getValue],
   );
+}
+
+export function timeFraction(
+  div: number,
+  displayUnit: SchedulerDisplayUnit,
+): [number, ManipulateType] {
+  switch (displayUnit) {
+    case "year":
+      return [Math.floor(12 / div), "month"];
+    case "month":
+      return [Math.floor(30 / div), "day"];
+    case "week":
+      return [Math.floor(168 / div), "hour"];
+    case "day":
+      return [Math.floor(24 / div), "hour"];
+    case "hour":
+      return [Math.floor(1440 / div), "minute"];
+  }
 }

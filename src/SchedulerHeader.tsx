@@ -4,20 +4,21 @@ import React, { useMemo } from "react";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
+  UnknownSchedulerController,
   useControllerContext,
-} from "./controller";
+} from "./controller/controller";
 
 export type SchedulerHeaderOnClickFn = (
   moment: Dayjs,
-  controller: SchedulerController,
+  controller: UnknownSchedulerController,
 ) => void;
 
 export type SchedulerHeaderOnClickProp = Partial<
   Record<SchedulerDisplayUnit, SchedulerHeaderOnClickFn>
 >;
 
-export interface SchedulerHeaderProps {
-  controller: SchedulerController;
+export interface SchedulerHeaderProps<TData, TResource> {
+  controller: SchedulerController<TData, TResource>;
   onClick?: SchedulerHeaderOnClickProp;
 }
 
@@ -121,7 +122,10 @@ const BottomLabel = ({ onClick, ...props }: BottomLabelProps) => {
   );
 };
 
-export function SchedulerHeader({ controller, onClick }: SchedulerHeaderProps) {
+export function SchedulerHeader<TData, TResource>({
+  controller,
+  onClick,
+}: SchedulerHeaderProps<TData, TResource>) {
   const resolvedOnClick = useMemo(
     () => onClick?.[controller.displayUnit],
     [controller.displayUnit, onClick],
@@ -169,6 +173,7 @@ export function SchedulerHeader({ controller, onClick }: SchedulerHeaderProps) {
               .map(([moment, momentWidth], index) => {
                 return (
                   <Paper
+                    key={`header_moment_${moment.toISOString()}`}
                     withBorder
                     radius={0}
                     style={{
