@@ -6,7 +6,8 @@ import {
   SchedulerDisplayUnit,
   UnknownSchedulerController,
   useControllerContext,
-} from "./controller/controller";
+} from "../controller/controller";
+import { DefaultMomentLabel, MomentLabelProps } from "./DefaultMomentLabel";
 
 export type SchedulerHeaderOnClickFn = (
   moment: Dayjs,
@@ -20,6 +21,7 @@ export type SchedulerHeaderOnClickProp = Partial<
 export interface SchedulerHeaderProps<TData, TResource> {
   controller: SchedulerController<TData, TResource>;
   onClick?: SchedulerHeaderOnClickProp;
+  momentLabelComponent?: React.FC<MomentLabelProps<TData, TResource>>;
 }
 
 interface TopLabelProps {
@@ -60,50 +62,36 @@ const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
   return null;
 });
 
-interface BottomLabelProps {
+interface BottomLabelProps<TData, TResource> {
   moment: Dayjs;
-  displayUnit: SchedulerDisplayUnit;
+  momentLabelComponent?: SchedulerHeaderProps<
+    TData,
+    TResource
+  >["momentLabelComponent"];
   onClick?: SchedulerHeaderOnClickFn;
 }
 
-function MomentLabelText({
+const BottomLabel = <TData, TResource>({
+  onClick,
   moment,
-  displayUnit,
-}: BottomLabelProps): React.ReactNode {
-  switch (displayUnit) {
-    case "year":
-      return String(moment.year());
-    case "month":
-      return moment.format("MMMM");
-    case "week":
-      return String(moment.week());
-    case "day":
-      return (
-        <Flex direction="column">
-          <Box>{moment.format("dddd")}</Box>
-          <Box>{moment.format("D MMMM")}</Box>
-        </Flex>
-      );
-    case "hour":
-      return moment.format("LT");
-  }
-
-  return null;
-}
-
-const BottomLabel = ({ onClick, ...props }: BottomLabelProps) => {
+  momentLabelComponent,
+}: BottomLabelProps<TData, TResource>) => {
   const controller = useControllerContext();
 
   const wrappedOnClick = useMemo(
-    () => (onClick ? () => onClick(props.moment, controller) : undefined),
-    [controller, onClick, props.moment],
+    () => (onClick ? () => onClick(moment, controller) : undefined),
+    [controller, moment, onClick],
+  );
+  const MomentLabel = useMemo(
+    () => momentLabelComponent ?? DefaultMomentLabel,
+    [momentLabelComponent],
   );
 
   if (!wrappedOnClick)
     return (
       <Box w="100%" h="100%" p={0} m={0}>
         <Center>
-          <MomentLabelText {...props} />
+          <MomentLabel controller={controller} moment={moment} />
         </Center>
       </Box>
     );
@@ -117,7 +105,7 @@ const BottomLabel = ({ onClick, ...props }: BottomLabelProps) => {
       w="100%"
       h="100%"
     >
-      <MomentLabelText {...props} />
+      <MomentLabel controller={controller} moment={moment} />
     </Button>
   );
 };
@@ -125,6 +113,7 @@ const BottomLabel = ({ onClick, ...props }: BottomLabelProps) => {
 export function SchedulerHeader<TData, TResource>({
   controller,
   onClick,
+  momentLabelComponent,
 }: SchedulerHeaderProps<TData, TResource>) {
   const resolvedOnClick = useMemo(
     () => onClick?.[controller.displayUnit],
@@ -188,8 +177,8 @@ export function SchedulerHeader<TData, TResource>({
                   >
                     <BottomLabel
                       moment={moment}
-                      displayUnit={controller.displayUnit}
                       onClick={resolvedOnClick}
+                      momentLabelComponent={momentLabelComponent}
                     />
                   </Paper>
                 );
