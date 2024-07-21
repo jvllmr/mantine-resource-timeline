@@ -26,7 +26,7 @@ export function NowMarkerController({
       clearTimeout(timeout);
     };
   });
-
+  if (!nowLeft) return null;
   return <Marker left={nowLeft} now={now} />;
 }
 
@@ -36,7 +36,6 @@ export interface NowMarkerProps {
 }
 
 export const NowMarker = React.memo(({ left, now }: NowMarkerProps) => {
-  if (!left) return null;
   return (
     <Tooltip.Floating label={now.toString()}>
       <Box pos="absolute" left={left} bg="yellow" h="100%" w={1} />
