@@ -14,10 +14,10 @@ export function NowMarkerController({
   const [now, setNow] = useState(dayjs());
 
   const nowLeft = useMemo(() => {
-    const distance = distanceCalculator(dayjs(), "left");
+    const distance = distanceCalculator(now, "left");
     if (!distance) return undefined;
     return `${distance}%`;
-  }, [distanceCalculator]);
+  }, [distanceCalculator, now]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setNow(dayjs()), 1000);

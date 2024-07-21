@@ -3,7 +3,7 @@ import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useSchedulerController } from "../controller/controller";
 
-import { SchedulerHeaderOnClickProp } from "../SchedulerHeader";
+import { SchedulerHeaderOnClickProp } from "../SchedulerHeader/SchedulerHeader";
 import { onSelectFn } from "../controller/selectControls";
 import { Scheduler } from "./Scheduler";
 export default { title: "Basic Examples" };
@@ -51,7 +51,7 @@ const onSelect: onSelectFn<
   );
 };
 
-export function BasicScheduler() {
+export function AdvancedScheduler() {
   const controller = useSchedulerController({ onSelect });
 
   return (

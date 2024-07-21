@@ -19,7 +19,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "mantine-resource-timeline/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
