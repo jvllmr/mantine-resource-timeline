@@ -209,21 +209,21 @@ export function useSchedulerController<TData, TResource>({
 
   const calculateDistancePercentage = useCallback(
     (date: Dayjs, leftOrRight: "left" | "right") => {
-      if (leftOrRight === "left") {
-        if (date.isBefore(maybeClippedViewStartDate)) return 0;
-        return (
-          (date.diff(maybeClippedViewStartDate, displayUnit, true) /
-            displayUnitDiff) *
-          100
-        );
+      if (
+        date.isBefore(maybeClippedViewStartDate) ||
+        date.isAfter(maybeClippedViewEndDate)
+      )
+        return 0;
+
+      let left = maybeClippedViewStartDate;
+      let right = date;
+
+      if (leftOrRight === "right") {
+        left = date;
+        right = maybeClippedViewEndDate;
       }
 
-      if (date.isAfter(maybeClippedViewEndDate)) return 0;
-      return (
-        (maybeClippedViewEndDate.diff(date, displayUnit, true) /
-          displayUnitDiff) *
-        100
-      );
+      return (right.diff(left, displayUnit, true) / displayUnitDiff) * 100;
     },
     [
       displayUnit,
