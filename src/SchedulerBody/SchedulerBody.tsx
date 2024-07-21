@@ -13,12 +13,13 @@ import {
   useStringAccessor,
   useStringArrayAccessor,
 } from "../utils";
+import { resourceContext } from "./contexts";
 import { NowMarker, NowMarkerController, NowMarkerProps } from "./NowMarker";
 import { ResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 import { SchedulerEntry, SchedulerEntryProps } from "./SchedulerEntry";
+import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoment } from "./SchedulerMoment/SchedulerMoment";
 import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
-import { resourceContext } from "./contexts";
 
 export interface SchedulerBodyProps<TData, TResource> {
   startDate?: Date;
@@ -37,6 +38,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   customDetermineSchedulerSubMomentsCount?: (
     controller: UnknownSchedulerController,
   ) => number;
+  momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
 function SchedulerBodyRow<TData, TResource>({
@@ -57,6 +59,7 @@ function SchedulerBodyRow<TData, TResource>({
   resources,
   rowIndex,
   customDetermineSchedulerSubMomentsCount,
+  momentStyle,
 }: {
   data: TData[];
   resources: TResource[];
@@ -84,6 +87,7 @@ function SchedulerBodyRow<TData, TResource>({
       TResource
     >["customDetermineSchedulerSubMomentsCount"]
   >;
+  momentStyle?: MomentStyleFn<TData, TResource>;
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
@@ -193,6 +197,7 @@ function SchedulerBodyRow<TData, TResource>({
                     ? lastMomentLoss
                     : 1
               }
+              momentStyle={momentStyle}
             />
           );
         })}
@@ -219,6 +224,7 @@ export function SchedulerBody<TData, TResource>({
   customDetermineSchedulerSubMomentsCount:
     customDetermineSchedulerSubMomentsCountParam,
   rowHeight,
+  momentStyle,
 }: SchedulerBodyProps<TData, TResource>) {
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
@@ -300,6 +306,7 @@ export function SchedulerBody<TData, TResource>({
                 resourceId={resourceId}
                 resources={resources}
                 rowHeight={rowHeight}
+                momentStyle={momentStyle}
               />
             </Grid.Col>
           </resourceContext.Provider>

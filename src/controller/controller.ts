@@ -116,7 +116,7 @@ export function useSchedulerController<TData, TResource>({
   TData,
   TResource
 > {
-  useEffect(() => {
+  useMemo(() => {
     dayjs.extend(weekOfYear);
     dayjs.extend(localizedFormat);
   }, []);

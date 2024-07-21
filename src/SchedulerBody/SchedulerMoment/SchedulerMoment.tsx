@@ -1,7 +1,10 @@
-import { Flex, MantineStyleProps, Paper } from "@mantine/core";
+import { Flex, MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { Dayjs } from "dayjs";
-import React, { DragEvent, useContext } from "react";
-import { SchedulerDisplayUnit } from "../../controller/controller";
+import { DragEvent, useContext, useMemo } from "react";
+import {
+  SchedulerDisplayUnit,
+  useControllerContext,
+} from "../../controller/controller";
 import {
   SchedulerMomentOnDragEndFn,
   SchedulerMomentOnDragStartOverFactory,
@@ -10,7 +13,8 @@ import {
 import { timeFraction } from "../../utils";
 import { resourceContext } from "../contexts";
 import classes from "./SchedulerMoment.module.css";
-export interface SchedulerMomentProps<TResource> {
+import { MomentStyleFn } from "./momentStyling";
+export interface SchedulerMomentProps<TData, TResource> {
   width: string;
   height: MantineStyleProps["h"];
   isTop: boolean;
@@ -28,39 +32,65 @@ export interface SchedulerMomentProps<TResource> {
   selectedMoments: SelectedMoments;
   selectedResource: TResource | null;
   isSelected?: boolean;
+  momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
-export const SchedulerMoment = React.memo(
-  (props: SchedulerMomentProps<unknown>) => {
-    const resource = useContext(resourceContext);
-    const onDragEnd =
+export const SchedulerMoment = <TData, TResource>(
+  props: SchedulerMomentProps<TData, TResource>,
+) => {
+  // @ts-expect-error context cannot know generic
+  const resource: TResource = useContext(resourceContext);
+  const controller = useControllerContext();
+  const onDragEnd = useMemo(
+    () =>
       props.inSub && props.onDragEnd
         ? (event: DragEvent<HTMLDivElement>) =>
             props.onDragEnd?.(event, resource)
-        : undefined;
-    const onDragStartOver = props.inSub
-      ? props.onDragStartOverFactory?.(props.moment, resource)
-      : undefined;
-
-    return (
+        : undefined,
+    [props, resource],
+  );
+  const onDragStartOver = useMemo(
+    () =>
+      props.inSub
+        ? props.onDragStartOverFactory?.(props.moment, resource)
+        : undefined,
+    [props, resource],
+  );
+  const theme = useMantineTheme();
+  const isSelected = useMemo(
+    () => props.isSelected && props.selectedResource == resource,
+    [props.isSelected, props.selectedResource, resource],
+  );
+  const completeStyle = useMemo(
+    () => ({
+      ...props.momentStyle?.({
+        moment: props.moment,
+        controller,
+        theme,
+        isSelected,
+      }),
+      borderTopWidth: props.isTop && props.inSub ? undefined : 0,
+      borderRightWidth: 0,
+      borderLeftWidth: props.isLeft ? 0 : undefined,
+      borderBottomWidth: props.isBottom && !props.inSub ? undefined : 0,
+    }),
+    [controller, isSelected, props, theme],
+  );
+  return useMemo(
+    () => (
       <Paper
         key={`${props.moment.toISOString()}_${props.resourceId}`}
         radius={0}
         withBorder
         h={props.height}
         w={props.width}
-        style={{
-          borderTopWidth: props.isTop && props.inSub ? undefined : 0,
-          borderRightWidth: 0,
-          borderLeftWidth: props.isLeft ? 0 : undefined,
-          borderBottomWidth: props.isBottom && !props.inSub ? undefined : 0,
-        }}
+        style={completeStyle}
         onDragStart={onDragStartOver}
         onDragOver={onDragStartOver}
         onDragEnd={onDragEnd}
         draggable={!!(onDragEnd && onDragStartOver)}
         className={classes.schedulerMoment}
-        data-selected={props.isSelected && props.selectedResource == resource}
+        data-selected={isSelected}
       >
         {props.inSub ? null : (
           <Flex>
@@ -68,38 +98,37 @@ export const SchedulerMoment = React.memo(
           </Flex>
         )}
       </Paper>
+    ),
+    [completeStyle, isSelected, onDragEnd, onDragStartOver, props],
+  );
+};
+
+export const SchedulerSubMoments = <TData, TResource>(
+  props: SchedulerMomentProps<TData, TResource>,
+) => {
+  const count = Math.ceil(props.subMomentCount * props.loss);
+  if (!count) return null;
+
+  const width = `${100 / count}%`;
+  return [...new Array(count).keys()].map((n) => {
+    const fraction = timeFraction(count, props.displayUnit);
+    const myMoment = props.moment.add(fraction[0] * n, fraction[1]);
+
+    return (
+      <SchedulerMoment
+        {...props}
+        key={`sub_${myMoment.toISOString()}_${props.resourceId}`}
+        isTop
+        isBottom
+        isLeft={n === 0}
+        isRight={n === count - 1}
+        width={width}
+        inSub
+        moment={myMoment}
+        isSelected={
+          !!props.selectedMoments.find((selected) => selected.isSame(myMoment))
+        }
+      />
     );
-  },
-);
-
-export const SchedulerSubMoments = React.memo(
-  (props: SchedulerMomentProps<unknown>) => {
-    const count = Math.ceil(props.subMomentCount * props.loss);
-    if (!count) return null;
-
-    const width = `${100 / count}%`;
-    return [...new Array(count).keys()].map((n) => {
-      const fraction = timeFraction(count, props.displayUnit);
-      const myMoment = props.moment.add(fraction[0] * n, fraction[1]);
-
-      return (
-        <SchedulerMoment
-          {...props}
-          key={myMoment.toISOString()}
-          isTop
-          isBottom
-          isLeft={n === 0}
-          isRight={n === count - 1}
-          width={width}
-          inSub
-          moment={myMoment}
-          isSelected={
-            !!props.selectedMoments.find((selected) =>
-              selected.isSame(myMoment),
-            )
-          }
-        />
-      );
-    });
-  },
-);
+  });
+};

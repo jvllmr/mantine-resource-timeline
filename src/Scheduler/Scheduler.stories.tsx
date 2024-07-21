@@ -1,8 +1,9 @@
-import { Box, Grid, Stack } from "@mantine/core";
+import { alpha, Box, getThemeColor, Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useSchedulerController } from "../controller/controller";
 
+import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import {
   DefaultMomentLabel,
   MomentLabelProps,
@@ -73,6 +74,20 @@ function GermanMomentLabel(
   return <DefaultMomentLabel {...props} />;
 }
 
+const momentStyle: MomentStyleFn<
+  (typeof data)[number],
+  (typeof resources)[number]
+> = ({ moment, theme, isSelected }) => {
+  const momentDay = moment.day();
+
+  if (!isSelected && (momentDay === 0 || momentDay === 6)) {
+    const bgColor = alpha(getThemeColor(`${theme.primaryColor}.1`, theme), 0.3);
+
+    return { background: bgColor };
+  }
+  return undefined;
+};
+
 export function AdvancedScheduler() {
   const controller = useSchedulerController({ onSelect });
 
@@ -112,6 +127,7 @@ export function AdvancedScheduler() {
         controller={controller}
         headerOnClick={headerOnClick}
         momentLabelComponent={GermanMomentLabel}
+        momentStyle={momentStyle}
       />
     </Stack>
   );

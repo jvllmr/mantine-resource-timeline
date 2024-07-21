@@ -29,6 +29,7 @@ export function Scheduler<TData, TResource>({
   data,
   headerOnClick,
   momentLabelComponent,
+
   ...props
 }: SchedulerProps<TData, TResource>) {
   const getEndDate = useDateAccessor(props.endDateAccessor);
@@ -66,6 +67,7 @@ export function Scheduler<TData, TResource>({
             controller={props.controller}
             onClick={headerOnClick}
             momentLabelComponent={momentLabelComponent}
+            momentStyle={props.momentStyle}
           />
 
           <SchedulerBody {...props} data={relevantData} rowHeight={rowHeight} />

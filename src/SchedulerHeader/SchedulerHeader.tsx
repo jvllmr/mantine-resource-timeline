@@ -1,4 +1,12 @@
-import { Box, Button, Center, Flex, Grid, Paper } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Grid,
+  Paper,
+  useMantineTheme,
+} from "@mantine/core";
 import { Dayjs } from "dayjs";
 import React, { useMemo } from "react";
 import {
@@ -7,6 +15,7 @@ import {
   UnknownSchedulerController,
   useControllerContext,
 } from "../controller/controller";
+import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import { DefaultMomentLabel, MomentLabelProps } from "./DefaultMomentLabel";
 
 export type SchedulerHeaderOnClickFn = (
@@ -22,6 +31,7 @@ export interface SchedulerHeaderProps<TData, TResource> {
   controller: SchedulerController<TData, TResource>;
   onClick?: SchedulerHeaderOnClickProp;
   momentLabelComponent?: React.FC<MomentLabelProps<TData, TResource>>;
+  momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
 interface TopLabelProps {
@@ -69,12 +79,14 @@ interface BottomLabelProps<TData, TResource> {
     TResource
   >["momentLabelComponent"];
   onClick?: SchedulerHeaderOnClickFn;
+  momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
 const BottomLabel = <TData, TResource>({
   onClick,
   moment,
   momentLabelComponent,
+  momentStyle,
 }: BottomLabelProps<TData, TResource>) => {
   const controller = useControllerContext();
 
@@ -86,10 +98,21 @@ const BottomLabel = <TData, TResource>({
     () => momentLabelComponent ?? DefaultMomentLabel,
     [momentLabelComponent],
   );
+  const theme = useMantineTheme();
+  const resolvedStyle = useMemo(
+    () => ({
+      ...momentStyle?.({ moment, controller, theme }),
+      height: "100%",
+      width: "100%",
+      padding: 0,
+      margin: 0,
+    }),
+    [controller, moment, momentStyle, theme],
+  );
 
   if (!wrappedOnClick)
     return (
-      <Box w="100%" h="100%" p={0} m={0}>
+      <Box style={resolvedStyle}>
         <Center>
           <MomentLabel controller={controller} moment={moment} />
         </Center>
@@ -100,10 +123,7 @@ const BottomLabel = <TData, TResource>({
       variant="subtle"
       radius={0}
       onClick={wrappedOnClick}
-      p={0}
-      m={0}
-      w="100%"
-      h="100%"
+      style={resolvedStyle}
     >
       <MomentLabel controller={controller} moment={moment} />
     </Button>
@@ -114,6 +134,7 @@ export function SchedulerHeader<TData, TResource>({
   controller,
   onClick,
   momentLabelComponent,
+  momentStyle,
 }: SchedulerHeaderProps<TData, TResource>) {
   const resolvedOnClick = useMemo(
     () => onClick?.[controller.displayUnit],
@@ -179,6 +200,7 @@ export function SchedulerHeader<TData, TResource>({
                       moment={moment}
                       onClick={resolvedOnClick}
                       momentLabelComponent={momentLabelComponent}
+                      momentStyle={momentStyle}
                     />
                   </Paper>
                 );
