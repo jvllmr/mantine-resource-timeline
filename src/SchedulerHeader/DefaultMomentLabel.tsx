@@ -1,6 +1,5 @@
 import { Box, Flex } from "@mantine/core";
 import { Dayjs } from "dayjs";
-import React from "react";
 import { SchedulerController } from "../controller/controller";
 
 export type MomentLabelProps<TData, TResource> = {
@@ -8,7 +7,7 @@ export type MomentLabelProps<TData, TResource> = {
   controller: SchedulerController<TData, TResource>;
 };
 
-function PrivateDefaultMomentLabel<TData, TResource>({
+export function DefaultMomentLabel<TData, TResource>({
   controller,
   moment,
 }: MomentLabelProps<TData, TResource>) {
@@ -30,5 +29,3 @@ function PrivateDefaultMomentLabel<TData, TResource>({
       return moment.format("LT");
   }
 }
-
-export const DefaultMomentLabel = React.memo(PrivateDefaultMomentLabel);

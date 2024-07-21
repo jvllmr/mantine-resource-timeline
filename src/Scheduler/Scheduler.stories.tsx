@@ -1,8 +1,12 @@
-import { Grid, Stack } from "@mantine/core";
+import { Box, Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { useSchedulerController } from "../controller/controller";
 
+import {
+  DefaultMomentLabel,
+  MomentLabelProps,
+} from "../SchedulerHeader/DefaultMomentLabel";
 import { SchedulerHeaderOnClickProp } from "../SchedulerHeader/SchedulerHeader";
 import { onSelectFn } from "../controller/selectControls";
 import { Scheduler } from "./Scheduler";
@@ -51,6 +55,24 @@ const onSelect: onSelectFn<
   );
 };
 
+function GermanMomentLabel(
+  props: MomentLabelProps<(typeof data)[number], (typeof resources)[number]>,
+) {
+  if (props.controller.displayUnit === "day") {
+    const dayStr = props.moment.format("DD.MM.");
+    if (props.moment.day() === 1) {
+      return (
+        <Stack gap={2}>
+          <Box>KW {props.moment.week()}</Box>
+          <Box>{dayStr}</Box>
+        </Stack>
+      );
+    }
+    return dayStr;
+  }
+  return <DefaultMomentLabel {...props} />;
+}
+
 export function AdvancedScheduler() {
   const controller = useSchedulerController({ onSelect });
 
@@ -89,6 +111,7 @@ export function AdvancedScheduler() {
         resourceIdAccessor="id"
         controller={controller}
         headerOnClick={headerOnClick}
+        momentLabelComponent={GermanMomentLabel}
       />
     </Stack>
   );
