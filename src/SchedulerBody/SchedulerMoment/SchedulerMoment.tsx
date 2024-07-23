@@ -38,8 +38,7 @@ export interface SchedulerMomentProps<TData, TResource> {
 export const SchedulerMoment = <TData, TResource>(
   props: SchedulerMomentProps<TData, TResource>,
 ) => {
-  // @ts-expect-error context cannot know generic
-  const resource: TResource = useContext(resourceContext);
+  const resource = useContext<TResource>(resourceContext);
   const controller = useControllerContext();
   const onDragEnd = useMemo(
     () =>

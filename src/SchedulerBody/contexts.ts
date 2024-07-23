@@ -1,3 +1,4 @@
 import { createContext } from "react";
 
-export const resourceContext = createContext<unknown | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const resourceContext = createContext<any | null>(null);

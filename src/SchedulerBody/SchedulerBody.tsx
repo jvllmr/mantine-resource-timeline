@@ -15,15 +15,17 @@ import {
 } from "../utils";
 import { resourceContext } from "./contexts";
 import {
-  DefaultSchedulerEntry,
-  SchedulerEntryProps,
-} from "./DefaultSchedulerEntry";
-import {
   DefaultNowMarker,
   NowMarkerController,
   NowMarkerProps,
 } from "./NowMarker";
 import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
+import { schedulerEntryContext } from "./SchedulerEntry/context";
+import {
+  DefaultSchedulerEntry,
+  SchedulerEntryProps,
+  SchedulerEntryRenderer,
+} from "./SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoment } from "./SchedulerMoment/SchedulerMoment";
 import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
@@ -40,7 +42,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   controller: SchedulerController<TData, TResource>;
   rowHeight: NonNullable<MantineStyleProps["h"]>;
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
-  entryComponent?: React.FC<SchedulerEntryProps<TData>>;
+  entryComponent?: React.FC<SchedulerEntryProps<TData, TResource>>;
   nowMarkerComponent?: React.FC<NowMarkerProps>;
   customDetermineSchedulerSubMomentsCount?: (
     controller: UnknownSchedulerController,
@@ -51,15 +53,12 @@ export interface SchedulerBodyProps<TData, TResource> {
 function SchedulerBodyRow<TData, TResource>({
   data,
   customNowMarker,
-  calculateDistancePercentage,
+
   getDataResourceId,
   resourceId,
   getEndDate,
   getStartDate,
-  entryComponent,
-  moments,
-  momentWidths,
-  displayUnit,
+
   firstMomentLoss,
   lastMomentLoss,
   rowHeight,
@@ -73,7 +72,7 @@ function SchedulerBodyRow<TData, TResource>({
   customNowMarker: NonNullable<
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
   >;
-  calculateDistancePercentage: UnknownSchedulerController["calculateDistancePercentage"];
+
   getDataResourceId: (dataItem: TData) => string[];
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
@@ -81,12 +80,11 @@ function SchedulerBodyRow<TData, TResource>({
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
-  moments: UnknownSchedulerController["moments"];
-  momentWidths: UnknownSchedulerController["momentWidths"];
+
   rowHeight: SchedulerBodyProps<TData, TResource>["rowHeight"];
   firstMomentLoss: number;
   lastMomentLoss: number;
-  displayUnit: UnknownSchedulerController["displayUnit"];
+
   rowIndex: number;
   customDetermineSchedulerSubMomentsCount: NonNullable<
     SchedulerBodyProps<
@@ -142,7 +140,7 @@ function SchedulerBodyRow<TData, TResource>({
     },
     { target: rowRef, wheel: { eventOptions: { passive: false } } },
   );
-  const CustomSchedulerEntry = useMemo(() => entryComponent, [entryComponent]);
+
   const subMomentsCount = useMemo(
     () => customDetermineSchedulerSubMomentsCount(controller),
     [controller, customDetermineSchedulerSubMomentsCount],
@@ -154,18 +152,24 @@ function SchedulerBodyRow<TData, TResource>({
   return (
     <Flex pos="relative" ref={rowRef} style={{ touchAction: "none" }}>
       <NowMarkerController
-        distanceCalculator={calculateDistancePercentage}
+        distanceCalculator={controller.calculateDistancePercentage}
         markerComponent={customNowMarker}
       />
 
       {filteredData.map((item, index) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
-        const startDistance = calculateDistancePercentage(startDate, "left");
-        const endDistance = calculateDistancePercentage(endDate, "right");
+        const startDistance = controller.calculateDistancePercentage(
+          startDate,
+          "left",
+        );
+        const endDistance = controller.calculateDistancePercentage(
+          endDate,
+          "right",
+        );
 
         return (
-          <CustomSchedulerEntry
+          <SchedulerEntryRenderer
             key={`entry_${index}`}
             pos="absolute"
             data={item}
@@ -177,13 +181,16 @@ function SchedulerBodyRow<TData, TResource>({
         );
       })}
 
-      {moments
-        .map((moment, index): [Dayjs, number] => [moment, momentWidths[index]])
+      {controller.moments
+        .map((moment, index): [Dayjs, number] => [
+          moment,
+          controller.momentWidths[index],
+        ])
         .map(([moment, distance], momentIndex) => {
           return (
             <SchedulerMoment
               key={`moment_top_${moment.toISOString()}`}
-              displayUnit={displayUnit}
+              displayUnit={controller.displayUnit}
               height={rowHeight}
               moment={moment}
               resourceId={resourceId}
@@ -191,7 +198,7 @@ function SchedulerBodyRow<TData, TResource>({
               isTop={rowIndex === 0}
               isBottom={rowIndex === resources.length - 1}
               isLeft={momentIndex === 0}
-              isRight={momentIndex === moments.length - 1}
+              isRight={momentIndex === controller.moments.length - 1}
               subMomentCount={subMomentsCount}
               onDragEnd={controller.momentDragEnd}
               onDragStartOverFactory={controller.momentDragStartOver}
@@ -200,7 +207,7 @@ function SchedulerBodyRow<TData, TResource>({
               loss={
                 momentIndex === 0
                   ? firstMomentLoss
-                  : momentIndex === moments.length - 1
+                  : momentIndex === controller.moments.length - 1
                     ? lastMomentLoss
                     : 1
               }
@@ -222,17 +229,14 @@ export function SchedulerBody<TData, TResource>({
   resourceLabelComponent,
   entryComponent,
   nowMarkerComponent,
-  controller: {
-    calculateDistancePercentage,
-    moments,
-    momentWidths,
-    displayUnit,
-  },
+
   customDetermineSchedulerSubMomentsCount:
     customDetermineSchedulerSubMomentsCountParam,
   rowHeight,
   momentStyle,
 }: SchedulerBodyProps<TData, TResource>) {
+  const controller: SchedulerController<TData, TResource> =
+    useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
@@ -258,18 +262,20 @@ export function SchedulerBody<TData, TResource>({
   );
 
   const firstMomentLoss = useMemo(
-    () => (momentWidths[0] / 100) * (momentWidths.length - 1),
-    [momentWidths],
+    () =>
+      (controller.momentWidths[0] / 100) * (controller.momentWidths.length - 1),
+    [controller.momentWidths],
   );
 
   const lastMomentLoss = useMemo(
     () =>
-      (momentWidths[momentWidths.length - 1] / 100) * (momentWidths.length - 1),
-    [momentWidths],
+      (controller.momentWidths[controller.momentWidths.length - 1] / 100) *
+      (controller.momentWidths.length - 1),
+    [controller.momentWidths],
   );
 
   return (
-    <>
+    <schedulerEntryContext.Provider value={customSchedulerEntry}>
       {resources.map((resource, rowIndex) => {
         const resourceId = getResourceId(resource);
         return (
@@ -295,21 +301,17 @@ export function SchedulerBody<TData, TResource>({
               <SchedulerBodyRow
                 key={rowIndex}
                 rowIndex={rowIndex}
-                calculateDistancePercentage={calculateDistancePercentage}
                 customDetermineSchedulerSubMomentsCount={
                   customDetermineSchedulerSubMomentsCount
                 }
                 customNowMarker={customNowMarker}
                 data={data}
-                displayUnit={displayUnit}
                 entryComponent={customSchedulerEntry}
                 firstMomentLoss={firstMomentLoss}
                 lastMomentLoss={lastMomentLoss}
                 getDataResourceId={getDataResourceId}
                 getEndDate={getEndDate}
                 getStartDate={getStartDate}
-                momentWidths={momentWidths}
-                moments={moments}
                 resourceId={resourceId}
                 resources={resources}
                 rowHeight={rowHeight}
@@ -319,6 +321,6 @@ export function SchedulerBody<TData, TResource>({
           </resourceContext.Provider>
         );
       })}
-    </>
+    </schedulerEntryContext.Provider>
   );
 }

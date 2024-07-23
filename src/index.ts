@@ -1,8 +1,4 @@
 import { Scheduler, SchedulerProps } from "./Scheduler/Scheduler";
-import {
-  DefaultSchedulerEntry,
-  SchedulerEntryProps,
-} from "./SchedulerBody/DefaultSchedulerEntry";
 import { DefaultNowMarker, NowMarkerProps } from "./SchedulerBody/NowMarker";
 import {
   DefaultResourceLabel,
@@ -12,6 +8,10 @@ import {
   SchedulerBody,
   SchedulerBodyProps,
 } from "./SchedulerBody/SchedulerBody";
+import {
+  DefaultSchedulerEntry,
+  SchedulerEntryProps,
+} from "./SchedulerBody/SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerBody/SchedulerMoment/momentStyling";
 import {
   DefaultMomentLabel,
