@@ -11,6 +11,7 @@ export interface SchedulerEntryProps<TData, TResource> {
   pos: NonNullable<MantineStyleProps["pos"]>;
   data: TData;
   resource: TResource;
+  display: MantineStyleProps["display"];
 }
 
 export type SchedulerEntryComponent<TData, TResource> = React.FC<

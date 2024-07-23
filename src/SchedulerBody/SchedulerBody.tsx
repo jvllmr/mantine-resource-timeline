@@ -167,6 +167,12 @@ function SchedulerBodyRow<TData, TResource>({
           endDate,
           "right",
         );
+        const isOverlap =
+          controller.viewStartDate.isBefore(endDate) &&
+          controller.viewEndDate.isAfter(startDate);
+        const display: MantineStyleProps["display"] = isOverlap
+          ? undefined
+          : "none";
 
         return (
           <SchedulerEntryRenderer
@@ -177,6 +183,7 @@ function SchedulerBodyRow<TData, TResource>({
             left={`${startDistance}%`}
             h="80%"
             right={`${endDistance}%`}
+            display={display}
           />
         );
       })}
