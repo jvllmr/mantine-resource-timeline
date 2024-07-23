@@ -1,4 +1,4 @@
-import { MantineStyleProps, Paper } from "@mantine/core";
+import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { useContext } from "react";
 import { resourceContext } from "../contexts";
 import { schedulerEntryContext } from "./context";
@@ -25,8 +25,10 @@ export const DefaultSchedulerEntry: SchedulerEntryComponent<any, any> = ({
 
   ...props
 }) => {
+  const theme = useMantineTheme();
+
   return (
-    <Paper bg="blue" style={{ overflow: "hidden" }} {...props}>
+    <Paper bg={theme.primaryColor} style={{ overflow: "hidden" }} {...props}>
       Pass your own component to entryComponent prop to render your own thing
       here
     </Paper>
