@@ -12,24 +12,23 @@ import React, { useMemo } from "react";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
-  UnknownSchedulerController,
   useControllerContext,
 } from "../controller/controller";
 import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import { DefaultMomentLabel, MomentLabelProps } from "./DefaultMomentLabel";
 
-export type SchedulerHeaderOnClickFn = (
-  moment: Dayjs,
-  controller: UnknownSchedulerController,
-) => void;
+export type SchedulerHeaderOnClickFn<TData, TResource> = (params: {
+  moment: Dayjs;
+  controller: SchedulerController<TData, TResource>;
+}) => void;
 
-export type SchedulerHeaderOnClickProp = Partial<
-  Record<SchedulerDisplayUnit, SchedulerHeaderOnClickFn>
+export type SchedulerHeaderOnClickProp<TData, TResource> = Partial<
+  Record<SchedulerDisplayUnit, SchedulerHeaderOnClickFn<TData, TResource>>
 >;
 
 export interface SchedulerHeaderProps<TData, TResource> {
   controller: SchedulerController<TData, TResource>;
-  onClick?: SchedulerHeaderOnClickProp;
+  onClick?: SchedulerHeaderOnClickProp<TData, TResource>;
   momentLabelComponent?: React.FC<MomentLabelProps<TData, TResource>>;
   momentStyle?: MomentStyleFn<TData, TResource>;
 }
@@ -78,7 +77,7 @@ interface BottomLabelProps<TData, TResource> {
     TData,
     TResource
   >["momentLabelComponent"];
-  onClick?: SchedulerHeaderOnClickFn;
+  onClick?: SchedulerHeaderOnClickFn<TData, TResource>;
   momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
@@ -91,7 +90,7 @@ const BottomLabel = <TData, TResource>({
   const controller = useControllerContext();
 
   const wrappedOnClick = useMemo(
-    () => (onClick ? () => onClick(moment, controller) : undefined),
+    () => (onClick ? () => onClick({ moment, controller }) : undefined),
     [controller, moment, onClick],
   );
   const MomentLabel = useMemo(

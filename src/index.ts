@@ -1,17 +1,18 @@
 import { Scheduler, SchedulerProps } from "./Scheduler/Scheduler";
-import { NowMarker, NowMarkerProps } from "./SchedulerBody/NowMarker";
 import {
-  ResourceLabel,
+  DefaultSchedulerEntry,
+  SchedulerEntryProps,
+} from "./SchedulerBody/DefaultSchedulerEntry";
+import { DefaultNowMarker, NowMarkerProps } from "./SchedulerBody/NowMarker";
+import {
+  DefaultResourceLabel,
   ResourceLabelProps,
 } from "./SchedulerBody/ResourceLabel";
 import {
   SchedulerBody,
   SchedulerBodyProps,
 } from "./SchedulerBody/SchedulerBody";
-import {
-  SchedulerEntry,
-  SchedulerEntryProps,
-} from "./SchedulerBody/SchedulerEntry";
+import { MomentStyleFn } from "./SchedulerBody/SchedulerMoment/momentStyling";
 import {
   DefaultMomentLabel,
   MomentLabelProps,
@@ -27,21 +28,23 @@ import {
   determineDisplayUnit,
   useSchedulerController,
 } from "./controller/controller";
-import { onSelectFn } from "./controller/selectControls";
+import { OnSelectFn } from "./controller/selectControls";
 
 export {
   DefaultMomentLabel,
-  NowMarker,
-  ResourceLabel,
+  DefaultNowMarker as NowMarker,
+  DefaultResourceLabel as ResourceLabel,
   Scheduler,
   SchedulerBody,
-  SchedulerEntry,
+  DefaultSchedulerEntry as SchedulerEntry,
   determineDisplayUnit,
   useSchedulerController,
 };
 export type {
   MomentLabelProps,
+  MomentStyleFn,
   NowMarkerProps,
+  OnSelectFn,
   ResourceLabelProps,
   SchedulerBodyProps,
   SchedulerController,
@@ -51,5 +54,4 @@ export type {
   SchedulerHeaderOnClickFn,
   SchedulerHeaderOnClickProp,
   SchedulerProps,
-  onSelectFn,
 };

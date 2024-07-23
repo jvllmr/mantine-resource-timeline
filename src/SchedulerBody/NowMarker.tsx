@@ -35,7 +35,7 @@ export interface NowMarkerProps {
   now: Dayjs;
 }
 
-export const NowMarker = React.memo(({ left, now }: NowMarkerProps) => {
+export const DefaultNowMarker = React.memo(({ left, now }: NowMarkerProps) => {
   return (
     <Tooltip.Floating label={now.toString()}>
       <Box pos="absolute" left={left} bg="yellow" h="100%" w={1} />

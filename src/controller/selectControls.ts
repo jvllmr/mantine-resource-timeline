@@ -3,7 +3,7 @@ import { Dayjs } from "dayjs";
 import { DragEvent, useMemo, useRef } from "react";
 import { SchedulerController } from "./controller";
 
-export type onSelectFn<TData, TResource> = (params: {
+export type OnSelectFn<TData, TResource> = (params: {
   firstMoment: Dayjs;
   lastMoment: Dayjs;
   controller: SchedulerController<TData, TResource>;
@@ -23,7 +23,7 @@ export type SelectedMoments = Dayjs[];
 const constantDiv = document.createElement("div");
 
 export const useSchedulerSelect = <TData, TResource>(
-  onSelect?: onSelectFn<TData, TResource>,
+  onSelect?: OnSelectFn<TData, TResource>,
 ) => {
   const [selectedMoments, selectedMomentsHandlers] = useListState<Dayjs>([]);
 

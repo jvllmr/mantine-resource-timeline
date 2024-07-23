@@ -6,7 +6,7 @@ export interface ResourceLabelProps<TResource> {
   resourceIdField: DataFieldAccessor<TResource, string>;
 }
 
-export function ResourceLabel<TResource>({
+export function DefaultResourceLabel<TResource>({
   resource,
   resourceIdField,
 }: ResourceLabelProps<TResource>) {

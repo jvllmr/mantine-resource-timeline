@@ -14,9 +14,16 @@ import {
   useStringArrayAccessor,
 } from "../utils";
 import { resourceContext } from "./contexts";
-import { NowMarker, NowMarkerController, NowMarkerProps } from "./NowMarker";
-import { ResourceLabel, ResourceLabelProps } from "./ResourceLabel";
-import { SchedulerEntry, SchedulerEntryProps } from "./SchedulerEntry";
+import {
+  DefaultSchedulerEntry,
+  SchedulerEntryProps,
+} from "./DefaultSchedulerEntry";
+import {
+  DefaultNowMarker,
+  NowMarkerController,
+  NowMarkerProps,
+} from "./NowMarker";
+import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoment } from "./SchedulerMoment/SchedulerMoment";
 import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
@@ -231,15 +238,15 @@ export function SchedulerBody<TData, TResource>({
   const getStartDate = useDateAccessor(startDateField);
   const getEndDate = useDateAccessor(endDateField);
   const CustomResourceLabel = useMemo(
-    () => resourceLabelComponent ?? ResourceLabel,
+    () => resourceLabelComponent ?? DefaultResourceLabel,
     [resourceLabelComponent],
   );
   const customSchedulerEntry = useMemo(
-    () => entryComponent ?? SchedulerEntry,
+    () => entryComponent ?? DefaultSchedulerEntry,
     [entryComponent],
   );
   const customNowMarker = useMemo(
-    () => nowMarkerComponent ?? NowMarker,
+    () => nowMarkerComponent ?? DefaultNowMarker,
     [nowMarkerComponent],
   );
 

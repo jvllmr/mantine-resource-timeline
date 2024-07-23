@@ -1,17 +1,18 @@
 import { alpha, Box, getThemeColor, Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
-import { useSchedulerController } from "../controller/controller";
 
-import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import {
   DefaultMomentLabel,
   MomentLabelProps,
-} from "../SchedulerHeader/DefaultMomentLabel";
-import { SchedulerHeaderOnClickProp } from "../SchedulerHeader/SchedulerHeader";
-import { onSelectFn } from "../controller/selectControls";
-import { Scheduler } from "./Scheduler";
-export default { title: "Basic Examples" };
+  type MomentStyleFn,
+  onSelectFn,
+  Scheduler,
+  SchedulerHeaderOnClickProp,
+  useSchedulerController,
+} from "mantine-resource-timeline";
+
+export default { title: "Advanced" };
 
 const resources = [
   {

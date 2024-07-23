@@ -9,7 +9,7 @@ export interface SchedulerEntryProps<TData> {
   data: TData;
 }
 
-export function SchedulerEntry<TData>({
+export function DefaultSchedulerEntry<TData>({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data,
   ...props

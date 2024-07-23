@@ -10,10 +10,10 @@ import {
   useState,
 } from "react";
 import {
+  OnSelectFn,
   SchedulerMomentOnDragEndFn,
   SchedulerMomentOnDragStartOverFactory,
   SelectedMoments,
-  onSelectFn,
   useSchedulerSelect,
 } from "./selectControls";
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
@@ -26,7 +26,7 @@ export interface SchedulerControllerParams<TData, TResource> {
   onViewStartDateChange?: (date: Dayjs) => void;
   onViewEndDateChange?: (date: Dayjs) => void;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
-  onSelect?: onSelectFn<TData, TResource>;
+  onSelect?: OnSelectFn<TData, TResource>;
 }
 
 // @ts-expect-error TData is unused for now
