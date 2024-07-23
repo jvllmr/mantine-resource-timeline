@@ -1,6 +1,5 @@
-import { useListState } from "@mantine/hooks";
 import { Dayjs } from "dayjs";
-import { DragEvent, useMemo, useRef } from "react";
+import { DragEvent, useMemo, useRef, useState } from "react";
 import { SchedulerController } from "./controller";
 
 export type OnSelectFn<TData, TResource> = (params: {
@@ -12,20 +11,21 @@ export type OnSelectFn<TData, TResource> = (params: {
 
 export type SchedulerMomentOnDragStartOverFactory<TResource> = (
   moment: Dayjs,
+  nextMoment: Dayjs,
   resource: TResource,
 ) => (event: DragEvent<HTMLDivElement>) => void;
 export type SchedulerMomentOnDragEndFn<TResource> = (
   event: DragEvent<HTMLDivElement>,
   resource: TResource,
 ) => void;
-export type SelectedMoments = Dayjs[];
 
 const constantDiv = document.createElement("div");
 
 export const useSchedulerSelect = <TData, TResource>(
   onSelect?: OnSelectFn<TData, TResource>,
 ) => {
-  const [selectedMoments, selectedMomentsHandlers] = useListState<Dayjs>([]);
+  const [firstMoment, setFirstMoment] = useState<Dayjs | null>(null);
+  const [lastMoment, setLastMoment] = useState<Dayjs | null>(null);
 
   const controllerRef = useRef<SchedulerController<TData, TResource> | null>(
     null,
@@ -37,22 +37,24 @@ export const useSchedulerSelect = <TData, TResource>(
     | undefined = useMemo(
     () =>
       onSelect
-        ? (moment: Dayjs, resource: TResource) => (event) => {
-            if (
-              resource == selectedResourceRef.current ||
-              selectedResourceRef.current === null
-            ) {
-              event.dataTransfer.setDragImage(constantDiv, 0, 0);
+        ? (moment: Dayjs, nextMoment: Dayjs, resource: TResource) =>
+            (event) => {
+              if (
+                resource == selectedResourceRef.current ||
+                selectedResourceRef.current === null
+              ) {
+                event.dataTransfer.setDragImage(constantDiv, 0, 0);
+                if (!firstMoment || moment.isBefore(firstMoment)) {
+                  setFirstMoment(moment);
+                } else if (!lastMoment?.isSame(nextMoment)) {
+                  setLastMoment(nextMoment);
+                }
 
-              selectedMomentsHandlers.filter(
-                (selected) => !selected.isSame(moment),
-              );
-              selectedMomentsHandlers.append(moment);
-              selectedResourceRef.current = resource;
+                selectedResourceRef.current = resource;
+              }
             }
-          }
         : undefined,
-    [onSelect, selectedMomentsHandlers],
+    [firstMoment, lastMoment, onSelect],
   );
 
   const onDragEnd: SchedulerMomentOnDragEndFn<TResource> | undefined = useMemo(
@@ -60,22 +62,26 @@ export const useSchedulerSelect = <TData, TResource>(
       onSelect
         ? (event, resource) => {
             event.preventDefault();
-            if (onSelect && controllerRef.current && selectedMoments.length) {
-              const sortedMoments = [...selectedMoments].sort((a, b) =>
-                a.isBefore(b) ? -1 : a.isSame(b) ? 0 : 1,
-              );
+            if (
+              onSelect &&
+              controllerRef.current &&
+              firstMoment &&
+              lastMoment
+            ) {
               onSelect({
-                firstMoment: sortedMoments[0],
-                lastMoment: sortedMoments.pop()!,
+                firstMoment,
+                lastMoment,
                 resource,
                 controller: controllerRef.current,
               });
-              selectedMomentsHandlers.setState([]);
+
+              setFirstMoment(null);
+              setLastMoment(null);
               selectedResourceRef.current = null;
             }
           }
         : undefined,
-    [onSelect, selectedMoments, selectedMomentsHandlers],
+    [firstMoment, lastMoment, onSelect],
   );
 
   return useMemo(
@@ -84,9 +90,10 @@ export const useSchedulerSelect = <TData, TResource>(
         (controllerRef.current = controller),
       onDragStartOverFactory,
       onDragEnd,
-      selectedMoments,
+      firstMoment,
+      lastMoment,
       selectedResource: selectedResourceRef.current,
     }),
-    [onDragStartOverFactory, onDragEnd, selectedMoments],
+    [onDragStartOverFactory, onDragEnd, firstMoment, lastMoment],
   );
 };

@@ -209,7 +209,8 @@ function SchedulerBodyRow<TData, TResource>({
               subMomentCount={subMomentsCount}
               onDragEnd={controller.momentDragEnd}
               onDragStartOverFactory={controller.momentDragStartOver}
-              selectedMoments={controller.selectedMoments}
+              firstSelectedMoment={controller.firstSelectedMoment}
+              lastSelectedMoment={controller.lastSelectedMoment}
               selectedResource={controller.selectedResource}
               loss={
                 momentIndex === 0

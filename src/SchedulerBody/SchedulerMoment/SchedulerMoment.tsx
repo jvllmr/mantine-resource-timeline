@@ -8,7 +8,6 @@ import {
 import {
   SchedulerMomentOnDragEndFn,
   SchedulerMomentOnDragStartOverFactory,
-  SelectedMoments,
 } from "../../controller/selectControls";
 import { timeFraction } from "../../utils";
 import { resourceContext } from "../contexts";
@@ -29,10 +28,12 @@ export interface SchedulerMomentProps<TData, TResource> {
   loss: number;
   onDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
   onDragStartOverFactory?: SchedulerMomentOnDragStartOverFactory<TResource>;
-  selectedMoments: SelectedMoments;
+  firstSelectedMoment: Dayjs | null;
+  lastSelectedMoment: Dayjs | null;
   selectedResource: TResource | null;
   isSelected?: boolean;
   momentStyle?: MomentStyleFn<TData, TResource>;
+  nextMoment?: Dayjs;
 }
 
 export const SchedulerMoment = <TData, TResource>(
@@ -40,20 +41,27 @@ export const SchedulerMoment = <TData, TResource>(
 ) => {
   const resource = useContext<TResource>(resourceContext);
   const controller = useControllerContext();
+  const {
+    inSub,
+    nextMoment,
+    onDragEnd: innerOnDragEnd,
+    onDragStartOverFactory,
+    moment,
+  } = props;
   const onDragEnd = useMemo(
     () =>
-      props.inSub && props.onDragEnd
+      inSub && innerOnDragEnd
         ? (event: DragEvent<HTMLDivElement>) =>
-            props.onDragEnd?.(event, resource)
+            innerOnDragEnd?.(event, resource)
         : undefined,
-    [props, resource],
+    [inSub, innerOnDragEnd, resource],
   );
   const onDragStartOver = useMemo(
     () =>
-      props.inSub
-        ? props.onDragStartOverFactory?.(props.moment, resource)
+      inSub && nextMoment
+        ? onDragStartOverFactory?.(moment, nextMoment, resource)
         : undefined,
-    [props, resource],
+    [inSub, moment, nextMoment, onDragStartOverFactory, resource],
   );
   const theme = useMantineTheme();
   const isSelected = useMemo(
@@ -112,7 +120,7 @@ export const SchedulerSubMoments = <TData, TResource>(
   return [...new Array(count).keys()].map((n) => {
     const fraction = timeFraction(count, props.displayUnit);
     const myMoment = props.moment.add(fraction[0] * n, fraction[1]);
-
+    const nextMoment = props.moment.add(fraction[0] * (n + 1), fraction[1]);
     return (
       <SchedulerMoment
         {...props}
@@ -125,8 +133,12 @@ export const SchedulerSubMoments = <TData, TResource>(
         inSub
         moment={myMoment}
         isSelected={
-          !!props.selectedMoments.find((selected) => selected.isSame(myMoment))
+          (myMoment.isAfter(props.firstSelectedMoment) &&
+            nextMoment.isBefore(props.lastSelectedMoment)) ||
+          myMoment.isSame(props.firstSelectedMoment) ||
+          nextMoment.isSame(props.lastSelectedMoment)
         }
+        nextMoment={nextMoment}
       />
     );
   });

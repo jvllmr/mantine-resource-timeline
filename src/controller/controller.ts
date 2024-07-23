@@ -13,7 +13,6 @@ import {
   OnSelectFn,
   SchedulerMomentOnDragEndFn,
   SchedulerMomentOnDragStartOverFactory,
-  SelectedMoments,
   useSchedulerSelect,
 } from "./selectControls";
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
@@ -47,7 +46,8 @@ export interface SchedulerController<TData, TResource> {
   enableGestures: boolean | undefined;
   momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
   momentDragStartOver?: SchedulerMomentOnDragStartOverFactory<TResource>;
-  selectedMoments: SelectedMoments;
+  firstSelectedMoment: Dayjs | null;
+  lastSelectedMoment: Dayjs | null;
   selectedResource: TResource | null;
 }
 export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
@@ -248,7 +248,8 @@ export function useSchedulerController<TData, TResource>({
       calculateDistancePercentage,
       enableGestures,
 
-      selectedMoments: selectControls.selectedMoments,
+      firstSelectedMoment: selectControls.firstMoment,
+      lastSelectedMoment: selectControls.lastMoment,
       momentDragEnd: selectControls.onDragEnd,
       momentDragStartOver: selectControls.onDragStartOverFactory,
       selectedResource: selectControls.selectedResource,
@@ -261,7 +262,8 @@ export function useSchedulerController<TData, TResource>({
       displayUnit,
       calculateDistancePercentage,
       enableGestures,
-      selectControls.selectedMoments,
+      selectControls.firstMoment,
+      selectControls.lastMoment,
       selectControls.onDragEnd,
       selectControls.onDragStartOverFactory,
       selectControls.selectedResource,
