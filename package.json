@@ -61,6 +61,7 @@
     "@storybook/addon-interactions": "^8.2.5",
     "@storybook/addon-links": "^8.2.5",
     "@storybook/addon-onboarding": "^8.2.5",
+    "@storybook/addon-storysource": "^8.2.5",
     "@storybook/blocks": "^8.2.5",
     "@storybook/preview-api": "^8.2.5",
     "@storybook/react": "^8.2.5",

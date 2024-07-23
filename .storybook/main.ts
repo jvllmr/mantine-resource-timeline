@@ -1,5 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-
+import path from "path";
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
@@ -10,6 +10,21 @@ const config: StorybookConfig = {
     "@storybook/addon-interactions",
     "storybook-dark-mode",
     "storybook-addon-mantine",
+    {
+      name: "@storybook/addon-storysource",
+      options: {
+        rule: {
+          // test: [/\.stories\.jsx?$/], This is default
+          include: [path.resolve(__dirname, "../src")], // You can specify directories
+        },
+        loaderOptions: {
+          prettierConfig: { singleQuote: false },
+        },
+        sourceLoaderOptions: {
+          injectStoryParameters: false,
+        },
+      },
+    },
   ],
   framework: {
     name: "@storybook/react-vite",
