@@ -101,5 +101,6 @@
     "calendar",
     "component",
     "react"
-  ]
+  ],
+  "packageManager": "pnpm@9.6.0"
 }
