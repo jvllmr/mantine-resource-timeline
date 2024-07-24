@@ -6,7 +6,7 @@ const config: StorybookConfig = {
   addons: [
     "@storybook/addon-interactions",
     "storybook-dark-mode",
-    "storybook-addon-mantine",
+
     {
       name: "@storybook/addon-storysource",
       options: {
@@ -30,7 +30,11 @@ const config: StorybookConfig = {
         },
       },
     },
-    "@storybook/addon-essentials",
+    {
+      name: "@storybook/addon-essentials",
+      options: { docs: false, backgrounds: false },
+    },
+    "@storybook/addon-themes",
   ],
   framework: {
     name: "@storybook/react-vite",

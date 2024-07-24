@@ -2,17 +2,17 @@ import {
   DEFAULT_THEME,
   MantineProvider,
   MantineTheme,
+  MantineThemeProvider,
   useMantineColorScheme,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "@mantine/core/styles.layer.css";
 import "@mantine/dates/styles.layer.css";
+import { withThemeFromJSXProvider } from "@storybook/addon-themes";
 import { addons } from "@storybook/preview-api";
-import type { Preview } from "@storybook/react";
+import type { Preview, ReactRenderer } from "@storybook/react";
 import { useEffect } from "react";
-import { withMantineThemes } from "storybook-addon-mantine";
 import { DARK_MODE_EVENT_NAME } from "storybook-dark-mode";
-
 const allColorThemes: MantineTheme[] = Object.keys(DEFAULT_THEME.colors)
   .sort()
   .map((primaryColor) => ({ ...DEFAULT_THEME, primaryColor }));
@@ -48,12 +48,12 @@ const preview: Preview = {
         </MantineProvider>
       );
     },
-    withMantineThemes({
-      themes: allColorThemes.map((theme) => ({
-        id: theme.primaryColor,
-        name: `Color: ${theme.primaryColor}`,
-        ...theme,
-      })),
+    withThemeFromJSXProvider<ReactRenderer>({
+      defaultTheme: "blue",
+      Provider: MantineThemeProvider,
+      themes: Object.fromEntries(
+        allColorThemes.map((theme) => [theme.primaryColor, theme]),
+      ),
     }),
   ],
 };
