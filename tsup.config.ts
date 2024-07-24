@@ -3,9 +3,15 @@ import { esbuildPluginFilePathExtensions } from "esbuild-plugin-file-path-extens
 import { defineConfig } from "tsup";
 export default defineConfig([
   {
-    entry: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css"],
+    entry: [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "!src/**/*.stories.tsx",
+      "!src/**/*.stories.ts",
+      "src/**/*.css",
+    ],
     format: ["cjs", "esm"],
-    target: ["es2020", "node16"],
+    target: ["es2020"],
     outDir: "build",
     dts: true,
     sourcemap: true,
