@@ -1,5 +1,3 @@
-import { esbuildPluginFilePathExtensions } from "esbuild-plugin-file-path-extensions";
-
 import { defineConfig } from "tsup";
 export default defineConfig([
   {
@@ -16,6 +14,6 @@ export default defineConfig([
     dts: true,
     sourcemap: true,
     clean: true,
-    esbuildPlugins: [esbuildPluginFilePathExtensions({ esmExtension: "js" })],
+    bundle: false,
   },
 ]);
