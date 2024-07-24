@@ -6,7 +6,7 @@ import {
   DefaultMomentLabel,
   MomentLabelProps,
   type MomentStyleFn,
-  onSelectFn,
+  OnSelectFn,
   Scheduler,
   SchedulerHeaderOnClickProp,
   useSchedulerController,
@@ -37,8 +37,11 @@ const data = [
   },
 ];
 
-const headerOnClick: SchedulerHeaderOnClickProp = {
-  day: (moment, controller) => {
+const headerOnClick: SchedulerHeaderOnClickProp<
+  (typeof data)[number],
+  (typeof resources)[number]
+> = {
+  day: ({ moment, controller }) => {
     controller.setViewStartDate(
       moment.hour(9).minute(0).second(0).millisecond(0),
     );
@@ -48,7 +51,7 @@ const headerOnClick: SchedulerHeaderOnClickProp = {
   },
 };
 
-const onSelect: onSelectFn<
+const onSelect: OnSelectFn<
   (typeof data)[number],
   (typeof resources)[number]
 > = ({ firstMoment, lastMoment, resource }) => {
@@ -90,7 +93,7 @@ const momentStyle: MomentStyleFn<
 };
 
 export function AdvancedScheduler() {
-  const controller = useSchedulerController({ onSelect });
+  const controller = useSchedulerController({ onSelect, enableGestures: true });
 
   return (
     <Stack>
