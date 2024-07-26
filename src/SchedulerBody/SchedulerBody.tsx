@@ -196,7 +196,7 @@ function SchedulerBodyRow<TData, TResource>({
         .map(([moment, distance], momentIndex) => {
           return (
             <SchedulerMoment
-              key={`moment_top_${moment.toISOString()}`}
+              key={`scheduler_moment_top_${resourceId}_${momentIndex}`}
               displayUnit={controller.displayUnit}
               height={rowHeight}
               moment={moment}
@@ -212,6 +212,7 @@ function SchedulerBodyRow<TData, TResource>({
               firstSelectedMoment={controller.firstSelectedMoment}
               lastSelectedMoment={controller.lastSelectedMoment}
               selectedResource={controller.selectedResource}
+              momentIndex={momentIndex}
               loss={
                 momentIndex === 0
                   ? firstMomentLoss

@@ -34,6 +34,7 @@ export interface SchedulerMomentProps<TData, TResource> {
   isSelected?: boolean;
   momentStyle?: MomentStyleFn<TData, TResource>;
   nextMoment?: Dayjs;
+  momentIndex: number;
 }
 
 export const SchedulerMoment = <TData, TResource>(
@@ -86,7 +87,6 @@ export const SchedulerMoment = <TData, TResource>(
   return useMemo(
     () => (
       <Paper
-        key={`${props.moment.toISOString()}_${props.resourceId}`}
         radius={0}
         withBorder
         h={props.height}
@@ -101,7 +101,10 @@ export const SchedulerMoment = <TData, TResource>(
       >
         {props.inSub ? null : (
           <Flex>
-            <SchedulerSubMoments {...props} />
+            <SchedulerSubMoments
+              {...props}
+              key={`scheduler_sub_moments_top_${props.resourceId}_${props.momentIndex}`}
+            />
           </Flex>
         )}
       </Paper>
@@ -124,7 +127,7 @@ export const SchedulerSubMoments = <TData, TResource>(
     return (
       <SchedulerMoment
         {...props}
-        key={`sub_${myMoment.toISOString()}_${props.resourceId}`}
+        key={`scheduler_sub_moment_${props.resourceId}_${props.momentIndex}.${n}`}
         isTop
         isBottom
         isLeft={n === 0}
