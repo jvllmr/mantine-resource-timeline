@@ -19,11 +19,10 @@ export type SchedulerMomentOnDragEndFn<TResource> = (
   resource: TResource,
 ) => void;
 
-const constantDiv = document.createElement("div");
-
 export const useSchedulerSelect = <TData, TResource>(
   onSelect?: OnSelectFn<TData, TResource>,
 ) => {
+  const constantDiv = useMemo(() => document.createElement("div"), []);
   const [firstMoment, setFirstMoment] = useState<Dayjs | null>(null);
   const [lastMoment, setLastMoment] = useState<Dayjs | null>(null);
 
@@ -54,7 +53,7 @@ export const useSchedulerSelect = <TData, TResource>(
               }
             }
         : undefined,
-    [firstMoment, lastMoment, onSelect],
+    [constantDiv, firstMoment, lastMoment, onSelect],
   );
 
   const onDragEnd: SchedulerMomentOnDragEndFn<TResource> | undefined = useMemo(
