@@ -31,7 +31,18 @@ export const SchedulerMoments = <TData, TResource>({
   const controller: SchedulerController<TData, TResource> =
     useControllerContext();
   const { momentDragEnd, momentDragStartOver } = controller;
+  const firstMomentLoss = useMemo(
+    () =>
+      (controller.momentWidths[0] / 100) * (controller.momentWidths.length - 1),
+    [controller.momentWidths],
+  );
 
+  const lastMomentLoss = useMemo(
+    () =>
+      (controller.momentWidths[controller.momentWidths.length - 1] / 100) *
+      (controller.momentWidths.length - 1),
+    [controller.momentWidths],
+  );
   const theme = useMantineTheme();
 
   const zippedMoments = useMemo(
@@ -44,19 +55,37 @@ export const SchedulerMoments = <TData, TResource>({
   );
   const subbedMoments = useMemo(
     () =>
-      zippedMoments.flatMap(([moment, distance]): [Dayjs, number][] => {
-        if (subMomentCount < 2) return [[moment, distance]];
-        const newDistance = distance / subMomentCount;
-        const newMoments = [moment];
-        let newestMoment = moment;
-        const fraction = timeFraction(subMomentCount, controller.displayUnit);
-        for (let i = 1; i < subMomentCount; i++) {
-          newestMoment = newestMoment.add(...fraction);
-          newMoments.push(newestMoment);
-        }
-        return newMoments.map((newMoment) => [newMoment, newDistance]);
-      }),
-    [controller.displayUnit, subMomentCount, zippedMoments],
+      zippedMoments.flatMap(
+        ([moment, distance], momentIndex): [Dayjs, number][] => {
+          const loss =
+            momentIndex === 0
+              ? firstMomentLoss
+              : momentIndex === zippedMoments.length
+                ? lastMomentLoss
+                : 1;
+          const subMomentCountWithLoss = Math.ceil(subMomentCount * loss);
+          if (subMomentCountWithLoss < 2) return [[moment, distance]];
+          const newDistance = distance / subMomentCountWithLoss;
+          const newMoments = [moment];
+          let newestMoment = moment;
+          const fraction = timeFraction(
+            subMomentCountWithLoss,
+            controller.displayUnit,
+          );
+          for (let i = 1; i < subMomentCountWithLoss; i++) {
+            newestMoment = newestMoment.add(...fraction);
+            newMoments.push(newestMoment);
+          }
+          return newMoments.map((newMoment) => [newMoment, newDistance]);
+        },
+      ),
+    [
+      controller.displayUnit,
+      firstMomentLoss,
+      lastMomentLoss,
+      subMomentCount,
+      zippedMoments,
+    ],
   );
   return (
     <>
