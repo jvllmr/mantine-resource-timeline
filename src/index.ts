@@ -5,6 +5,7 @@ import {
   ResourceLabelProps,
 } from "./SchedulerBody/ResourceLabel";
 import {
+  DetermineSubMomentCountsFn,
   SchedulerBody,
   SchedulerBodyProps,
 } from "./SchedulerBody/SchedulerBody";
@@ -41,6 +42,7 @@ export {
   useSchedulerController,
 };
 export type {
+  DetermineSubMomentCountsFn,
   MomentLabelProps,
   MomentStyleFn,
   NowMarkerProps,

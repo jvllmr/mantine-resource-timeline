@@ -1,148 +1,114 @@
-import { Flex, MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
+import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import { DragEvent, useContext, useMemo } from "react";
 import {
-  SchedulerDisplayUnit,
+  SchedulerController,
   useControllerContext,
 } from "../../controller/controller";
-import {
-  SchedulerMomentOnDragEndFn,
-  SchedulerMomentOnDragStartOverFactory,
-} from "../../controller/selectControls";
 import { timeFraction } from "../../utils";
 import { resourceContext } from "../contexts";
 import classes from "./SchedulerMoment.module.css";
 import { MomentStyleFn } from "./momentStyling";
-export interface SchedulerMomentProps<TData, TResource> {
-  width: string;
-  height: MantineStyleProps["h"];
-  isTop: boolean;
-  isBottom: boolean;
-  isRight: boolean;
-  isLeft: boolean;
-  moment: Dayjs;
+
+export interface SchedulerMomentsProps<TData, TResource> {
   resourceId: string;
-  displayUnit: SchedulerDisplayUnit;
-  inSub?: boolean;
-  subMomentCount: number;
-  loss: number;
-  onDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
-  onDragStartOverFactory?: SchedulerMomentOnDragStartOverFactory<TResource>;
-  firstSelectedMoment: Dayjs | null;
-  lastSelectedMoment: Dayjs | null;
-  selectedResource: TResource | null;
-  isSelected?: boolean;
+  rowIndex: number;
+  rowHeight: MantineStyleProps["h"];
   momentStyle?: MomentStyleFn<TData, TResource>;
-  nextMoment?: Dayjs;
-  momentIndex: number;
+  resourcesCount: number;
+  subMomentCount: number;
 }
 
-export const SchedulerMoment = <TData, TResource>(
-  props: SchedulerMomentProps<TData, TResource>,
-) => {
-  const resource = useContext<TResource>(resourceContext);
-  const controller = useControllerContext();
-  const {
-    inSub,
-    nextMoment,
-    onDragEnd: innerOnDragEnd,
-    onDragStartOverFactory,
-    moment,
-  } = props;
-  const onDragEnd = useMemo(
-    () =>
-      inSub && innerOnDragEnd
-        ? (event: DragEvent<HTMLDivElement>) =>
-            innerOnDragEnd?.(event, resource)
-        : undefined,
-    [inSub, innerOnDragEnd, resource],
-  );
-  const onDragStartOver = useMemo(
-    () =>
-      inSub && nextMoment
-        ? onDragStartOverFactory?.(moment, nextMoment, resource)
-        : undefined,
-    [inSub, moment, nextMoment, onDragStartOverFactory, resource],
-  );
+export const SchedulerMoments = <TData, TResource>({
+  resourceId,
+  rowHeight,
+  rowIndex,
+  momentStyle,
+  subMomentCount,
+  resourcesCount,
+}: SchedulerMomentsProps<TData, TResource>) => {
+  const resource: TResource = useContext(resourceContext);
+  const controller: SchedulerController<TData, TResource> =
+    useControllerContext();
+  const { momentDragEnd, momentDragStartOver } = controller;
+
   const theme = useMantineTheme();
-  const isSelected = useMemo(
-    () => props.isSelected && props.selectedResource == resource,
-    [props.isSelected, props.selectedResource, resource],
-  );
-  const completeStyle = useMemo(
-    () => ({
-      ...props.momentStyle?.({
-        moment: props.moment,
-        controller,
-        theme,
-        isSelected,
-      }),
-      borderTopWidth: props.isTop && props.inSub ? undefined : 0,
-      borderRightWidth: 0,
-      borderLeftWidth: props.isLeft ? 0 : undefined,
-      borderBottomWidth: props.isBottom && !props.inSub ? undefined : 0,
-    }),
-    [controller, isSelected, props, theme],
-  );
-  return useMemo(
-    () => (
-      <Paper
-        radius={0}
-        withBorder
-        h={props.height}
-        w={props.width}
-        style={completeStyle}
-        onDragStart={onDragStartOver}
-        onDragOver={onDragStartOver}
-        onDragEnd={onDragEnd}
-        draggable={!!(onDragEnd && onDragStartOver)}
-        className={classes.schedulerMoment}
-        data-selected={isSelected}
-      >
-        {props.inSub ? null : (
-          <Flex>
-            <SchedulerSubMoments
-              {...props}
-              key={`scheduler_sub_moments_top_${props.resourceId}_${props.momentIndex}`}
-            />
-          </Flex>
-        )}
-      </Paper>
-    ),
-    [completeStyle, isSelected, onDragEnd, onDragStartOver, props],
-  );
-};
 
-export const SchedulerSubMoments = <TData, TResource>(
-  props: SchedulerMomentProps<TData, TResource>,
-) => {
-  const count = Math.ceil(props.subMomentCount * props.loss);
-  if (!count) return null;
-
-  const width = `${100 / count}%`;
-  return [...new Array(count).keys()].map((n) => {
-    const fraction = timeFraction(count, props.displayUnit);
-    const myMoment = props.moment.add(fraction[0] * n, fraction[1]);
-    const nextMoment = props.moment.add(fraction[0] * (n + 1), fraction[1]);
-    return (
-      <SchedulerMoment
-        {...props}
-        key={`scheduler_sub_moment_${props.resourceId}_${props.momentIndex}.${n}`}
-        isTop
-        isBottom
-        isLeft={n === 0}
-        isRight={n === count - 1}
-        width={width}
-        inSub
-        moment={myMoment}
-        isSelected={
-          (myMoment.isAfter(props.firstSelectedMoment) &&
-            nextMoment.isBefore(props.lastSelectedMoment)) ||
-          myMoment.isSame(props.firstSelectedMoment) ||
-          nextMoment.isSame(props.lastSelectedMoment)
+  const zippedMoments = useMemo(
+    () =>
+      controller.moments.map((moment, index): [Dayjs, number] => [
+        moment,
+        controller.momentWidths[index],
+      ]),
+    [controller.momentWidths, controller.moments],
+  );
+  const subbedMoments = useMemo(
+    () =>
+      zippedMoments.flatMap(([moment, distance]): [Dayjs, number][] => {
+        if (subMomentCount < 2) return [[moment, distance]];
+        const newDistance = distance / subMomentCount;
+        const newMoments = [moment];
+        let newestMoment = moment;
+        const fraction = timeFraction(subMomentCount, controller.displayUnit);
+        for (let i = 1; i < subMomentCount; i++) {
+          newestMoment = newestMoment.add(...fraction);
+          newMoments.push(newestMoment);
         }
-        nextMoment={nextMoment}
-      />
-    );
-  });
+        return newMoments.map((newMoment) => [newMoment, newDistance]);
+      }),
+    [controller.displayUnit, subMomentCount, zippedMoments],
+  );
+  return (
+    <>
+      {subbedMoments.map(([moment, distance], momentIndex) => {
+        const nextMoment =
+          momentIndex + 1 < subbedMoments.length
+            ? subbedMoments[momentIndex + 1][0]
+            : moment;
+        const isSelected =
+          controller.selectedResource == resource && // resource correct
+          ((moment.isAfter(controller.firstSelectedMoment) &&
+            nextMoment.isBefore(controller.lastSelectedMoment)) ||
+            moment.isSame(controller.firstSelectedMoment) ||
+            nextMoment.isSame(controller.lastSelectedMoment));
+        const completeStyle = {
+          ...momentStyle?.({
+            moment,
+            controller,
+            theme,
+            isSelected,
+          }),
+          borderTopWidth: rowIndex === 0 ? undefined : 0,
+          borderRightWidth: 0,
+          borderLeftWidth: momentIndex === 0 ? 0 : undefined,
+          borderBottomWidth: rowIndex === resourcesCount - 1 ? 0 : undefined,
+        };
+        const onDragStartOver = momentDragStartOver?.(
+          moment,
+          nextMoment,
+          resource,
+        );
+        const onDragEnd = momentDragEnd
+          ? (event: DragEvent<HTMLDivElement>) => momentDragEnd(event, resource)
+          : undefined;
+
+        return (
+          <Paper
+            key={`moment_${resourceId}_${momentIndex}`}
+            radius={0}
+            w={`${distance}%`}
+            h={rowHeight}
+            withBorder
+            style={completeStyle}
+            className={classes.schedulerMoment}
+            data-selected={isSelected}
+            onDragEnd={onDragEnd}
+            onDragOver={onDragStartOver}
+            onDragStart={onDragStartOver}
+            draggable={!!(onDragEnd && onDragStartOver)}
+          />
+        );
+      })}
+    </>
+  );
 };

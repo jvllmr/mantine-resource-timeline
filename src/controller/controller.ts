@@ -15,6 +15,7 @@ import {
   SchedulerMomentOnDragStartOverFactory,
   useSchedulerSelect,
 } from "./selectControls";
+
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
 
 export interface SchedulerControllerParams<TData, TResource> {
@@ -111,6 +112,7 @@ export function useSchedulerController<TData, TResource>({
   onViewStartDateChange,
   enableGestures,
   onSelect,
+
   determineDisplayUnit: determineDisplayUnitParam,
 }: SchedulerControllerParams<TData, TResource>): SchedulerController<
   TData,

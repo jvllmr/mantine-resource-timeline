@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 
 import {
   DefaultMomentLabel,
+  DetermineSubMomentCountsFn,
   MomentLabelProps,
   type MomentStyleFn,
   OnSelectFn,
@@ -60,6 +61,8 @@ const onSelect: OnSelectFn<
   );
 };
 
+const determineSubMomentCounts: DetermineSubMomentCountsFn = () => 2;
+
 function GermanMomentLabel(
   props: MomentLabelProps<(typeof data)[number], (typeof resources)[number]>,
 ) {
@@ -93,7 +96,10 @@ const momentStyle: MomentStyleFn<
 };
 
 export function AdvancedScheduler() {
-  const controller = useSchedulerController({ onSelect, enableGestures: true });
+  const controller = useSchedulerController({
+    onSelect,
+    enableGestures: false,
+  });
 
   return (
     <Stack>
@@ -132,6 +138,7 @@ export function AdvancedScheduler() {
         headerOnClick={headerOnClick}
         momentLabelComponent={GermanMomentLabel}
         momentStyle={momentStyle}
+        determineSubMomentCounts={determineSubMomentCounts}
       />
     </Stack>
   );

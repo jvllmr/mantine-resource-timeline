@@ -4,7 +4,7 @@ import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
 import {
   SchedulerController,
-  UnknownSchedulerController,
+  SchedulerDisplayUnit,
   useControllerContext,
 } from "../controller/controller";
 import {
@@ -27,9 +27,11 @@ import {
   SchedulerEntryRenderer,
 } from "./SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
-import { SchedulerMoment } from "./SchedulerMoment/SchedulerMoment";
-import { determineSchedulerSubMomentsCount } from "./SchedulerMoment/util";
+import { SchedulerMoments } from "./SchedulerMoment/SchedulerMoment";
 
+export type DetermineSubMomentCountsFn = (
+  displayUnit: SchedulerDisplayUnit,
+) => number;
 export interface SchedulerBodyProps<TData, TResource> {
   startDate?: Date;
   endDate?: Date;
@@ -44,9 +46,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
   entryComponent?: React.FC<SchedulerEntryProps<TData, TResource>>;
   nowMarkerComponent?: React.FC<NowMarkerProps>;
-  customDetermineSchedulerSubMomentsCount?: (
-    controller: UnknownSchedulerController,
-  ) => number;
+  determineSubMomentCounts?: DetermineSubMomentCountsFn;
   momentStyle?: MomentStyleFn<TData, TResource>;
 }
 
@@ -58,17 +58,14 @@ function SchedulerBodyRow<TData, TResource>({
   resourceId,
   getEndDate,
   getStartDate,
-
-  firstMomentLoss,
-  lastMomentLoss,
+  resourcesCount,
   rowHeight,
-  resources,
   rowIndex,
-  customDetermineSchedulerSubMomentsCount,
   momentStyle,
+  subMomentCount,
 }: {
   data: TData[];
-  resources: TResource[];
+  resourcesCount: number;
   customNowMarker: NonNullable<
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
   >;
@@ -82,16 +79,9 @@ function SchedulerBodyRow<TData, TResource>({
   >;
 
   rowHeight: SchedulerBodyProps<TData, TResource>["rowHeight"];
-  firstMomentLoss: number;
-  lastMomentLoss: number;
 
   rowIndex: number;
-  customDetermineSchedulerSubMomentsCount: NonNullable<
-    SchedulerBodyProps<
-      TData,
-      TResource
-    >["customDetermineSchedulerSubMomentsCount"]
-  >;
+  subMomentCount: number;
   momentStyle?: MomentStyleFn<TData, TResource>;
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -141,10 +131,6 @@ function SchedulerBodyRow<TData, TResource>({
     { target: rowRef, wheel: { eventOptions: { passive: false } } },
   );
 
-  const subMomentsCount = useMemo(
-    () => customDetermineSchedulerSubMomentsCount(controller),
-    [controller, customDetermineSchedulerSubMomentsCount],
-  );
   const filteredData = useMemo(
     () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
     [data, getDataResourceId, resourceId],
@@ -188,42 +174,14 @@ function SchedulerBodyRow<TData, TResource>({
         );
       })}
 
-      {controller.moments
-        .map((moment, index): [Dayjs, number] => [
-          moment,
-          controller.momentWidths[index],
-        ])
-        .map(([moment, distance], momentIndex) => {
-          return (
-            <SchedulerMoment
-              key={`scheduler_moment_top_${resourceId}_${momentIndex}`}
-              displayUnit={controller.displayUnit}
-              height={rowHeight}
-              moment={moment}
-              resourceId={resourceId}
-              width={`${distance}%`}
-              isTop={rowIndex === 0}
-              isBottom={rowIndex === resources.length - 1}
-              isLeft={momentIndex === 0}
-              isRight={momentIndex === controller.moments.length - 1}
-              subMomentCount={subMomentsCount}
-              onDragEnd={controller.momentDragEnd}
-              onDragStartOverFactory={controller.momentDragStartOver}
-              firstSelectedMoment={controller.firstSelectedMoment}
-              lastSelectedMoment={controller.lastSelectedMoment}
-              selectedResource={controller.selectedResource}
-              momentIndex={momentIndex}
-              loss={
-                momentIndex === 0
-                  ? firstMomentLoss
-                  : momentIndex === controller.moments.length - 1
-                    ? lastMomentLoss
-                    : 1
-              }
-              momentStyle={momentStyle}
-            />
-          );
-        })}
+      <SchedulerMoments
+        resourceId={resourceId}
+        resourcesCount={resourcesCount}
+        rowHeight={rowHeight}
+        rowIndex={rowIndex}
+        momentStyle={momentStyle}
+        subMomentCount={subMomentCount}
+      />
     </Flex>
   );
 }
@@ -238,14 +196,11 @@ export function SchedulerBody<TData, TResource>({
   resourceLabelComponent,
   entryComponent,
   nowMarkerComponent,
-
-  customDetermineSchedulerSubMomentsCount:
-    customDetermineSchedulerSubMomentsCountParam,
+  determineSubMomentCounts,
   rowHeight,
   momentStyle,
 }: SchedulerBodyProps<TData, TResource>) {
-  const controller: SchedulerController<TData, TResource> =
-    useControllerContext();
+  const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
@@ -263,24 +218,9 @@ export function SchedulerBody<TData, TResource>({
     [nowMarkerComponent],
   );
 
-  const customDetermineSchedulerSubMomentsCount = useMemo(
-    () =>
-      customDetermineSchedulerSubMomentsCountParam ??
-      determineSchedulerSubMomentsCount,
-    [customDetermineSchedulerSubMomentsCountParam],
-  );
-
-  const firstMomentLoss = useMemo(
-    () =>
-      (controller.momentWidths[0] / 100) * (controller.momentWidths.length - 1),
-    [controller.momentWidths],
-  );
-
-  const lastMomentLoss = useMemo(
-    () =>
-      (controller.momentWidths[controller.momentWidths.length - 1] / 100) *
-      (controller.momentWidths.length - 1),
-    [controller.momentWidths],
+  const subMomentCount = useMemo(
+    () => determineSubMomentCounts?.(controller.displayUnit) ?? 0,
+    [controller.displayUnit, determineSubMomentCounts],
   );
 
   return (
@@ -310,21 +250,17 @@ export function SchedulerBody<TData, TResource>({
               <SchedulerBodyRow
                 key={rowIndex}
                 rowIndex={rowIndex}
-                customDetermineSchedulerSubMomentsCount={
-                  customDetermineSchedulerSubMomentsCount
-                }
                 customNowMarker={customNowMarker}
                 data={data}
                 entryComponent={customSchedulerEntry}
-                firstMomentLoss={firstMomentLoss}
-                lastMomentLoss={lastMomentLoss}
                 getDataResourceId={getDataResourceId}
                 getEndDate={getEndDate}
                 getStartDate={getStartDate}
                 resourceId={resourceId}
-                resources={resources}
                 rowHeight={rowHeight}
                 momentStyle={momentStyle}
+                resourcesCount={resources.length}
+                subMomentCount={subMomentCount}
               />
             </Grid.Col>
           </resourceContext.Provider>
