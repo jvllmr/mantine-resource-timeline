@@ -234,7 +234,7 @@ export function SchedulerBody<TData, TResource>({
                 withBorder
                 radius={0}
                 w="100%"
-                h="100%"
+                mah={rowHeight}
                 style={{
                   borderLeftWidth: 0,
                   borderBottomWidth: 0,
