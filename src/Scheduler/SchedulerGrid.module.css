@@ -1,0 +1,20 @@
+.grid {
+  display: grid;
+  gap: 0rem;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.subGrid {
+  display: grid;
+  grid-template-columns: subgrid;
+
+  grid-column: span 12;
+}
+
+.resourceLabels {
+  grid-column: span 2;
+}
+
+.mainBody {
+  grid-column: span 10;
+}

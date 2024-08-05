@@ -3,7 +3,6 @@ import {
   Button,
   Center,
   Flex,
-  Grid,
   Paper,
   useMantineTheme,
 } from "@mantine/core";
@@ -142,7 +141,7 @@ export function SchedulerHeader<TData, TResource>({
 
   return (
     <>
-      <Grid.Col span={2}>
+      <div style={{ gridColumn: "span 2" }}>
         <Paper
           withBorder
           h="100%"
@@ -155,8 +154,8 @@ export function SchedulerHeader<TData, TResource>({
             borderBottomWidth: 0,
           }}
         />
-      </Grid.Col>
-      <Grid.Col span={10}>
+      </div>
+      <div style={{ gridColumn: "span 10" }}>
         <Flex direction="column" w="100%">
           <Paper
             withBorder
@@ -206,7 +205,7 @@ export function SchedulerHeader<TData, TResource>({
               })}
           </Flex>
         </Flex>
-      </Grid.Col>
+      </div>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Flex, Grid, MantineStyleProps, Paper } from "@mantine/core";
+import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
 import {
@@ -6,6 +6,7 @@ import {
   SchedulerDisplayUnit,
   useControllerContext,
 } from "../controller/controller";
+import gridClasses from "../Scheduler/SchedulerGrid.module.css";
 import {
   DataFieldAccessor,
   useDateAccessor,
@@ -27,7 +28,6 @@ import {
 } from "./SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoments } from "./SchedulerMoment/SchedulerMoment";
-
 export type DetermineSubMomentCountsFn = (
   displayUnit: SchedulerDisplayUnit,
 ) => number;
@@ -186,52 +186,54 @@ export function SchedulerBody<TData, TResource>({
   );
 
   return (
-    <schedulerEntryContext.Provider value={customSchedulerEntry}>
-      {resources.map((resource, rowIndex) => {
-        const resourceId = getResourceId(resource);
-        return (
-          <resourceContext.Provider
-            key={`resource_row_${resourceId}`}
-            value={resource}
-          >
-            <Grid.Col span={2}>
-              <Paper
-                withBorder
-                radius={0}
-                w="100%"
-                mah={rowHeight}
-                style={{
-                  borderLeftWidth: 0,
-                  borderBottomWidth: 0,
-                }}
-              >
-                <CustomResourceLabel
-                  resource={resource}
-                  getResourceId={getResourceId}
+    <Box className={gridClasses.subGrid}>
+      <schedulerEntryContext.Provider value={customSchedulerEntry}>
+        {resources.map((resource, rowIndex) => {
+          const resourceId = getResourceId(resource);
+          return (
+            <resourceContext.Provider
+              key={`resource_row_${resourceId}`}
+              value={resource}
+            >
+              <Box className={gridClasses.resourceLabels}>
+                <Paper
+                  withBorder
+                  radius={0}
+                  w="100%"
+                  mah={rowHeight}
+                  style={{
+                    borderLeftWidth: 0,
+                    borderBottomWidth: 0,
+                  }}
+                >
+                  <CustomResourceLabel
+                    resource={resource}
+                    getResourceId={getResourceId}
+                  />
+                </Paper>
+              </Box>
+              <Box className={gridClasses.mainBody}>
+                <SchedulerBodyRow
+                  key={`row_content_${resourceId}`}
+                  rowIndex={rowIndex}
+                  customNowMarker={customNowMarker}
+                  data={data}
+                  entryComponent={customSchedulerEntry}
+                  getDataResourceId={getDataResourceId}
+                  getEndDate={getEndDate}
+                  getStartDate={getStartDate}
+                  resourceId={resourceId}
+                  rowHeight={rowHeight}
+                  momentStyle={momentStyle}
+                  resourcesCount={resources.length}
+                  subMomentCount={subMomentCount}
+                  dataIdAccessor={dataIdAccessor}
                 />
-              </Paper>
-            </Grid.Col>
-            <Grid.Col span={10}>
-              <SchedulerBodyRow
-                key={`row_content_${resourceId}`}
-                rowIndex={rowIndex}
-                customNowMarker={customNowMarker}
-                data={data}
-                entryComponent={customSchedulerEntry}
-                getDataResourceId={getDataResourceId}
-                getEndDate={getEndDate}
-                getStartDate={getStartDate}
-                resourceId={resourceId}
-                rowHeight={rowHeight}
-                momentStyle={momentStyle}
-                resourcesCount={resources.length}
-                subMomentCount={subMomentCount}
-                dataIdAccessor={dataIdAccessor}
-              />
-            </Grid.Col>
-          </resourceContext.Provider>
-        );
-      })}
-    </schedulerEntryContext.Provider>
+              </Box>
+            </resourceContext.Provider>
+          );
+        })}
+      </schedulerEntryContext.Provider>
+    </Box>
   );
 }
