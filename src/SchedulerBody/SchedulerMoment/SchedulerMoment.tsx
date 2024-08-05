@@ -1,6 +1,6 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { Dayjs } from "dayjs";
-import { DragEvent, useContext, useMemo } from "react";
+import { DragEvent, useContext, useMemo, useState } from "react";
 import {
   SchedulerController,
   useControllerContext,
@@ -44,6 +44,8 @@ export const SchedulerMoments = <TData, TResource>({
     [controller.momentWidths],
   );
   const theme = useMantineTheme();
+
+  const [draggingEnabled, setDraggingEnabled] = useState(false);
 
   const zippedMoments = useMemo(
     () =>
@@ -134,7 +136,11 @@ export const SchedulerMoments = <TData, TResource>({
             onDragEnd={onDragEnd}
             onDragOver={onDragStartOver}
             onDragStart={onDragStartOver}
-            draggable={!!(onDragEnd && onDragStartOver)}
+            onMouseDown={() => {
+              setDraggingEnabled(true);
+            }}
+            onMouseUp={() => setDraggingEnabled(false)}
+            draggable={draggingEnabled && !!(onDragEnd && onDragStartOver)}
           />
         );
       })}
