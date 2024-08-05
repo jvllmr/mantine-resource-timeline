@@ -2,7 +2,9 @@ import { Dayjs, ManipulateType, isDayjs } from "dayjs";
 import { createContext, useCallback } from "react";
 import { SchedulerDisplayUnit } from "./controller/controller";
 
-export type DataFieldAccessor<T, TValue> = keyof T | ((data: T) => TValue);
+export type DataFieldAccessor<T, TValue> =
+  | KeysOfValue<T, TValue>
+  | ((data: T) => TValue);
 
 export function useAccessor<T, TValue>(field: DataFieldAccessor<T, TValue>) {
   return useCallback(
@@ -16,7 +18,8 @@ export function useAccessor<T, TValue>(field: DataFieldAccessor<T, TValue>) {
   );
 }
 
-export function useStringAccessor<T>(field: DataFieldAccessor<T, string>) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useStringAccessor<T>(field: DataFieldAccessor<T, any>) {
   const getValue = useAccessor(field);
 
   return useCallback(
@@ -56,7 +59,8 @@ export function useArrayAccessor<T, TValue>(
 }
 
 export function useStringArrayAccessor<T>(
-  field: DataFieldAccessor<T, string[] | string>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  field: DataFieldAccessor<T, any[] | any>,
 ) {
   const getValue = useArrayAccessor(field);
 
@@ -96,3 +100,7 @@ export function createComponentContextFactory<
     return createContext<React.FC<TInnerProps>>(defaultComponent);
   };
 }
+
+export type KeysOfValue<T, TCondition> = {
+  [K in keyof T]: T[K] extends TCondition ? K : never;
+}[keyof T];

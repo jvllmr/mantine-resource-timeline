@@ -32,6 +32,7 @@ const resources = [
 
 const data = [
   {
+    id: 1,
     resourceId: "b",
     startDate: dayjs().subtract(4, "days"),
     endDate: dayjs().add(5, "hours"),
@@ -139,6 +140,7 @@ export function AdvancedScheduler() {
         momentLabelComponent={GermanMomentLabel}
         momentStyle={momentStyle}
         determineSubMomentCounts={determineSubMomentCounts}
+        dataIdAccessor="id"
       />
     </Stack>
   );

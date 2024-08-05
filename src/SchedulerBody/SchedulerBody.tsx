@@ -39,8 +39,9 @@ export interface SchedulerBodyProps<TData, TResource> {
   resources: TResource[];
   startDateAccessor: DataFieldAccessor<TData, Dayjs>;
   endDateAccessor: DataFieldAccessor<TData, Dayjs>;
-  dataResourceIdAccessor: DataFieldAccessor<TData, string>;
-  resourceIdAccessor: DataFieldAccessor<TResource, string>;
+  dataIdAccessor: DataFieldAccessor<TData, string | number>;
+  dataResourceIdAccessor: DataFieldAccessor<TData, string | number>;
+  resourceIdAccessor: DataFieldAccessor<TResource, string | number>;
   controller: SchedulerController<TData, TResource>;
   rowHeight: NonNullable<MantineStyleProps["h"]>;
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
@@ -63,13 +64,14 @@ function SchedulerBodyRow<TData, TResource>({
   rowIndex,
   momentStyle,
   subMomentCount,
+  dataIdAccessor,
 }: {
   data: TData[];
   resourcesCount: number;
   customNowMarker: NonNullable<
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
   >;
-
+  dataIdAccessor: DataFieldAccessor<TData, string | number>;
   getDataResourceId: (dataItem: TData) => string[];
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
@@ -86,6 +88,7 @@ function SchedulerBodyRow<TData, TResource>({
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
+  const getDataId = useStringAccessor(dataIdAccessor);
 
   useGesture(
     {
@@ -142,7 +145,7 @@ function SchedulerBodyRow<TData, TResource>({
         markerComponent={customNowMarker}
       />
 
-      {filteredData.map((item, index) => {
+      {filteredData.map((item) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
         const startDistance = controller.calculateDistancePercentage(
@@ -159,10 +162,11 @@ function SchedulerBodyRow<TData, TResource>({
         const display: MantineStyleProps["display"] = isOverlap
           ? undefined
           : "none";
+        const entryId = getDataId(item);
 
         return (
           <SchedulerEntryRenderer
-            key={`entry_${index}`}
+            key={`entry_${entryId}`}
             pos="absolute"
             data={item}
             top="10%"
@@ -175,6 +179,7 @@ function SchedulerBodyRow<TData, TResource>({
       })}
 
       <SchedulerMoments
+        key="scheduler_moments"
         resourceId={resourceId}
         resourcesCount={resourcesCount}
         rowHeight={rowHeight}
@@ -199,12 +204,14 @@ export function SchedulerBody<TData, TResource>({
   determineSubMomentCounts,
   rowHeight,
   momentStyle,
+  dataIdAccessor,
 }: SchedulerBodyProps<TData, TResource>) {
   const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
   const getEndDate = useDateAccessor(endDateField);
+
   const CustomResourceLabel = useMemo(
     () => resourceLabelComponent ?? DefaultResourceLabel,
     [resourceLabelComponent],
@@ -228,7 +235,10 @@ export function SchedulerBody<TData, TResource>({
       {resources.map((resource, rowIndex) => {
         const resourceId = getResourceId(resource);
         return (
-          <resourceContext.Provider key={`row_${rowIndex}`} value={resource}>
+          <resourceContext.Provider
+            key={`resource_row_${resourceId}`}
+            value={resource}
+          >
             <Grid.Col span={2}>
               <Paper
                 withBorder
@@ -242,13 +252,13 @@ export function SchedulerBody<TData, TResource>({
               >
                 <CustomResourceLabel
                   resource={resource}
-                  resourceIdField={resourceIdField}
+                  getResourceId={getResourceId}
                 />
               </Paper>
             </Grid.Col>
             <Grid.Col span={10}>
               <SchedulerBodyRow
-                key={rowIndex}
+                key={`row_content_${resourceId}`}
                 rowIndex={rowIndex}
                 customNowMarker={customNowMarker}
                 data={data}
@@ -261,6 +271,7 @@ export function SchedulerBody<TData, TResource>({
                 momentStyle={momentStyle}
                 resourcesCount={resources.length}
                 subMomentCount={subMomentCount}
+                dataIdAccessor={dataIdAccessor}
               />
             </Grid.Col>
           </resourceContext.Provider>
