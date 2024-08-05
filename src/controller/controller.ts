@@ -22,7 +22,7 @@ export interface SchedulerControllerParams<TData, TResource> {
   initialViewStartDate?: Dayjs;
   initialViewEndDate?: Dayjs;
   clip?: boolean;
-  enableGestures?: boolean;
+
   onViewStartDateChange?: (date: Dayjs) => void;
   onViewEndDateChange?: (date: Dayjs) => void;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
@@ -44,7 +44,7 @@ export interface SchedulerController<TData, TResource> {
     date: Dayjs,
     leftOrRight: "left" | "right",
   ) => number;
-  enableGestures: boolean | undefined;
+
   momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
   momentDragStartOver?: SchedulerMomentOnDragStartOverFactory<TResource>;
   firstSelectedMoment: Dayjs | null;
@@ -110,7 +110,7 @@ export function useSchedulerController<TData, TResource>({
   clip,
   onViewEndDateChange,
   onViewStartDateChange,
-  enableGestures,
+
   onSelect,
 
   determineDisplayUnit: determineDisplayUnitParam,
@@ -248,7 +248,6 @@ export function useSchedulerController<TData, TResource>({
       setViewEndDate,
       setViewStartDate,
       calculateDistancePercentage,
-      enableGestures,
 
       firstSelectedMoment: selectControls.firstMoment,
       lastSelectedMoment: selectControls.lastMoment,
@@ -263,7 +262,7 @@ export function useSchedulerController<TData, TResource>({
       viewStartDate,
       displayUnit,
       calculateDistancePercentage,
-      enableGestures,
+
       selectControls.firstMoment,
       selectControls.lastMoment,
       selectControls.onDragEnd,

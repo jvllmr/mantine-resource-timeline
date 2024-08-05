@@ -39,8 +39,9 @@ export const useSchedulerSelect = <TData, TResource>(
         ? (moment: Dayjs, nextMoment: Dayjs, resource: TResource) =>
             (event) => {
               if (
-                resource == selectedResourceRef.current ||
-                selectedResourceRef.current === null
+                !event.ctrlKey &&
+                (resource == selectedResourceRef.current ||
+                  selectedResourceRef.current === null)
               ) {
                 event.dataTransfer.setDragImage(constantDiv, 0, 0);
                 if (!firstMoment || moment.isBefore(firstMoment)) {
@@ -62,6 +63,7 @@ export const useSchedulerSelect = <TData, TResource>(
         ? (event, resource) => {
             event.preventDefault();
             if (
+              !event.ctrlKey &&
               onSelect &&
               controllerRef.current &&
               firstMoment &&

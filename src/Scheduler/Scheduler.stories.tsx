@@ -99,7 +99,6 @@ const momentStyle: MomentStyleFn<
 export function AdvancedScheduler() {
   const controller = useSchedulerController({
     onSelect,
-    enableGestures: false,
   });
 
   return (

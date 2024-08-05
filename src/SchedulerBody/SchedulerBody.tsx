@@ -1,5 +1,4 @@
 import { Flex, Grid, MantineStyleProps, Paper } from "@mantine/core";
-import { useGesture } from "@use-gesture/react";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
 import {
@@ -89,50 +88,6 @@ function SchedulerBodyRow<TData, TResource>({
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
   const getDataId = useStringAccessor(dataIdAccessor);
-
-  useGesture(
-    {
-      onDrag: ({ offset: [x] }) => {
-        // event.preventDefault();
-        if (!controller.enableGestures) return;
-        if (x < 0) {
-          controller.setViewEndDate(
-            controller.viewEndDate.add(1, controller.displayUnit),
-          );
-          controller.setViewStartDate(
-            controller.viewStartDate.add(1, controller.displayUnit),
-          );
-        } else {
-          controller.setViewEndDate(
-            controller.viewEndDate.subtract(1, controller.displayUnit),
-          );
-          controller.setViewStartDate(
-            controller.viewStartDate.subtract(1, controller.displayUnit),
-          );
-        }
-      },
-      onWheel: ({ event, offset: [, y] }) => {
-        event.preventDefault();
-        if (!controller.enableGestures) return;
-        if (y > 0) {
-          controller.setViewEndDate(
-            controller.viewEndDate.add(1, controller.displayUnit),
-          );
-          controller.setViewStartDate(
-            controller.viewStartDate.subtract(1, controller.displayUnit),
-          );
-        } else {
-          controller.setViewEndDate(
-            controller.viewEndDate.subtract(1, controller.displayUnit),
-          );
-          controller.setViewStartDate(
-            controller.viewStartDate.add(1, controller.displayUnit),
-          );
-        }
-      },
-    },
-    { target: rowRef, wheel: { eventOptions: { passive: false } } },
-  );
 
   const filteredData = useMemo(
     () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
