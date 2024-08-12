@@ -111,7 +111,7 @@ export const SchedulerMoments = <TData, TResource>({
           }),
           borderTopWidth: rowIndex === 0 ? undefined : 0,
           borderRightWidth: 0,
-          borderLeftWidth: momentIndex === 0 ? 0 : undefined,
+
           borderBottomWidth: rowIndex === resourcesCount - 1 ? 0 : undefined,
         };
         const onDragStartOver = momentDragStartOver?.(

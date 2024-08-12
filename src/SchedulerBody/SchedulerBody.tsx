@@ -204,6 +204,7 @@ export function SchedulerBody<TData, TResource>({
                   style={{
                     borderLeftWidth: 0,
                     borderBottomWidth: 0,
+                    borderRightWidth: 0,
                   }}
                 >
                   <CustomResourceLabel
