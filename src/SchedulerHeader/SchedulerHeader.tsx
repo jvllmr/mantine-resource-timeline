@@ -3,6 +3,7 @@ import {
   Button,
   Center,
   Flex,
+  MantineStyleProps,
   Paper,
   useMantineTheme,
 } from "@mantine/core";
@@ -13,9 +14,9 @@ import {
   SchedulerDisplayUnit,
   useControllerContext,
 } from "../controller/controller";
+import gridClasses from "../Scheduler/SchedulerGrid.module.css";
 import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import { DefaultMomentLabel, MomentLabelProps } from "./DefaultMomentLabel";
-
 export type SchedulerHeaderOnClickFn<TData, TResource> = (params: {
   moment: Dayjs;
   controller: SchedulerController<TData, TResource>;
@@ -30,6 +31,8 @@ export interface SchedulerHeaderProps<TData, TResource> {
   onClick?: SchedulerHeaderOnClickProp<TData, TResource>;
   momentLabelComponent?: React.FC<MomentLabelProps<TData, TResource>>;
   momentStyle?: MomentStyleFn<TData, TResource>;
+  stickyHeader?: boolean;
+  stickyHeaderOffset?: MantineStyleProps["top"];
 }
 
 interface TopLabelProps {
@@ -133,6 +136,8 @@ export function SchedulerHeader<TData, TResource>({
   onClick,
   momentLabelComponent,
   momentStyle,
+  stickyHeader,
+  stickyHeaderOffset,
 }: SchedulerHeaderProps<TData, TResource>) {
   const resolvedOnClick = useMemo(
     () => onClick?.[controller.displayUnit],
@@ -140,8 +145,13 @@ export function SchedulerHeader<TData, TResource>({
   );
 
   return (
-    <>
-      <div style={{ gridColumn: "span 2" }}>
+    <Box
+      className={gridClasses.subGrid}
+      pos={stickyHeader ? "sticky" : undefined}
+      top={stickyHeaderOffset}
+      style={{ zIndex: 1000 }}
+    >
+      <Box className={gridClasses.resourceLabels}>
         <Paper
           withBorder
           h="100%"
@@ -154,8 +164,8 @@ export function SchedulerHeader<TData, TResource>({
             borderBottomWidth: 0,
           }}
         />
-      </div>
-      <div style={{ gridColumn: "span 10" }}>
+      </Box>
+      <Box className={gridClasses.mainBody}>
         <Flex direction="column" w="100%">
           <Paper
             withBorder
@@ -205,7 +215,7 @@ export function SchedulerHeader<TData, TResource>({
               })}
           </Flex>
         </Flex>
-      </div>
-    </>
+      </Box>
+    </Box>
   );
 }

@@ -20,6 +20,11 @@ export interface SchedulerProps<TData, TResource>
     TData,
     TResource
   >["momentLabelComponent"];
+  stickyHeader?: SchedulerHeaderProps<TData, TResource>["stickyHeader"];
+  stickyHeaderOffset?: SchedulerHeaderProps<
+    TData,
+    TResource
+  >["stickyHeaderOffset"];
 }
 
 export function Scheduler<TData, TResource>({
@@ -28,6 +33,8 @@ export function Scheduler<TData, TResource>({
 
   headerOnClick,
   momentLabelComponent,
+  stickyHeader,
+  stickyHeaderOffset,
 
   ...props
 }: SchedulerProps<TData, TResource>) {
@@ -42,6 +49,8 @@ export function Scheduler<TData, TResource>({
             onClick={headerOnClick}
             momentLabelComponent={momentLabelComponent}
             momentStyle={props.momentStyle}
+            stickyHeader={stickyHeader}
+            stickyHeaderOffset={stickyHeaderOffset}
           />
 
           <SchedulerBody {...props} rowHeight={rowHeight} />
