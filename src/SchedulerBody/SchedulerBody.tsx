@@ -1,4 +1,5 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
 import {
@@ -42,12 +43,13 @@ export interface SchedulerBodyProps<TData, TResource> {
   dataResourceIdAccessor: DataFieldAccessor<TData, string | number>;
   resourceIdAccessor: DataFieldAccessor<TResource, string | number>;
   controller: SchedulerController<TData, TResource>;
-  rowHeight: NonNullable<MantineStyleProps["h"]>;
+  rowHeight: number;
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
   entryComponent?: React.FC<SchedulerEntryProps<TData, TResource>>;
   nowMarkerComponent?: React.FC<NowMarkerProps>;
   determineSubMomentCounts?: DetermineSubMomentCountsFn;
   momentStyle?: MomentStyleFn<TData, TResource>;
+  enableVirtualizer?: boolean;
 }
 
 function SchedulerBodyRow<TData, TResource>({
@@ -79,7 +81,7 @@ function SchedulerBodyRow<TData, TResource>({
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
 
-  rowHeight: SchedulerBodyProps<TData, TResource>["rowHeight"];
+  rowHeight: number;
 
   rowIndex: number;
   subMomentCount: number;
@@ -160,6 +162,7 @@ export function SchedulerBody<TData, TResource>({
   rowHeight,
   momentStyle,
   dataIdAccessor,
+  enableVirtualizer,
 }: SchedulerBodyProps<TData, TResource>) {
   const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
@@ -185,14 +188,31 @@ export function SchedulerBody<TData, TResource>({
     [controller.displayUnit, determineSubMomentCounts],
   );
 
+  const virtualizer = useWindowVirtualizer({
+    count: resources.length,
+    estimateSize: () => rowHeight,
+    enabled: enableVirtualizer,
+  });
+  const virtualItems = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+  const paddingTop =
+    virtualItems.length > 0 ? virtualItems?.[0]?.start || 0 : 0;
+  const paddingBottom =
+    virtualItems.length > 0
+      ? totalSize - (virtualItems?.[virtualItems.length - 1]?.end || 0)
+      : 0;
   return (
     <Box className={gridClasses.subGrid}>
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
-        {resources.map((resource, rowIndex) => {
+        {paddingTop ? (
+          <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />
+        ) : null}
+        {virtualItems.map((virtualItem, rowIndex) => {
+          const resource = resources[virtualItem.index];
           const resourceId = getResourceId(resource);
           return (
             <resourceContext.Provider
-              key={`resource_row_${resourceId}`}
+              key={`resource_row_${virtualItem.key}`}
               value={resource}
             >
               <Box className={gridClasses.resourceLabels}>
@@ -234,6 +254,12 @@ export function SchedulerBody<TData, TResource>({
             </resourceContext.Provider>
           );
         })}
+        {paddingBottom ? (
+          <Box
+            className={gridClasses.fullRow}
+            style={{ height: paddingBottom }}
+          />
+        ) : null}
       </schedulerEntryContext.Provider>
     </Box>
   );

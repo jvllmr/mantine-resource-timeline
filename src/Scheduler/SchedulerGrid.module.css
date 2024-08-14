@@ -18,3 +18,7 @@
 .mainBody {
   grid-column: span 10;
 }
+
+.fullRow {
+  grid-column: span 12;
+}

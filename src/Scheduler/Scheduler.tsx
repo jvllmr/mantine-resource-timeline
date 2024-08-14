@@ -12,8 +12,8 @@ import { controllerContext } from "../controller/controller";
 import gridClasses from "./SchedulerGrid.module.css";
 export interface SchedulerProps<TData, TResource>
   extends Omit<SchedulerBodyProps<TData, TResource>, "rowHeight"> {
-  width: MantineStyleProps["w"];
-  height: MantineStyleProps["h"];
+  width?: MantineStyleProps["w"];
+  height?: MantineStyleProps["h"];
   rowHeight?: SchedulerBodyProps<TData, TResource>["rowHeight"];
   headerOnClick?: SchedulerHeaderProps<TData, TResource>["onClick"];
   momentLabelComponent?: SchedulerHeaderProps<
