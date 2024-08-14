@@ -8,9 +8,10 @@ Read here about its browser compatibility: https://caniuse.com/css-subgrid
 
 It uses the following peer dependencies:
 
-- `@mantine/hooks`
-- `@mantine/core`
-- `dayjs`
+- `@mantine/hooks` for @mantine/core
+- `@mantine/core` for styling
+- `dayjs` for handling of dates
+- `@tanstack/react-virtual` for virtualization
 
 Roadmap:
 
