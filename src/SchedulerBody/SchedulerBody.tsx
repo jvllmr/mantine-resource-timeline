@@ -187,11 +187,13 @@ export function SchedulerBody<TData, TResource>({
     () => determineSubMomentCounts?.(controller.displayUnit) ?? 0,
     [controller.displayUnit, determineSubMomentCounts],
   );
-
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
     estimateSize: () => rowHeight,
     enabled: enableVirtualizer,
+    overscan: 5,
+    scrollMargin: bodyRef.current?.offsetTop ?? 0,
   });
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
@@ -202,7 +204,7 @@ export function SchedulerBody<TData, TResource>({
       ? totalSize - (virtualItems?.[virtualItems.length - 1]?.end || 0)
       : 0;
   return (
-    <Box className={gridClasses.subGrid}>
+    <Box className={gridClasses.subGrid} ref={bodyRef}>
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
         {paddingTop ? (
           <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />
