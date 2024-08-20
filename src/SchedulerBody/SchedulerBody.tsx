@@ -198,11 +198,18 @@ export function SchedulerBody<TData, TResource>({
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
   const paddingTop =
-    virtualItems.length > 0 ? virtualItems?.[0]?.start || 0 : 0;
+    virtualItems.length > 0
+      ? virtualItems?.[0]?.start
+        ? virtualItems?.[0]?.start - (bodyRef.current?.offsetTop ?? 0)
+        : 0
+      : 0;
   const paddingBottom =
     virtualItems.length > 0
-      ? totalSize - (virtualItems?.[virtualItems.length - 1]?.end || 0)
+      ? totalSize -
+        (virtualItems?.[virtualItems.length - 1]?.end || 0) +
+        (bodyRef.current?.offsetTop ?? 0)
       : 0;
+
   return (
     <Box className={gridClasses.subGrid} ref={bodyRef}>
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
