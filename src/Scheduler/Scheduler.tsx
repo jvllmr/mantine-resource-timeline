@@ -41,7 +41,15 @@ export function Scheduler<TData, TResource>({
   const rowHeight = useMemo(() => props.rowHeight ?? 60, [props.rowHeight]);
 
   return (
-    <Paper withBorder w={width} mah={height}>
+    <Paper
+      withBorder
+      w={width}
+      mah={height}
+      style={{
+        // establish a local stacking context
+        zIndex: 0,
+      }}
+    >
       <controllerContext.Provider value={props.controller}>
         <Box className={gridClasses.grid}>
           <SchedulerHeader

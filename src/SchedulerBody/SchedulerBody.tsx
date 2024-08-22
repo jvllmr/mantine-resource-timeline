@@ -211,7 +211,7 @@ export function SchedulerBody<TData, TResource>({
       : 0;
 
   return (
-    <Box className={gridClasses.subGrid} ref={bodyRef}>
+    <Box className={gridClasses.subGrid} ref={bodyRef} style={{ zIndex: 1 }}>
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
         {paddingTop ? (
           <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />

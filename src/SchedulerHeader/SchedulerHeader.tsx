@@ -149,7 +149,7 @@ export function SchedulerHeader<TData, TResource>({
       className={gridClasses.subGrid}
       pos={stickyHeader ? "sticky" : undefined}
       top={stickyHeaderOffset}
-      style={{ zIndex: 1000 }}
+      style={{ zIndex: 2 }}
     >
       <Box className={gridClasses.resourceLabels}>
         <Paper
