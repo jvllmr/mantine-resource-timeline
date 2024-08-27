@@ -30,7 +30,7 @@ export const SchedulerMoments = <TData, TResource>({
   const resource: TResource = useContext(resourceContext);
   const controller: SchedulerController<TData, TResource> =
     useControllerContext();
-  const { momentDragEnd, momentDragStartOver } = controller;
+  const { momentDragEnd, momentDragStartOver, momentSelectClick } = controller;
   const firstMomentLoss = useMemo(
     () =>
       (controller.momentWidths[0] / 100) * (controller.momentWidths.length - 1),
@@ -123,6 +123,8 @@ export const SchedulerMoments = <TData, TResource>({
           ? (event: DragEvent<HTMLDivElement>) => momentDragEnd(event, resource)
           : undefined;
 
+        const onClick = momentSelectClick?.(resource, moment, nextMoment);
+
         return (
           <Paper
             key={`moment_${resourceId}_${momentIndex}`}
@@ -141,6 +143,7 @@ export const SchedulerMoments = <TData, TResource>({
             }}
             onMouseUp={() => setDraggingEnabled(false)}
             draggable={draggingEnabled && !!(onDragEnd && onDragStartOver)}
+            onClick={onClick}
           />
         );
       })}

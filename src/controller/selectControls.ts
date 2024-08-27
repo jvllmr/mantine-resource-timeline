@@ -19,6 +19,12 @@ export type SchedulerMomentOnDragEndFn<TResource> = (
   resource: TResource,
 ) => void;
 
+export type SchedulerMomentSelectClickFnFactory<TResource> = (
+  resource: TResource,
+  moment: Dayjs,
+  nextMoment: Dayjs,
+) => (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+
 export const useSchedulerSelect = <TData, TResource>(
   onSelect?: OnSelectFn<TData, TResource>,
 ) => {
@@ -85,6 +91,26 @@ export const useSchedulerSelect = <TData, TResource>(
     [firstMoment, lastMoment, onSelect],
   );
 
+  const selectClick:
+    | SchedulerMomentSelectClickFnFactory<TResource>
+    | undefined = useMemo(
+    () =>
+      onSelect
+        ? (resource, firstMoment, lastMoment) => (event) => {
+            event.preventDefault();
+            if (controllerRef.current) {
+              onSelect({
+                controller: controllerRef.current,
+                resource,
+                firstMoment,
+                lastMoment,
+              });
+            }
+          }
+        : undefined,
+    [onSelect],
+  );
+
   return useMemo(
     () => ({
       setController: (controller: SchedulerController<TData, TResource>) =>
@@ -94,7 +120,8 @@ export const useSchedulerSelect = <TData, TResource>(
       firstMoment,
       lastMoment,
       selectedResource: selectedResourceRef.current,
+      selectClick,
     }),
-    [onDragStartOverFactory, onDragEnd, firstMoment, lastMoment],
+    [onDragStartOverFactory, onDragEnd, firstMoment, lastMoment, selectClick],
   );
 };

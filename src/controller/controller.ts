@@ -13,6 +13,7 @@ import {
   OnSelectFn,
   SchedulerMomentOnDragEndFn,
   SchedulerMomentOnDragStartOverFactory,
+  SchedulerMomentSelectClickFnFactory,
   useSchedulerSelect,
 } from "./selectControls";
 
@@ -47,6 +48,7 @@ export interface SchedulerController<TData, TResource> {
 
   momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
   momentDragStartOver?: SchedulerMomentOnDragStartOverFactory<TResource>;
+  momentSelectClick?: SchedulerMomentSelectClickFnFactory<TResource>;
   firstSelectedMoment: Dayjs | null;
   lastSelectedMoment: Dayjs | null;
   selectedResource: TResource | null;
@@ -254,6 +256,7 @@ export function useSchedulerController<TData, TResource>({
       momentDragEnd: selectControls.onDragEnd,
       momentDragStartOver: selectControls.onDragStartOverFactory,
       selectedResource: selectControls.selectedResource,
+      momentSelectClick: selectControls.selectClick,
     }),
     [
       moments,
@@ -262,12 +265,12 @@ export function useSchedulerController<TData, TResource>({
       viewStartDate,
       displayUnit,
       calculateDistancePercentage,
-
       selectControls.firstMoment,
       selectControls.lastMoment,
       selectControls.onDragEnd,
       selectControls.onDragStartOverFactory,
       selectControls.selectedResource,
+      selectControls.selectClick,
     ],
   );
 
