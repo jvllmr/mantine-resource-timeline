@@ -1,6 +1,6 @@
 .grid {
   display: grid;
-  gap: 0rem;
+  gap: 0px;
   grid-template-columns: repeat(12, 1fr);
 }
 
@@ -12,11 +12,11 @@
 }
 
 .resourceLabels {
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 .mainBody {
-  grid-column: span 10;
+  grid-column: span 11;
 }
 
 .fullRow {
