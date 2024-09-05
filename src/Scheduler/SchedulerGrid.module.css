@@ -1,24 +1,24 @@
 .grid {
   display: grid;
-  gap: 0rem;
-  grid-template-columns: repeat(12, 1fr);
+  gap: 0;
+  grid-template-columns: var(--mantine-scheduler-grid-repeat);
 }
 
 .subGrid {
   display: grid;
   grid-template-columns: subgrid;
 
-  grid-column: span 12;
+  grid-column: var(--mantine-scheduler-grid-size);
 }
 
 .resourceLabels {
-  grid-column: span 2;
+  grid-column: var(--mantine-scheduler-grid-label-size);
 }
 
 .mainBody {
-  grid-column: span 10;
+  grid-column: var(--mantine-scheduler-grid-main-size);
 }
 
 .fullRow {
-  grid-column: span 12;
+  grid-column: var(--mantine-scheduler-grid-size);
 }

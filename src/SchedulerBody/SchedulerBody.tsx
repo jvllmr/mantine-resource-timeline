@@ -50,6 +50,8 @@ export interface SchedulerBodyProps<TData, TResource> {
   determineSubMomentCounts?: DetermineSubMomentCountsFn;
   momentStyle?: MomentStyleFn<TData, TResource>;
   enableVirtualizer?: boolean;
+  gridLabelSize: number;
+  totalGridSize: number;
 }
 
 function SchedulerBodyRow<TData, TResource>({
@@ -163,6 +165,8 @@ export function SchedulerBody<TData, TResource>({
   momentStyle,
   dataIdAccessor,
   enableVirtualizer,
+  totalGridSize,
+  gridLabelSize,
 }: SchedulerBodyProps<TData, TResource>) {
   const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
@@ -211,7 +215,14 @@ export function SchedulerBody<TData, TResource>({
       : 0;
 
   return (
-    <Box className={gridClasses.subGrid} ref={bodyRef} style={{ zIndex: 1 }}>
+    <Box
+      className={gridClasses.subGrid}
+      ref={bodyRef}
+      style={{
+        zIndex: 1,
+        "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
+      }}
+    >
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
         {paddingTop ? (
           <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />
@@ -224,7 +235,12 @@ export function SchedulerBody<TData, TResource>({
               key={`resource_row_${virtualItem.key}`}
               value={resource}
             >
-              <Box className={gridClasses.resourceLabels}>
+              <Box
+                className={gridClasses.resourceLabels}
+                style={{
+                  "--mantine-scheduler-grid-label-size": `span ${gridLabelSize}`,
+                }}
+              >
                 <Paper
                   withBorder
                   radius={0}
@@ -242,7 +258,12 @@ export function SchedulerBody<TData, TResource>({
                   />
                 </Paper>
               </Box>
-              <Box className={gridClasses.mainBody}>
+              <Box
+                className={gridClasses.mainBody}
+                style={{
+                  "--mantine-scheduler-grid-main-size": `span ${totalGridSize - gridLabelSize}`,
+                }}
+              >
                 <SchedulerBodyRow
                   key={`row_content_${resourceId}`}
                   rowIndex={rowIndex}
