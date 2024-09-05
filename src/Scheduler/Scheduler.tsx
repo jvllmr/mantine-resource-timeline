@@ -1,5 +1,4 @@
-import { Box, MantineStyleProps, Paper } from "@mantine/core";
-import { useMemo } from "react";
+import { Box, MantineStyleProps, Paper, useProps } from "@mantine/core";
 import {
   SchedulerBody,
   SchedulerBodyProps,
@@ -27,18 +26,29 @@ export interface SchedulerProps<TData, TResource>
   >["stickyHeaderOffset"];
 }
 
-export function Scheduler<TData, TResource>({
-  height,
-  width,
+const defaultProps = {
+  rowHeight: 60,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} satisfies Partial<SchedulerProps<any, any>>;
 
-  headerOnClick,
-  momentLabelComponent,
-  stickyHeader,
-  stickyHeaderOffset,
+export function Scheduler<TData, TResource>(
+  inputProps: SchedulerProps<TData, TResource>,
+) {
+  const {
+    height,
+    width,
 
-  ...props
-}: SchedulerProps<TData, TResource>) {
-  const rowHeight = useMemo(() => props.rowHeight ?? 60, [props.rowHeight]);
+    headerOnClick,
+    momentLabelComponent,
+    stickyHeader,
+    stickyHeaderOffset,
+
+    ...props
+  }: SchedulerProps<TData, TResource> & typeof defaultProps = useProps(
+    "Scheduler",
+    defaultProps,
+    inputProps,
+  );
 
   return (
     <Paper
@@ -61,7 +71,7 @@ export function Scheduler<TData, TResource>({
             stickyHeaderOffset={stickyHeaderOffset}
           />
 
-          <SchedulerBody {...props} rowHeight={rowHeight} />
+          <SchedulerBody {...props} />
         </Box>
       </controllerContext.Provider>
     </Paper>
