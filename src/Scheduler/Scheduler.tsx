@@ -1,4 +1,5 @@
 import { Box, MantineStyleProps, Paper, useProps } from "@mantine/core";
+import { useMemo } from "react";
 import {
   SchedulerBody,
   SchedulerBodyProps,
@@ -10,10 +11,14 @@ import {
 import { controllerContext } from "../controller/controller";
 import gridClasses from "./SchedulerGrid.module.css";
 export interface SchedulerProps<TData, TResource>
-  extends Omit<SchedulerBodyProps<TData, TResource>, "rowHeight"> {
+  extends Omit<
+    SchedulerBodyProps<TData, TResource>,
+    "rowHeight" | "gridLabelSize"
+  > {
   width?: MantineStyleProps["w"];
   height?: MantineStyleProps["h"];
   rowHeight?: SchedulerBodyProps<TData, TResource>["rowHeight"];
+  gridLabelSize?: number;
   headerOnClick?: SchedulerHeaderProps<TData, TResource>["onClick"];
   momentLabelComponent?: SchedulerHeaderProps<
     TData,
@@ -28,6 +33,7 @@ export interface SchedulerProps<TData, TResource>
 
 const defaultProps = {
   rowHeight: 60,
+  gridLabelSize: 1,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } satisfies Partial<SchedulerProps<any, any>>;
 
@@ -49,7 +55,10 @@ export function Scheduler<TData, TResource>(
     defaultProps,
     inputProps,
   );
-
+  const totalGridSize = useMemo(
+    () => props.gridLabelSize + props.controller.moments.length,
+    [props.controller.moments.length, props.gridLabelSize],
+  );
   return (
     <Paper
       withBorder
@@ -61,7 +70,12 @@ export function Scheduler<TData, TResource>(
       }}
     >
       <controllerContext.Provider value={props.controller}>
-        <Box className={gridClasses.grid}>
+        <Box
+          className={gridClasses.grid}
+          style={{
+            "--mantine-scheduler-grid-repeat": `repeat(${totalGridSize}, 1fr)`,
+          }}
+        >
           <SchedulerHeader
             controller={props.controller}
             onClick={headerOnClick}
@@ -69,9 +83,11 @@ export function Scheduler<TData, TResource>(
             momentStyle={props.momentStyle}
             stickyHeader={stickyHeader}
             stickyHeaderOffset={stickyHeaderOffset}
+            totalGridSize={totalGridSize}
+            gridLabelSize={props.gridLabelSize}
           />
 
-          <SchedulerBody {...props} />
+          <SchedulerBody {...props} totalGridSize={totalGridSize} />
         </Box>
       </controllerContext.Provider>
     </Paper>

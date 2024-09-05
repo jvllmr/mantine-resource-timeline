@@ -33,6 +33,8 @@ export interface SchedulerHeaderProps<TData, TResource> {
   momentStyle?: MomentStyleFn<TData, TResource>;
   stickyHeader?: boolean;
   stickyHeaderOffset?: MantineStyleProps["top"];
+  gridLabelSize: number;
+  totalGridSize: number;
 }
 
 interface TopLabelProps {
@@ -138,6 +140,8 @@ export function SchedulerHeader<TData, TResource>({
   momentStyle,
   stickyHeader,
   stickyHeaderOffset,
+  totalGridSize,
+  gridLabelSize,
 }: SchedulerHeaderProps<TData, TResource>) {
   const resolvedOnClick = useMemo(
     () => onClick?.[controller.displayUnit],
@@ -149,9 +153,17 @@ export function SchedulerHeader<TData, TResource>({
       className={gridClasses.subGrid}
       pos={stickyHeader ? "sticky" : undefined}
       top={stickyHeaderOffset}
-      style={{ zIndex: 2 }}
+      style={{
+        zIndex: 2,
+        "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
+      }}
     >
-      <Box className={gridClasses.resourceLabels}>
+      <Box
+        className={gridClasses.resourceLabels}
+        style={{
+          "--mantine-scheduler-grid-label-size": `span ${gridLabelSize}`,
+        }}
+      >
         <Paper
           withBorder
           h="100%"
@@ -165,7 +177,12 @@ export function SchedulerHeader<TData, TResource>({
           }}
         />
       </Box>
-      <Box className={gridClasses.mainBody}>
+      <Box
+        className={gridClasses.mainBody}
+        style={{
+          "--mantine-scheduler-grid-main-size": `span ${totalGridSize - gridLabelSize}`,
+        }}
+      >
         <Flex direction="column" w="100%">
           <Paper
             withBorder
