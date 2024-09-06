@@ -13,7 +13,7 @@ import gridClasses from "./SchedulerGrid.module.css";
 export interface SchedulerProps<TData, TResource>
   extends Omit<
     SchedulerBodyProps<TData, TResource>,
-    "rowHeight" | "gridLabelSize"
+    "rowHeight" | "gridLabelSize" | "totalGridSize"
   > {
   width?: MantineStyleProps["w"];
   height?: MantineStyleProps["h"];
