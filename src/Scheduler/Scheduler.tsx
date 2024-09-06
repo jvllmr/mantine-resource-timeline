@@ -1,5 +1,4 @@
 import { Box, MantineStyleProps, Paper, useProps } from "@mantine/core";
-import { useMemo } from "react";
 import {
   SchedulerBody,
   SchedulerBodyProps,
@@ -19,6 +18,7 @@ export interface SchedulerProps<TData, TResource>
   height?: MantineStyleProps["h"];
   rowHeight?: SchedulerBodyProps<TData, TResource>["rowHeight"];
   gridLabelSize?: number;
+  totalGridSize?: number;
   headerOnClick?: SchedulerHeaderProps<TData, TResource>["onClick"];
   momentLabelComponent?: SchedulerHeaderProps<
     TData,
@@ -33,7 +33,8 @@ export interface SchedulerProps<TData, TResource>
 
 const defaultProps = {
   rowHeight: 60,
-  gridLabelSize: 1,
+  gridLabelSize: 2,
+  totalGridSize: 16,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } satisfies Partial<SchedulerProps<any, any>>;
 
@@ -55,10 +56,7 @@ export function Scheduler<TData, TResource>(
     defaultProps,
     inputProps,
   );
-  const totalGridSize = useMemo(
-    () => props.gridLabelSize + props.controller.moments.length,
-    [props.controller.moments.length, props.gridLabelSize],
-  );
+
   return (
     <Paper
       withBorder
@@ -73,7 +71,7 @@ export function Scheduler<TData, TResource>(
         <Box
           className={gridClasses.grid}
           style={{
-            "--mantine-scheduler-grid-repeat": `repeat(${totalGridSize}, 1fr)`,
+            "--mantine-scheduler-grid-repeat": `repeat(${props.totalGridSize}, 1fr)`,
           }}
         >
           <SchedulerHeader
@@ -83,11 +81,11 @@ export function Scheduler<TData, TResource>(
             momentStyle={props.momentStyle}
             stickyHeader={stickyHeader}
             stickyHeaderOffset={stickyHeaderOffset}
-            totalGridSize={totalGridSize}
+            totalGridSize={props.totalGridSize}
             gridLabelSize={props.gridLabelSize}
           />
 
-          <SchedulerBody {...props} totalGridSize={totalGridSize} />
+          <SchedulerBody {...props} />
         </Box>
       </controllerContext.Provider>
     </Paper>
