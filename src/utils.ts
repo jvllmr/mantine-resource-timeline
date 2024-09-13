@@ -88,7 +88,7 @@ export function timeFraction(
     case "day":
       return [Math.floor(24 / div), "hour"];
     case "hour":
-      return [Math.floor(1440 / div), "minute"];
+      return [Math.floor(60 / div), "minute"];
   }
 }
 
