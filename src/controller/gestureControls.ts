@@ -7,6 +7,8 @@ export const useSchedulerGestures = (
 ) => {
   useGesture(
     {
+      // @ts-expect-error we don't need x, but unpacking is just so much more elegant
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onWheel({ ctrlKey, movement: [x, y], event }) {
         if (ctrlKey) {
           event.preventDefault();
