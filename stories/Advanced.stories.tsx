@@ -12,7 +12,6 @@ import {
   SchedulerHeaderOnClickProp,
   useSchedulerController,
 } from "mantine-resource-timeline";
-
 export default { title: "Advanced" };
 
 const resources = [

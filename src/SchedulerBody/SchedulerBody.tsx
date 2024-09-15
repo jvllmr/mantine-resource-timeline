@@ -98,7 +98,7 @@ function SchedulerBodyRow<TData, TResource>({
     [data, getDataResourceId, resourceId],
   );
   return (
-    <Flex pos="relative" ref={rowRef} style={{ touchAction: "none" }}>
+    <Flex pos="relative" ref={rowRef} style={{ touchAction: "pan-y" }}>
       <NowMarkerController
         distanceCalculator={controller.calculateDistancePercentage}
         markerComponent={customNowMarker}
@@ -191,33 +191,34 @@ export function SchedulerBody<TData, TResource>({
     () => determineSubMomentCounts?.(controller.displayUnit) ?? 0,
     [controller.displayUnit, determineSubMomentCounts],
   );
-  const bodyRef = useRef<HTMLDivElement | null>(null);
+
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
     estimateSize: () => rowHeight,
     enabled: enableVirtualizer,
     overscan: 5,
-    scrollMargin: bodyRef.current?.offsetTop ?? 0,
+    scrollMargin: controller.bodyRef.current?.offsetTop ?? 0,
   });
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
   const paddingTop =
     virtualItems.length > 0
       ? virtualItems?.[0]?.start
-        ? virtualItems?.[0]?.start - (bodyRef.current?.offsetTop ?? 0)
+        ? virtualItems?.[0]?.start -
+          (controller.bodyRef.current?.offsetTop ?? 0)
         : 0
       : 0;
   const paddingBottom =
     virtualItems.length > 0
       ? totalSize -
         (virtualItems?.[virtualItems.length - 1]?.end || 0) +
-        (bodyRef.current?.offsetTop ?? 0)
+        (controller.bodyRef.current?.offsetTop ?? 0)
       : 0;
 
   return (
     <Box
       className={gridClasses.subGrid}
-      ref={bodyRef}
+      ref={controller.bodyRef}
       style={{
         zIndex: 1,
         "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
