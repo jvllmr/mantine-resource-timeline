@@ -29,8 +29,8 @@ import {
   determineDisplayUnit,
   useSchedulerController,
 } from "./controller/controller";
+import { useSchedulerGestures } from "./controller/gestureControls";
 import { OnSelectFn } from "./controller/selectControls";
-
 export {
   DefaultMomentLabel,
   DefaultNowMarker as NowMarker,
@@ -40,6 +40,7 @@ export {
   DefaultSchedulerEntry as SchedulerEntry,
   determineDisplayUnit,
   useSchedulerController,
+  useSchedulerGestures,
 };
 export type {
   DetermineSubMomentCountsFn,

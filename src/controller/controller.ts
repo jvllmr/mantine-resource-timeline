@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -52,6 +53,7 @@ export interface SchedulerController<TData, TResource> {
   firstSelectedMoment: Dayjs | null;
   lastSelectedMoment: Dayjs | null;
   selectedResource: TResource | null;
+  bodyRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
 
@@ -120,6 +122,7 @@ export function useSchedulerController<TData, TResource>({
   TData,
   TResource
 > {
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   useMemo(() => {
     dayjs.extend(weekOfYear);
     dayjs.extend(localizedFormat);
@@ -246,7 +249,7 @@ export function useSchedulerController<TData, TResource>({
       viewEndDate,
       viewStartDate,
       displayUnit,
-
+      bodyRef,
       setViewEndDate,
       setViewStartDate,
       calculateDistancePercentage,
