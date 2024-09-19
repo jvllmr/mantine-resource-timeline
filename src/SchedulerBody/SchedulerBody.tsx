@@ -218,11 +218,13 @@ export function SchedulerBody<TData, TResource>({
   return (
     <Box
       className={gridClasses.subGrid}
-      ref={controller.bodyRef}
       style={{
         zIndex: 1,
         "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
+        userSelect: "none",
+        WebkitUserSelect: "none",
       }}
+      ref={controller.bodyRef}
     >
       <schedulerEntryContext.Provider value={customSchedulerEntry}>
         {paddingTop ? (

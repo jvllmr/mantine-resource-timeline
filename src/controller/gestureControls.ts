@@ -29,15 +29,18 @@ export const useSchedulerGestures = (
           }
         }
       },
-      onDrag({ ctrlKey, movement: [x] }) {
-        if (ctrlKey) {
+      onMove({ ctrlKey, pressed, delta: [x], event }) {
+        if (ctrlKey && pressed) {
+          event.preventDefault();
+          const movement = x / 7;
+
           const newStartDate = controller.viewStartDate.subtract(
-            x / 420,
+            movement,
             controller.displayUnit,
           );
 
           const newEndDate = controller.viewEndDate.subtract(
-            x / 420,
+            movement,
             controller.displayUnit,
           );
 
@@ -46,6 +49,10 @@ export const useSchedulerGestures = (
         }
       },
     },
-    { target: controller.bodyRef, eventOptions: { passive: false } },
+    {
+      target: controller.bodyRef,
+      eventOptions: { passive: false },
+      move: { threshold: 1 },
+    },
   );
 };
