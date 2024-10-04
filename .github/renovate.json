@@ -14,5 +14,6 @@
   ],
   "ignorePresets": [":ignoreModulesAndTests"],
   "labels": ["dependencies"],
-  "rangeStrategy": "bump"
+  "rangeStrategy": "bump",
+  "packageRules": [{ "matchPackageNames": ["tsup"], "matchManagers": ["npm"] }]
 }
