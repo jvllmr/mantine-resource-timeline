@@ -40,7 +40,10 @@ export interface SchedulerBodyProps<TData, TResource> {
   startDateAccessor: DataFieldAccessor<TData, Dayjs>;
   endDateAccessor: DataFieldAccessor<TData, Dayjs>;
   dataIdAccessor: DataFieldAccessor<TData, string | number>;
-  dataResourceIdAccessor: DataFieldAccessor<TData, string | number>;
+  dataResourceIdAccessor: DataFieldAccessor<
+    TData,
+    string | number | string[] | number[]
+  >;
   resourceIdAccessor: DataFieldAccessor<TResource, string | number>;
   controller: SchedulerController<TData, TResource>;
   rowHeight: number;
