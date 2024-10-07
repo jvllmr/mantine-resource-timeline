@@ -1,8 +1,6 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
-import { useContext } from "react";
-import { resourceContext } from "../contexts";
-import { schedulerEntryContext } from "./context";
-
+import deepEqual from "fast-deep-equal";
+import React from "react";
 export interface SchedulerEntryProps<TData, TResource> {
   top: NonNullable<MantineStyleProps["top"]>;
   left: NonNullable<MantineStyleProps["left"]>;
@@ -35,11 +33,30 @@ export const DefaultSchedulerEntry: SchedulerEntryComponent<any, any> = ({
   );
 };
 
-export function SchedulerEntryRenderer<TData, TResource>(
-  props: Omit<SchedulerEntryProps<TData, TResource>, "resource">,
-) {
-  const CustomSchedulerEntry: SchedulerEntryComponent<TData, TResource> =
-    useContext(schedulerEntryContext);
-  const resource = useContext<TResource>(resourceContext);
-  return <CustomSchedulerEntry {...props} resource={resource} />;
+interface SchedulerEntryRendererProps<TData, TResource>
+  extends SchedulerEntryProps<TData, TResource> {
+  CustomSchedulerEntry: SchedulerEntryComponent<TData, TResource>;
 }
+
+function SchedulerEntryRenderer_<TData, TResource>({
+  CustomSchedulerEntry,
+  ...props
+}: SchedulerEntryRendererProps<TData, TResource>) {
+  return <CustomSchedulerEntry {...props} />;
+}
+
+export const SchedulerEntryRenderer = React.memo(
+  <TData, TResource>(props: SchedulerEntryRendererProps<TData, TResource>) => (
+    <SchedulerEntryRenderer_ {...props} />
+  ),
+  (prev, next) => {
+    return (
+      prev.display == next.display &&
+      prev.left === next.left &&
+      prev.right === next.right &&
+      prev.CustomSchedulerEntry == next.CustomSchedulerEntry &&
+      deepEqual(prev.resource, next.resource) &&
+      deepEqual(prev.data, next.data)
+    );
+  },
+);

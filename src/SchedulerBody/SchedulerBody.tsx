@@ -1,7 +1,7 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
-import React, { useMemo, useRef } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -71,6 +71,7 @@ function SchedulerBodyRow<TData, TResource>({
   momentStyle,
   subMomentCount,
   dataIdAccessor,
+  entryComponent,
 }: {
   data: TData[];
   resourcesCount: number;
@@ -95,7 +96,7 @@ function SchedulerBodyRow<TData, TResource>({
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
   const getDataId = useStringAccessor(dataIdAccessor);
-
+  const resource = useContext<TResource>(resourceContext);
   const filteredData = useMemo(
     () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
     [data, getDataResourceId, resourceId],
@@ -128,6 +129,8 @@ function SchedulerBodyRow<TData, TResource>({
 
         return (
           <SchedulerEntryRenderer
+            // @ts-expect-error unkown generics
+            CustomSchedulerEntry={entryComponent}
             key={`entry_${entryId}`}
             pos="absolute"
             data={item}
@@ -136,6 +139,7 @@ function SchedulerBodyRow<TData, TResource>({
             h="80%"
             right={`${endDistance}%`}
             display={display}
+            resource={resource}
           />
         );
       })}
