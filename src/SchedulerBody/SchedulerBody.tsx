@@ -55,6 +55,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   enableVirtualizer?: boolean;
   gridLabelSize: number;
   totalGridSize: number;
+  tz?: string;
 }
 
 function SchedulerBodyRow<TData, TResource>({
@@ -72,8 +73,10 @@ function SchedulerBodyRow<TData, TResource>({
   subMomentCount,
   dataIdAccessor,
   entryComponent,
+  tz,
 }: {
   data: TData[];
+  tz?: string;
   resourcesCount: number;
   customNowMarker: NonNullable<
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
@@ -106,6 +109,7 @@ function SchedulerBodyRow<TData, TResource>({
       <NowMarkerController
         distanceCalculator={controller.calculateDistancePercentage}
         markerComponent={customNowMarker}
+        tz={tz}
       />
 
       {filteredData.map((item) => {
@@ -174,6 +178,7 @@ export function SchedulerBody<TData, TResource>({
   enableVirtualizer,
   totalGridSize,
   gridLabelSize,
+  tz,
 }: SchedulerBodyProps<TData, TResource>) {
   const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
@@ -302,6 +307,7 @@ export function SchedulerBody<TData, TResource>({
                     resourcesCount={resources.length}
                     subMomentCount={subMomentCount}
                     dataIdAccessor={dataIdAccessor}
+                    tz={tz}
                   />
                 </resourceContext.Provider>
               </schedulerEntryContext.Provider>

@@ -7,11 +7,13 @@ import {
   DetermineSubMomentCountsFn,
   MomentLabelProps,
   type MomentStyleFn,
+  NowMarkerProps,
   OnSelectFn,
   Scheduler,
   SchedulerHeaderOnClickProp,
   useSchedulerController,
 } from "mantine-resource-timeline";
+import { DefaultNowMarker } from "../src/SchedulerBody/NowMarker";
 export default { title: "Advanced" };
 
 const resources = [
@@ -95,6 +97,10 @@ const momentStyle: MomentStyleFn<
   return undefined;
 };
 
+function CustomNowMarker(props: NowMarkerProps) {
+  return <DefaultNowMarker {...props} format="DD.MM.YYYY HH:mm:ss [Uhr] Z" />;
+}
+
 export function AdvancedScheduler() {
   const controller = useSchedulerController({
     onSelect,
@@ -139,6 +145,8 @@ export function AdvancedScheduler() {
         momentStyle={momentStyle}
         determineSubMomentCounts={determineSubMomentCounts}
         dataIdAccessor="id"
+        tz="Europe/Berlin"
+        nowMarkerComponent={CustomNowMarker}
       />
     </Stack>
   );

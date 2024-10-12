@@ -1,5 +1,6 @@
 import dayjs, { Dayjs } from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import timezone from "dayjs/plugin/timezone";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import {
   createContext,
@@ -17,7 +18,6 @@ import {
   SchedulerMomentSelectClickFnFactory,
   useSchedulerSelect,
 } from "./selectControls";
-
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
 
 export interface SchedulerControllerParams<TData, TResource> {
@@ -126,6 +126,7 @@ export function useSchedulerController<TData, TResource>({
   useMemo(() => {
     dayjs.extend(weekOfYear);
     dayjs.extend(localizedFormat);
+    dayjs.extend(timezone);
   }, []);
 
   const [viewStartDate, setViewStartDate] = useState(
