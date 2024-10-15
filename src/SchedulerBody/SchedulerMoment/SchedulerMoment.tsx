@@ -127,7 +127,7 @@ export const SchedulerMoments = <TData, TResource>({
 
         return (
           <Paper
-            key={`moment_${resourceId}_${momentIndex}`}
+            key={`moment_${resourceId}_${moment.format()}`}
             radius={0}
             w={`${distance}%`}
             h={rowHeight}
