@@ -58,3 +58,5 @@ export type {
   SchedulerHeaderOnClickProp,
   SchedulerProps,
 };
+
+export { DefaultNowMarker } from "./SchedulerBody/NowMarker";
