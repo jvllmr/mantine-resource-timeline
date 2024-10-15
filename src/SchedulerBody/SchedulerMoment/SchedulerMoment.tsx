@@ -97,7 +97,7 @@ export const SchedulerMoments = <TData, TResource>({
             ? subbedMoments[momentIndex + 1][0]
             : moment;
         const isSelected =
-          controller.selectedResource == resource && // resource correct
+          controller.selectedResource === resource && // resource correct
           ((moment.isAfter(controller.firstSelectedMoment) &&
             nextMoment.isBefore(controller.lastSelectedMoment)) ||
             moment.isSame(controller.firstSelectedMoment) ||
