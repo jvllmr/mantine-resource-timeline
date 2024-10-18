@@ -1,7 +1,7 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
-import React, { useContext, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -204,12 +204,29 @@ export function SchedulerBody<TData, TResource>({
     [controller.displayUnit, determineSubMomentCounts],
   );
 
+  const [scrollMargin, setScrollMargin] = useState(
+    controller.bodyRef.current?.offsetTop ?? 0,
+  );
+
+  useEffect(() => {
+    const update = () => {
+      setScrollMargin(controller.bodyRef.current?.offsetTop ?? 0);
+    };
+    const observer = new ResizeObserver(update);
+    update();
+
+    return () => {
+      observer.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
     estimateSize: () => rowHeight,
     enabled: enableVirtualizer,
     overscan: 5,
-    scrollMargin: controller.bodyRef.current?.offsetTop ?? 0,
+    scrollMargin,
   });
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
