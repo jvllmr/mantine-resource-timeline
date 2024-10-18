@@ -1,7 +1,7 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
-import React, { useContext, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -180,6 +180,7 @@ export function SchedulerBody<TData, TResource>({
   gridLabelSize,
   tz,
 }: SchedulerBodyProps<TData, TResource>) {
+  const localBodyRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
@@ -204,12 +205,28 @@ export function SchedulerBody<TData, TResource>({
     [controller.displayUnit, determineSubMomentCounts],
   );
 
+  const [scrollMargin, setScrollMargin] = useState(
+    localBodyRef.current?.offsetTop ?? 0,
+  );
+
+  useEffect(() => {
+    const update = () => {
+      setScrollMargin(localBodyRef.current?.offsetTop ?? 0);
+    };
+    const observer = new ResizeObserver(update);
+    update();
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
     estimateSize: () => rowHeight,
     enabled: enableVirtualizer,
     overscan: 5,
-    scrollMargin: controller.bodyRef.current?.offsetTop ?? 0,
+    scrollMargin,
   });
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
@@ -217,27 +234,25 @@ export function SchedulerBody<TData, TResource>({
     () =>
       virtualItems.length > 0
         ? virtualItems?.[0]?.start
-          ? virtualItems?.[0]?.start -
-            (controller.bodyRef.current?.offsetTop ?? 0)
+          ? virtualItems?.[0]?.start - (localBodyRef.current?.offsetTop ?? 0)
           : 0
         : 0,
-    [controller.bodyRef, virtualItems],
+    [virtualItems],
   );
   const paddingBottom = useMemo(
     () =>
       virtualItems.length > 0
         ? totalSize -
           (virtualItems?.[virtualItems.length - 1]?.end || 0) +
-          (controller.bodyRef.current?.offsetTop ?? 0)
+          (localBodyRef.current?.offsetTop ?? 0)
         : 0,
-    [controller.bodyRef, totalSize, virtualItems],
+    [totalSize, virtualItems],
   );
 
   return (
     <Box
       className={gridClasses.subGrid}
-      ref={controller.bodyRef}
-      pos="relative"
+      ref={localBodyRef}
       w="100%"
       style={{
         "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
@@ -247,80 +262,93 @@ export function SchedulerBody<TData, TResource>({
         WebkitUserSelect: "none",
       }}
     >
-      {paddingTop ? (
-        <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />
-      ) : null}
-      {virtualItems.map((virtualItem, rowIndex) => {
-        const resource = resources[virtualItem.index];
-        const resourceId = getResourceId(resource);
-        return (
-          <Box
-            key={`resource_row_${virtualItem.key}`}
-            className={gridClasses.subGrid}
-            style={{
-              "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
-            }}
-          >
+      <Box
+        className={gridClasses.subGrid}
+        ref={controller.bodyRef}
+        w="100%"
+        style={{
+          "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
+          height: `${totalSize}px`,
+          zIndex: 1,
+          userSelect: "none",
+          WebkitUserSelect: "none",
+        }}
+      >
+        {paddingTop ? (
+          <Box className={gridClasses.fullRow} style={{ height: paddingTop }} />
+        ) : null}
+        {virtualItems.map((virtualItem, rowIndex) => {
+          const resource = resources[virtualItem.index];
+          const resourceId = getResourceId(resource);
+          return (
             <Box
-              className={gridClasses.resourceLabels}
+              key={`resource_row_${virtualItem.key}`}
+              className={gridClasses.subGrid}
               style={{
-                "--mantine-scheduler-grid-label-size": `span ${gridLabelSize}`,
+                "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
               }}
             >
-              <Paper
-                withBorder
-                radius={0}
-                w="100%"
-                mah={rowHeight}
+              <Box
+                className={gridClasses.resourceLabels}
                 style={{
-                  borderLeftWidth: 0,
-                  borderBottomWidth: 0,
-                  borderRightWidth: 0,
+                  "--mantine-scheduler-grid-label-size": `span ${gridLabelSize}`,
                 }}
               >
-                <CustomResourceLabel
-                  resource={resource}
-                  getResourceId={getResourceId}
-                />
-              </Paper>
-            </Box>
-            <Box
-              className={gridClasses.mainBody}
-              style={{
-                "--mantine-scheduler-grid-main-size": `span ${totalGridSize - gridLabelSize}`,
-              }}
-            >
-              <schedulerEntryContext.Provider value={customSchedulerEntry}>
-                <resourceContext.Provider value={resource}>
-                  <SchedulerBodyRow
-                    key={`row_content_${resourceId}`}
-                    rowIndex={rowIndex}
-                    customNowMarker={customNowMarker}
-                    data={data}
-                    entryComponent={customSchedulerEntry}
-                    getDataResourceId={getDataResourceId}
-                    getEndDate={getEndDate}
-                    getStartDate={getStartDate}
-                    resourceId={resourceId}
-                    rowHeight={rowHeight}
-                    momentStyle={momentStyle}
-                    resourcesCount={resources.length}
-                    subMomentCount={subMomentCount}
-                    dataIdAccessor={dataIdAccessor}
-                    tz={tz}
+                <Paper
+                  withBorder
+                  radius={0}
+                  w="100%"
+                  mah={rowHeight}
+                  style={{
+                    borderLeftWidth: 0,
+                    borderBottomWidth: 0,
+                    borderRightWidth: 0,
+                  }}
+                >
+                  <CustomResourceLabel
+                    resource={resource}
+                    getResourceId={getResourceId}
                   />
-                </resourceContext.Provider>
-              </schedulerEntryContext.Provider>
+                </Paper>
+              </Box>
+              <Box
+                className={gridClasses.mainBody}
+                style={{
+                  "--mantine-scheduler-grid-main-size": `span ${totalGridSize - gridLabelSize}`,
+                }}
+              >
+                <schedulerEntryContext.Provider value={customSchedulerEntry}>
+                  <resourceContext.Provider value={resource}>
+                    <SchedulerBodyRow
+                      key={`row_content_${resourceId}`}
+                      rowIndex={rowIndex}
+                      customNowMarker={customNowMarker}
+                      data={data}
+                      entryComponent={customSchedulerEntry}
+                      getDataResourceId={getDataResourceId}
+                      getEndDate={getEndDate}
+                      getStartDate={getStartDate}
+                      resourceId={resourceId}
+                      rowHeight={rowHeight}
+                      momentStyle={momentStyle}
+                      resourcesCount={resources.length}
+                      subMomentCount={subMomentCount}
+                      dataIdAccessor={dataIdAccessor}
+                      tz={tz}
+                    />
+                  </resourceContext.Provider>
+                </schedulerEntryContext.Provider>
+              </Box>
             </Box>
-          </Box>
-        );
-      })}
-      {paddingBottom ? (
-        <Box
-          className={gridClasses.fullRow}
-          style={{ height: paddingBottom }}
-        />
-      ) : null}
+          );
+        })}
+        {paddingBottom ? (
+          <Box
+            className={gridClasses.fullRow}
+            style={{ height: paddingBottom }}
+          />
+        ) : null}
+      </Box>
     </Box>
   );
 }
