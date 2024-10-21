@@ -1,6 +1,7 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import { DragEvent, useContext, useMemo, useState } from "react";
+import { useSnapshot } from "valtio";
 import {
   SchedulerController,
   useControllerContext,
@@ -17,6 +18,7 @@ export interface SchedulerMomentsProps<TData, TResource> {
   momentStyle?: MomentStyleFn<TData, TResource>;
   resourcesCount: number;
   subMomentCount: number;
+  getResourceId: (resource: TResource) => string;
 }
 
 export const SchedulerMoments = <TData, TResource>({
@@ -26,22 +28,23 @@ export const SchedulerMoments = <TData, TResource>({
   momentStyle,
   subMomentCount,
   resourcesCount,
+  getResourceId,
 }: SchedulerMomentsProps<TData, TResource>) => {
   const resource: TResource = useContext(resourceContext);
   const controller: SchedulerController<TData, TResource> =
     useControllerContext();
-  const { momentDragEnd, momentDragStartOver, momentSelectClick } = controller;
+  const snap = useSnapshot(controller);
+
   const firstMomentLoss = useMemo(
-    () =>
-      (controller.momentWidths[0] / 100) * (controller.momentWidths.length - 1),
-    [controller.momentWidths],
+    () => (snap.momentWidths[0] / 100) * (snap.momentWidths.length - 1),
+    [snap.momentWidths],
   );
 
   const lastMomentLoss = useMemo(
     () =>
-      (controller.momentWidths[controller.momentWidths.length - 1] / 100) *
-      (controller.momentWidths.length - 1),
-    [controller.momentWidths],
+      (snap.momentWidths[snap.momentWidths.length - 1] / 100) *
+      (snap.momentWidths.length - 1),
+    [snap.momentWidths],
   );
   const theme = useMantineTheme();
 
@@ -49,11 +52,11 @@ export const SchedulerMoments = <TData, TResource>({
 
   const zippedMoments = useMemo(
     () =>
-      controller.moments.map((moment, index): [Dayjs, number] => [
+      snap.moments.map((moment, index): [Dayjs, number] => [
         moment,
-        controller.momentWidths[index],
+        snap.momentWidths[index],
       ]),
-    [controller.momentWidths, controller.moments],
+    [snap.momentWidths, snap.moments],
   );
   const subbedMoments = useMemo(
     () =>
@@ -72,7 +75,7 @@ export const SchedulerMoments = <TData, TResource>({
           let newestMoment = moment;
           const fraction = timeFraction(
             subMomentCountWithLoss,
-            controller.displayUnit,
+            snap.displayUnit,
           );
           for (let i = 1; i < subMomentCountWithLoss; i++) {
             newestMoment = newestMoment.add(...fraction);
@@ -82,7 +85,7 @@ export const SchedulerMoments = <TData, TResource>({
         },
       ),
     [
-      controller.displayUnit,
+      snap.displayUnit,
       firstMomentLoss,
       lastMomentLoss,
       subMomentCount,
@@ -97,11 +100,14 @@ export const SchedulerMoments = <TData, TResource>({
             ? subbedMoments[momentIndex + 1][0]
             : moment;
         const isSelected =
-          controller.selectedResource == resource && // resource correct
-          ((moment.isAfter(controller.firstSelectedMoment) &&
-            nextMoment.isBefore(controller.lastSelectedMoment)) ||
-            moment.isSame(controller.firstSelectedMoment) ||
-            nextMoment.isSame(controller.lastSelectedMoment));
+          !!snap.selectedResource &&
+          // @ts-expect-error unrelated generic or something...
+          getResourceId(snap.selectedResource) === getResourceId(resource) && // resource correct
+          ((moment.isAfter(snap.firstSelectedMoment) &&
+            nextMoment.isBefore(snap.lastSelectedMoment)) ||
+            moment.isSame(snap.firstSelectedMoment) ||
+            nextMoment.isSame(snap.lastSelectedMoment));
+
         const completeStyle = {
           ...momentStyle?.({
             moment,
@@ -114,16 +120,17 @@ export const SchedulerMoments = <TData, TResource>({
 
           borderBottomWidth: rowIndex === resourcesCount - 1 ? 0 : undefined,
         };
-        const onDragStartOver = momentDragStartOver?.(
+        const onDragStartOver = snap.momentDragStartOver?.(
           moment,
           nextMoment,
           resource,
         );
-        const onDragEnd = momentDragEnd
-          ? (event: DragEvent<HTMLDivElement>) => momentDragEnd(event, resource)
+        const onDragEnd = snap.momentDragEnd
+          ? (event: DragEvent<HTMLDivElement>) =>
+              snap.momentDragEnd?.(event, resource)
           : undefined;
 
-        const onClick = momentSelectClick?.(resource, moment, nextMoment);
+        const onClick = snap.momentSelectClick?.(resource, moment, nextMoment);
 
         return (
           <Paper

@@ -2,15 +2,8 @@ import dayjs, { Dayjs } from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import weekOfYear from "dayjs/plugin/weekOfYear";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { proxy, subscribe } from "valtio";
 import {
   OnSelectFn,
   SchedulerMomentOnDragEndFn,
@@ -25,8 +18,6 @@ export interface SchedulerControllerParams<TData, TResource> {
   initialViewEndDate?: Dayjs;
   clip?: boolean;
 
-  onViewStartDateChange?: (date: Dayjs) => void;
-  onViewEndDateChange?: (date: Dayjs) => void;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
   onSelect?: OnSelectFn<TData, TResource>;
 }
@@ -40,8 +31,6 @@ export interface SchedulerController<TData, TResource> {
   viewEndDate: Dayjs;
   displayUnit: SchedulerDisplayUnit;
 
-  setViewStartDate: React.Dispatch<React.SetStateAction<Dayjs>>;
-  setViewEndDate: React.Dispatch<React.SetStateAction<Dayjs>>;
   calculateDistancePercentage: (
     date: Dayjs,
     leftOrRight: "left" | "right",
@@ -53,7 +42,7 @@ export interface SchedulerController<TData, TResource> {
   firstSelectedMoment: Dayjs | null;
   lastSelectedMoment: Dayjs | null;
   selectedResource: TResource | null;
-  bodyRef: React.MutableRefObject<HTMLDivElement | null>;
+  bodyRef: HTMLDivElement | null;
 }
 export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
 
@@ -108,12 +97,94 @@ function clipStartViewDate(date: Dayjs, displayUnit: SchedulerDisplayUnit) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function calculateDisplayUnit(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controller: SchedulerController<any, any>,
+  calcFn?: (diff: number) => SchedulerDisplayUnit,
+) {
+  const daysDiff = Math.abs(
+    controller.viewStartDate.diff(controller.viewEndDate, "days", true),
+  );
+  const customDetermineDisplayUnit = calcFn ?? determineDisplayUnit;
+  const newDisplayUnit = customDetermineDisplayUnit(daysDiff);
+  if (newDisplayUnit !== controller.displayUnit) {
+    controller.displayUnit = newDisplayUnit;
+  }
+}
+
+function calculateMoments(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controller: SchedulerController<any, any>,
+  clip?: boolean,
+) {
+  const maybeClippedViewStartDate = clip
+    ? clipStartViewDate(controller.viewStartDate, controller.displayUnit)
+    : controller.viewStartDate;
+  const maybeClippedViewEndDate = clip
+    ? getNextMoment[controller.displayUnit](controller.viewEndDate)
+    : controller.viewEndDate;
+
+  const displayUnitDiff = Math.abs(
+    maybeClippedViewStartDate.diff(
+      maybeClippedViewEndDate,
+      controller.displayUnit,
+      true,
+    ),
+  );
+
+  let diff = displayUnitDiff;
+  const moments: Dayjs[] = [maybeClippedViewStartDate];
+  let latestAddition = maybeClippedViewStartDate;
+  while (diff >= 1) {
+    diff -= 1;
+    const newMoment = getNextMoment[controller.displayUnit](latestAddition);
+    if (newMoment.isSame(maybeClippedViewEndDate)) break;
+    moments.push(newMoment);
+    latestAddition = newMoment;
+  }
+  controller.moments = moments;
+  const momentWidths = moments.map((moment, index, array) => {
+    const distance =
+      index < array.length - 1
+        ? Math.abs(moment.diff(array[index + 1], controller.displayUnit, true))
+        : Math.abs(
+            moment.diff(maybeClippedViewEndDate, controller.displayUnit, true),
+          );
+
+    return (distance / (moments.length - 1)) * 100;
+  });
+
+  controller.momentWidths = momentWidths;
+
+  controller.calculateDistancePercentage = (
+    date: Dayjs,
+    leftOrRight: "left" | "right",
+  ) => {
+    if (
+      date.isBefore(maybeClippedViewStartDate) ||
+      date.isAfter(maybeClippedViewEndDate)
+    )
+      return 0;
+
+    let left = maybeClippedViewStartDate;
+    let right = date;
+
+    if (leftOrRight === "right") {
+      left = date;
+      right = maybeClippedViewEndDate;
+    }
+
+    return (
+      (right.diff(left, controller.displayUnit, true) / displayUnitDiff) * 100
+    );
+  };
+}
+
 export function useSchedulerController<TData, TResource>({
   initialViewEndDate,
   initialViewStartDate,
   clip,
-  onViewEndDateChange,
-  onViewStartDateChange,
 
   onSelect,
 
@@ -122,165 +193,82 @@ export function useSchedulerController<TData, TResource>({
   TData,
   TResource
 > {
-  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const controller = useRef(
+    proxy<SchedulerController<TData, TResource>>({
+      bodyRef: null,
+      calculateDistancePercentage: () => 0,
+      displayUnit: "day",
+      firstSelectedMoment: null,
+      lastSelectedMoment: null,
+      moments: [],
+      momentWidths: [],
+      selectedResource: null,
+
+      viewStartDate: dayjs().subtract(7, "days"),
+      viewEndDate: dayjs().add(7, "days"),
+    }),
+  ).current;
   useMemo(() => {
     dayjs.extend(weekOfYear);
     dayjs.extend(localizedFormat);
     dayjs.extend(timezone);
   }, []);
 
-  const [viewStartDate, setViewStartDate] = useState(
-    initialViewStartDate ?? dayjs().subtract(7, "days"),
-  );
-
   useEffect(() => {
-    onViewStartDateChange?.(viewStartDate);
-  }, [onViewStartDateChange, viewStartDate]);
-
-  const [viewEndDate, setViewEndDate] = useState(
-    initialViewEndDate ?? dayjs().add(7, "days"),
-  );
-
-  useEffect(() => {
-    onViewEndDateChange?.(viewEndDate);
-  }, [onViewEndDateChange, viewEndDate]);
-
-  const daysDiff = useMemo(
-    () => Math.abs(viewStartDate.diff(viewEndDate, "days", true)),
-    [viewEndDate, viewStartDate],
-  );
-
-  const customDetermineDisplayUnit = useMemo(
-    () => determineDisplayUnitParam ?? determineDisplayUnit,
-    [determineDisplayUnitParam],
-  );
-
-  const displayUnit: SchedulerDisplayUnit = useMemo(
-    () => customDetermineDisplayUnit(daysDiff),
-    [customDetermineDisplayUnit, daysDiff],
-  );
-  const maybeClippedViewStartDate = useMemo(
-    () =>
-      clip ? clipStartViewDate(viewStartDate, displayUnit) : viewStartDate,
-    [clip, displayUnit, viewStartDate],
-  );
-
-  const maybeClippedViewEndDate = useMemo(
-    () => (clip ? getNextMoment[displayUnit](viewEndDate) : viewEndDate),
-    [clip, displayUnit, viewEndDate],
-  );
-
-  const displayUnitDiff = useMemo(
-    () =>
-      Math.abs(
-        maybeClippedViewStartDate.diff(
-          maybeClippedViewEndDate,
-          displayUnit,
-          true,
-        ),
-      ),
-    [displayUnit, maybeClippedViewEndDate, maybeClippedViewStartDate],
-  );
-
-  const moments = useMemo(() => {
-    let diff = displayUnitDiff;
-    const result: Dayjs[] = [maybeClippedViewStartDate];
-    let latestAddition = maybeClippedViewStartDate;
-    while (diff >= 1) {
-      diff -= 1;
-      const newMoment = getNextMoment[displayUnit](latestAddition);
-      if (newMoment.isSame(maybeClippedViewEndDate)) break;
-      result.push(newMoment);
-      latestAddition = newMoment;
+    if (
+      initialViewStartDate &&
+      !initialViewStartDate.isSame(controller.viewStartDate)
+    ) {
+      controller.viewStartDate = initialViewStartDate;
     }
-
-    return result;
-  }, [
-    displayUnit,
-    displayUnitDiff,
-    maybeClippedViewEndDate,
-    maybeClippedViewStartDate,
-  ]);
-
-  const momentWidths = useMemo(
-    () =>
-      moments.map((moment, index, array) => {
-        const distance =
-          index < array.length - 1
-            ? Math.abs(moment.diff(array[index + 1], displayUnit, true))
-            : Math.abs(moment.diff(maybeClippedViewEndDate, displayUnit, true));
-
-        return (distance / (moments.length - 1)) * 100;
-      }),
-    [displayUnit, maybeClippedViewEndDate, moments],
-  );
-
-  const calculateDistancePercentage = useCallback(
-    (date: Dayjs, leftOrRight: "left" | "right") => {
-      if (
-        date.isBefore(maybeClippedViewStartDate) ||
-        date.isAfter(maybeClippedViewEndDate)
-      )
-        return 0;
-
-      let left = maybeClippedViewStartDate;
-      let right = date;
-
-      if (leftOrRight === "right") {
-        left = date;
-        right = maybeClippedViewEndDate;
-      }
-
-      return (right.diff(left, displayUnit, true) / displayUnitDiff) * 100;
-    },
-    [
-      displayUnit,
-      displayUnitDiff,
-      maybeClippedViewEndDate,
-      maybeClippedViewStartDate,
-    ],
-  );
-
-  const selectControls = useSchedulerSelect(onSelect);
-
-  const controller: SchedulerController<TData, TResource> = useMemo(
-    () => ({
-      moments,
-      momentWidths,
-      viewEndDate,
-      viewStartDate,
-      displayUnit,
-      bodyRef,
-      setViewEndDate,
-      setViewStartDate,
-      calculateDistancePercentage,
-
-      firstSelectedMoment: selectControls.firstMoment,
-      lastSelectedMoment: selectControls.lastMoment,
-      momentDragEnd: selectControls.onDragEnd,
-      momentDragStartOver: selectControls.onDragStartOverFactory,
-      selectedResource: selectControls.selectedResource,
-      momentSelectClick: selectControls.selectClick,
-    }),
-    [
-      moments,
-      momentWidths,
-      viewEndDate,
-      viewStartDate,
-      displayUnit,
-      calculateDistancePercentage,
-      selectControls.firstMoment,
-      selectControls.lastMoment,
-      selectControls.onDragEnd,
-      selectControls.onDragStartOverFactory,
-      selectControls.selectedResource,
-      selectControls.selectClick,
-    ],
-  );
+    if (
+      initialViewEndDate &&
+      !initialViewEndDate.isSame(controller.viewEndDate)
+    ) {
+      controller.viewEndDate = initialViewEndDate;
+    }
+  }, [controller, initialViewEndDate, initialViewStartDate]);
 
   useEffect(() => {
-    selectControls.setController(controller);
-  }, [controller, selectControls]);
+    calculateDisplayUnit(controller, determineDisplayUnitParam);
+    const unsubscribe = subscribe(controller, (ops) => {
+      if (
+        !ops.find(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([op, key]) => key[0] === "viewStartDate" || key[0] === "viewEndDate",
+        )
+      ) {
+        return;
+      }
+      calculateDisplayUnit(controller, determineDisplayUnitParam);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [controller, determineDisplayUnitParam]);
+
+  useEffect(() => {
+    calculateMoments(controller, clip);
+    const unsubscribe = subscribe(controller, (ops) => {
+      if (
+        !ops.find(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([op, key]) =>
+            key[0] === "viewStartDate" ||
+            key[0] === "viewEndDate" ||
+            key[0] === "displayUnit",
+        )
+      )
+        return;
+      calculateMoments(controller, clip);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [clip, controller]);
+
+  useSchedulerSelect(controller, onSelect);
 
   return controller;
 }

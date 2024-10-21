@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import React, { useMemo } from "react";
+import { useSnapshot } from "valtio";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -143,9 +144,10 @@ export function SchedulerHeader<TData, TResource>({
   totalGridSize,
   gridLabelSize,
 }: SchedulerHeaderProps<TData, TResource>) {
+  const snap = useSnapshot(controller);
   const resolvedOnClick = useMemo(
-    () => onClick?.[controller.displayUnit],
-    [controller.displayUnit, onClick],
+    () => onClick?.[snap.displayUnit],
+    [snap.displayUnit, onClick],
   );
 
   return (
@@ -195,15 +197,16 @@ export function SchedulerHeader<TData, TResource>({
             p="xs"
           >
             <TopLabel
-              displayUnit={controller.displayUnit}
-              moments={controller.moments}
+              displayUnit={snap.displayUnit}
+              //  @ts-expect-error snap value is immutable
+              moments={snap.moments}
             />
           </Paper>
           <Flex w="100%">
-            {controller.moments
+            {snap.moments
               .map((moment, index): [Dayjs, number] => [
                 moment,
-                controller.momentWidths[index],
+                snap.momentWidths[index],
               ])
               .map(([moment, momentWidth], index) => {
                 return (
@@ -216,7 +219,7 @@ export function SchedulerHeader<TData, TResource>({
                       borderLeftWidth: 0,
                       borderBottomWidth: 0,
                       borderRightWidth:
-                        index === controller.moments.length - 1 ? 0 : undefined,
+                        index === snap.moments.length - 1 ? 0 : undefined,
                       overflow: "hidden",
                     }}
                     w={`${momentWidth}%`}

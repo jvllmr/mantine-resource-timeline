@@ -2,6 +2,7 @@ import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useSnapshot } from "valtio";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -74,6 +75,7 @@ function SchedulerBodyRow<TData, TResource>({
   dataIdAccessor,
   entryComponent,
   tz,
+  getResourceId,
 }: {
   data: TData[];
   tz?: string;
@@ -85,6 +87,7 @@ function SchedulerBodyRow<TData, TResource>({
   getDataResourceId: (dataItem: TData) => string[];
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
+  getResourceId: (resource: TResource) => string;
   resourceId: string;
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
@@ -98,6 +101,7 @@ function SchedulerBodyRow<TData, TResource>({
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
+  const snap = useSnapshot(controller);
   const getDataId = useStringAccessor(dataIdAccessor);
   const resource = useContext<TResource>(resourceContext);
   const filteredData = useMemo(
@@ -107,7 +111,7 @@ function SchedulerBodyRow<TData, TResource>({
   return (
     <Flex pos="relative" ref={rowRef} style={{ touchAction: "pan-y" }}>
       <NowMarkerController
-        distanceCalculator={controller.calculateDistancePercentage}
+        distanceCalculator={snap.calculateDistancePercentage}
         markerComponent={customNowMarker}
         tz={tz}
       />
@@ -115,17 +119,14 @@ function SchedulerBodyRow<TData, TResource>({
       {filteredData.map((item) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
-        const startDistance = controller.calculateDistancePercentage(
+        const startDistance = snap.calculateDistancePercentage(
           startDate,
           "left",
         );
-        const endDistance = controller.calculateDistancePercentage(
-          endDate,
-          "right",
-        );
+        const endDistance = snap.calculateDistancePercentage(endDate, "right");
         const isOverlap =
-          controller.viewStartDate.isBefore(endDate) &&
-          controller.viewEndDate.isAfter(startDate);
+          snap.viewStartDate.isBefore(endDate) &&
+          snap.viewEndDate.isAfter(startDate);
         const display: MantineStyleProps["display"] = isOverlap
           ? undefined
           : "none";
@@ -155,6 +156,7 @@ function SchedulerBodyRow<TData, TResource>({
         rowHeight={rowHeight}
         rowIndex={rowIndex}
         momentStyle={momentStyle}
+        getResourceId={getResourceId}
         subMomentCount={subMomentCount}
       />
     </Flex>
@@ -182,6 +184,7 @@ export function SchedulerBody<TData, TResource>({
 }: SchedulerBodyProps<TData, TResource>) {
   const localBodyRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
+  const snap = useSnapshot(controller);
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
@@ -201,8 +204,8 @@ export function SchedulerBody<TData, TResource>({
   );
 
   const subMomentCount = useMemo(
-    () => determineSubMomentCounts?.(controller.displayUnit) ?? 0,
-    [controller.displayUnit, determineSubMomentCounts],
+    () => determineSubMomentCounts?.(snap.displayUnit) ?? 0,
+    [determineSubMomentCounts, snap.displayUnit],
   );
 
   const [scrollMargin, setScrollMargin] = useState(
@@ -264,7 +267,6 @@ export function SchedulerBody<TData, TResource>({
     >
       <Box
         className={gridClasses.subGrid}
-        ref={controller.bodyRef}
         w="100%"
         style={{
           "--mantine-scheduler-grid-size": `span ${totalGridSize}`,
@@ -334,6 +336,7 @@ export function SchedulerBody<TData, TResource>({
                       resourcesCount={resources.length}
                       subMomentCount={subMomentCount}
                       dataIdAccessor={dataIdAccessor}
+                      getResourceId={getResourceId}
                       tz={tz}
                     />
                   </resourceContext.Provider>

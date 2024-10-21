@@ -13,6 +13,7 @@ import {
   SchedulerHeaderOnClickProp,
   useSchedulerController,
 } from "mantine-resource-timeline";
+import { useSnapshot } from "valtio";
 import { DefaultNowMarker } from "../src/SchedulerBody/NowMarker";
 export default { title: "Advanced" };
 
@@ -45,12 +46,12 @@ const headerOnClick: SchedulerHeaderOnClickProp<
   (typeof resources)[number]
 > = {
   day: ({ moment, controller }) => {
-    controller.setViewStartDate(
-      moment.hour(9).minute(0).second(0).millisecond(0),
-    );
-    controller.setViewEndDate(
-      moment.hour(17).minute(0).second(0).millisecond(0),
-    );
+    controller.viewStartDate = moment
+      .hour(9)
+      .minute(0)
+      .second(0)
+      .millisecond(0);
+    controller.viewEndDate = moment.hour(17).minute(0).second(0).millisecond(0);
   },
 };
 
@@ -68,7 +69,8 @@ const determineSubMomentCounts: DetermineSubMomentCountsFn = () => 2;
 function GermanMomentLabel(
   props: MomentLabelProps<(typeof data)[number], (typeof resources)[number]>,
 ) {
-  if (props.controller.displayUnit === "day") {
+  const snap = useSnapshot(props.controller);
+  if (snap.displayUnit === "day") {
     const dayStr = props.moment.format("DD.MM.");
     if (props.moment.day() === 1) {
       return (
@@ -106,26 +108,27 @@ export function AdvancedScheduler() {
     onSelect,
   });
 
+  const snap = useSnapshot(controller);
   return (
     <Stack>
       <Grid>
         <Grid.Col span={6}>
           <DateTimePicker
             label="Start"
-            value={controller.viewStartDate.toDate()}
+            value={snap.viewStartDate.toDate()}
             onChange={(value) => {
               if (!value) return;
-              controller.setViewStartDate(dayjs(value));
+              controller.viewStartDate = dayjs(value);
             }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
           <DateTimePicker
             label="End"
-            value={controller.viewEndDate.toDate()}
+            value={snap.viewEndDate.toDate()}
             onChange={(value) => {
               if (!value) return;
-              controller.setViewEndDate(dayjs(value));
+              controller.viewEndDate = dayjs(value);
             }}
           />
         </Grid.Col>

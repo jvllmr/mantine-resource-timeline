@@ -1,5 +1,6 @@
 import { Box, Flex } from "@mantine/core";
 import { Dayjs } from "dayjs";
+import { useSnapshot } from "valtio";
 import { SchedulerController } from "../controller/controller";
 
 export type MomentLabelProps<TData, TResource> = {
@@ -11,7 +12,8 @@ export function DefaultMomentLabel<TData, TResource>({
   controller,
   moment,
 }: MomentLabelProps<TData, TResource>) {
-  switch (controller.displayUnit) {
+  const snap = useSnapshot(controller);
+  switch (snap.displayUnit) {
     case "year":
       return String(moment.year());
     case "month":

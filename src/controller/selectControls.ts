@@ -1,7 +1,8 @@
 import { Dayjs } from "dayjs";
-import { DragEvent, useMemo, useRef, useState } from "react";
+import deepEqual from "fast-deep-equal";
+import { DragEvent, useEffect, useRef } from "react";
+import { snapshot } from "valtio";
 import { SchedulerController } from "./controller";
-
 export type OnSelectFn<TData, TResource> = (params: {
   firstMoment: Dayjs;
   lastMoment: Dayjs;
@@ -26,102 +27,75 @@ export type SchedulerMomentSelectClickFnFactory<TResource> = (
 ) => (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 
 export const useSchedulerSelect = <TData, TResource>(
+  controller: SchedulerController<TData, TResource>,
   onSelect?: OnSelectFn<TData, TResource>,
 ) => {
-  const constantDiv = useMemo(() => document.createElement("div"), []);
-  const [firstMoment, setFirstMoment] = useState<Dayjs | null>(null);
-  const [lastMoment, setLastMoment] = useState<Dayjs | null>(null);
+  const constantDiv = useRef(document.createElement("div")).current;
 
-  const controllerRef = useRef<SchedulerController<TData, TResource> | null>(
-    null,
-  );
-  const selectedResourceRef = useRef<TResource | null>(null);
+  useEffect(() => {
+    controller.momentDragStartOver = onSelect
+      ? (moment: Dayjs, nextMoment: Dayjs, resource: TResource) => (event) => {
+          const selectedResource = controller.selectedResource
+            ? snapshot(controller.selectedResource)
+            : null;
 
-  const onDragStartOverFactory:
-    | SchedulerMomentOnDragStartOverFactory<TResource>
-    | undefined = useMemo(
-    () =>
-      onSelect
-        ? (moment: Dayjs, nextMoment: Dayjs, resource: TResource) =>
-            (event) => {
-              if (
-                !event.ctrlKey &&
-                (resource == selectedResourceRef.current ||
-                  selectedResourceRef.current === null)
-              ) {
-                event.dataTransfer.setDragImage(constantDiv, 0, 0);
-                if (!firstMoment || moment.isBefore(firstMoment)) {
-                  setFirstMoment(moment);
-                } else if (!lastMoment?.isSame(nextMoment)) {
-                  setLastMoment(nextMoment);
-                }
-
-                selectedResourceRef.current = resource;
-              }
-            }
-        : undefined,
-    [constantDiv, firstMoment, lastMoment, onSelect],
-  );
-
-  const onDragEnd: SchedulerMomentOnDragEndFn<TResource> | undefined = useMemo(
-    () =>
-      onSelect
-        ? (event, resource) => {
-            event.preventDefault();
+          if (
+            !event.ctrlKey &&
+            (deepEqual(resource, selectedResource) || selectedResource === null)
+          ) {
+            event.dataTransfer.setDragImage(constantDiv, 0, 0);
             if (
-              !event.ctrlKey &&
-              onSelect &&
-              controllerRef.current &&
-              firstMoment &&
-              lastMoment
+              !controller.firstSelectedMoment ||
+              moment.isBefore(controller.firstSelectedMoment)
             ) {
-              onSelect({
-                firstMoment,
-                lastMoment,
-                resource,
-                controller: controllerRef.current,
-              });
-
-              setFirstMoment(null);
-              setLastMoment(null);
-              selectedResourceRef.current = null;
+              controller.firstSelectedMoment = moment;
+            } else if (!controller.lastSelectedMoment?.isSame(nextMoment)) {
+              controller.lastSelectedMoment = nextMoment;
+            }
+            if (selectedResource !== resource) {
+              controller.selectedResource = resource;
             }
           }
-        : undefined,
-    [firstMoment, lastMoment, onSelect],
-  );
+        }
+      : undefined;
+  }, [constantDiv, controller, onSelect]);
 
-  const selectClick:
-    | SchedulerMomentSelectClickFnFactory<TResource>
-    | undefined = useMemo(
-    () =>
-      onSelect
-        ? (resource, firstMoment, lastMoment) => (event) => {
-            event.preventDefault();
-            if (controllerRef.current) {
-              onSelect({
-                controller: controllerRef.current,
-                resource,
-                firstMoment,
-                lastMoment,
-              });
-            }
+  useEffect(() => {
+    controller.momentDragEnd = onSelect
+      ? (event, resource) => {
+          event.preventDefault();
+          if (
+            !event.ctrlKey &&
+            onSelect &&
+            controller.firstSelectedMoment &&
+            controller.lastSelectedMoment
+          ) {
+            onSelect({
+              firstMoment: controller.firstSelectedMoment,
+              lastMoment: controller.lastSelectedMoment,
+              resource,
+              controller,
+            });
+
+            controller.firstSelectedMoment = null;
+            controller.lastSelectedMoment = null;
+            controller.selectedResource = null;
           }
-        : undefined,
-    [onSelect],
-  );
+        }
+      : undefined;
+  }, [controller, onSelect]);
+  useEffect(() => {
+    controller.momentSelectClick = onSelect
+      ? (resource, firstMoment, lastMoment) => (event) => {
+          event.preventDefault();
 
-  return useMemo(
-    () => ({
-      setController: (controller: SchedulerController<TData, TResource>) =>
-        (controllerRef.current = controller),
-      onDragStartOverFactory,
-      onDragEnd,
-      firstMoment,
-      lastMoment,
-      selectedResource: selectedResourceRef.current,
-      selectClick,
-    }),
-    [onDragStartOverFactory, onDragEnd, firstMoment, lastMoment, selectClick],
-  );
+          onSelect({
+            controller,
+            resource,
+            firstMoment,
+            lastMoment,
+          });
+        }
+      : undefined;
+  }, [controller, onSelect]);
 };

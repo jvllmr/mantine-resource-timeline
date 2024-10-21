@@ -1,10 +1,25 @@
 import { useGesture } from "@use-gesture/react";
+import { useEffect, useRef } from "react";
+import { subscribeKey } from "valtio/utils";
 import { SchedulerController } from "./controller";
 
 export const useSchedulerGestures = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller: SchedulerController<any, any>,
 ) => {
+  const artificialRef = useRef(controller.bodyRef);
+
+  useEffect(() => {
+    const unsubscribe = subscribeKey(controller, "bodyRef", (value) => {
+      artificialRef.current = value;
+      console.log(artificialRef.current);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [controller]);
+
   useGesture(
     {
       // @ts-expect-error we don't need x, but unpacking is just so much more elegant
@@ -24,8 +39,8 @@ export const useSchedulerGestures = (
           );
 
           if (newStartDate.isBefore(newEndDate)) {
-            controller.setViewStartDate(newStartDate);
-            controller.setViewEndDate(newEndDate);
+            controller.viewStartDate = newStartDate;
+            controller.viewEndDate = newEndDate;
           }
         }
       },
@@ -43,14 +58,13 @@ export const useSchedulerGestures = (
             movement,
             controller.displayUnit,
           );
-
-          controller.setViewStartDate(newStartDate);
-          controller.setViewEndDate(newEndDate);
+          controller.viewStartDate = newStartDate;
+          controller.viewEndDate = newEndDate;
         }
       },
     },
     {
-      target: controller.bodyRef,
+      target: artificialRef,
       eventOptions: { passive: false },
       move: { threshold: 1 },
     },
