@@ -234,6 +234,7 @@ export function useSchedulerController<TData, TResource>({
     const unsubscribe = subscribe(controller, (ops) => {
       if (
         !ops.find(
+          // @ts-expect-error we only need key
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([op, key]) => key[0] === "viewStartDate" || key[0] === "viewEndDate",
         )
@@ -253,6 +254,7 @@ export function useSchedulerController<TData, TResource>({
     const unsubscribe = subscribe(controller, (ops) => {
       if (
         !ops.find(
+          // @ts-expect-error we only need key
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([op, key]) =>
             key[0] === "viewStartDate" ||
