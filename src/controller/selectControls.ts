@@ -46,7 +46,7 @@ export const useSchedulerSelect = <TData, TResource>(
             (event) => {
               if (
                 !event.ctrlKey &&
-                (resource === selectedResourceRef.current ||
+                (resource == selectedResourceRef.current ||
                   selectedResourceRef.current === null)
               ) {
                 event.dataTransfer.setDragImage(constantDiv, 0, 0);

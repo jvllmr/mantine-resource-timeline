@@ -51,10 +51,10 @@ export const SchedulerEntryRenderer = React.memo(
   ),
   (prev, next) => {
     return (
-      prev.display === next.display &&
+      prev.display == next.display &&
       prev.left === next.left &&
       prev.right === next.right &&
-      prev.CustomSchedulerEntry === next.CustomSchedulerEntry &&
+      prev.CustomSchedulerEntry == next.CustomSchedulerEntry &&
       deepEqual(prev.resource, next.resource) &&
       deepEqual(prev.data, next.data)
     );
