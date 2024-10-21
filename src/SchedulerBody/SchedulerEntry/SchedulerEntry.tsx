@@ -1,5 +1,4 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
-import deepEqual from "fast-deep-equal";
 import React from "react";
 export interface SchedulerEntryProps<TData, TResource> {
   top: NonNullable<MantineStyleProps["top"]>;
@@ -49,14 +48,4 @@ export const SchedulerEntryRenderer = React.memo(
   <TData, TResource>(props: SchedulerEntryRendererProps<TData, TResource>) => (
     <SchedulerEntryRenderer_ {...props} />
   ),
-  (prev, next) => {
-    return (
-      prev.display == next.display &&
-      prev.left === next.left &&
-      prev.right === next.right &&
-      prev.CustomSchedulerEntry == next.CustomSchedulerEntry &&
-      deepEqual(prev.resource, next.resource) &&
-      deepEqual(prev.data, next.data)
-    );
-  },
 );

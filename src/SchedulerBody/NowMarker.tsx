@@ -41,10 +41,6 @@ export const NowMarkerController = React.memo(
     if (!nowLeft) return null;
     return <Marker left={nowLeft} now={now} />;
   },
-  (prev, next) =>
-    prev.markerComponent == next.markerComponent &&
-    prev.distanceCalculator == next.distanceCalculator &&
-    prev.tz == next.tz,
 );
 
 export interface NowMarkerProps {
