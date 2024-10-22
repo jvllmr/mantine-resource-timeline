@@ -1,12 +1,9 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
 import { Dayjs } from "dayjs";
-import { DragEvent, useContext, useMemo, useState } from "react";
+import { DragEvent, useMemo, useState } from "react";
 import { useSnapshot } from "valtio";
-import {
-  SchedulerController,
-  useControllerContext,
-} from "../../controller/controller";
-import { resourceContext } from "../contexts";
+import { SchedulerController } from "../../controller/controller";
+
 import classes from "./SchedulerMoment.module.css";
 import { MomentStyleFn } from "./momentStyling";
 
@@ -16,6 +13,8 @@ export interface SchedulerMomentsProps<TData, TResource> {
   rowHeight: MantineStyleProps["h"];
   momentStyle?: MomentStyleFn<TData, TResource>;
   resourcesCount: number;
+  controller: SchedulerController<TData, TResource>;
+  resource: TResource;
 }
 
 const SchedulerMoment = <TData, TResource>({
@@ -29,6 +28,8 @@ const SchedulerMoment = <TData, TResource>({
   rowHeight,
   moment,
   resourceId,
+  controller,
+  resource,
 }: SchedulerMomentsProps<TData, TResource> & {
   distance: number;
 
@@ -37,8 +38,6 @@ const SchedulerMoment = <TData, TResource>({
   setDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   momentIndex: number;
 }) => {
-  const resource: TResource = useContext(resourceContext);
-  const controller = useControllerContext();
   const subbedMoments = useSnapshot(controller.subbedMoments);
   const { momentSelectClick, momentDragEnd, momentDragStartOver } =
     useSnapshot(controller);
@@ -122,10 +121,9 @@ const SchedulerMoment = <TData, TResource>({
 };
 
 export const SchedulerMoments = <TData, TResource>({
+  controller,
   ...props
 }: SchedulerMomentsProps<TData, TResource>) => {
-  const controller: SchedulerController<TData, TResource> =
-    useControllerContext();
   const subbedMoments = useSnapshot(controller.subbedMoments);
 
   const [draggingEnabled, setDraggingEnabled] = useState(false);
@@ -142,6 +140,7 @@ export const SchedulerMoments = <TData, TResource>({
             setDraggingEnabled={setDraggingEnabled}
             moment={moment}
             momentIndex={momentIndex}
+            controller={controller}
           />
         );
       })}

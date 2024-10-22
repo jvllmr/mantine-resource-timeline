@@ -10,10 +10,10 @@ import {
 import { Dayjs } from "dayjs";
 import React, { useMemo } from "react";
 import { useSnapshot } from "valtio";
+
 import {
   SchedulerController,
   SchedulerDisplayUnit,
-  useControllerContext,
 } from "../controller/controller";
 import gridClasses from "../Scheduler/SchedulerGrid.module.css";
 import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
@@ -84,6 +84,7 @@ interface BottomLabelProps<TData, TResource> {
   >["momentLabelComponent"];
   onClick?: SchedulerHeaderOnClickFn<TData, TResource>;
   momentStyle?: MomentStyleFn<TData, TResource>;
+  controller: SchedulerController<TData, TResource>;
 }
 
 const BottomLabel = <TData, TResource>({
@@ -91,9 +92,8 @@ const BottomLabel = <TData, TResource>({
   moment,
   momentLabelComponent,
   momentStyle,
+  controller,
 }: BottomLabelProps<TData, TResource>) => {
-  const controller = useControllerContext();
-
   const wrappedOnClick = useMemo(
     () => (onClick ? () => onClick({ moment, controller }) : undefined),
     [controller, moment, onClick],
@@ -229,6 +229,7 @@ export function SchedulerHeader<TData, TResource>({
                       onClick={resolvedOnClick}
                       momentLabelComponent={momentLabelComponent}
                       momentStyle={momentStyle}
+                      controller={controller}
                     />
                   </Paper>
                 );

@@ -1,12 +1,9 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
-import React, { useContext, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
-import {
-  SchedulerController,
-  useControllerContext,
-} from "../controller/controller";
+import { SchedulerController } from "../controller/controller";
 import gridClasses from "../Scheduler/SchedulerGrid.module.css";
 import {
   DataFieldAccessor,
@@ -14,14 +11,14 @@ import {
   useStringAccessor,
   useStringArrayAccessor,
 } from "../utils";
-import { resourceContext } from "./contexts";
+
 import {
   DefaultNowMarker,
   NowMarkerController,
   NowMarkerProps,
 } from "./NowMarker";
 import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
-import { schedulerEntryContext } from "./SchedulerEntry/context";
+
 import {
   DefaultSchedulerEntry,
   SchedulerEntryProps,
@@ -64,6 +61,8 @@ const SchedulerEntries = <TData, TResource>({
   resourceId,
   getEndDate,
   getStartDate,
+  controller,
+  resource,
 }: {
   data: TData[];
   dataIdAccessor: DataFieldAccessor<TData, string | number>;
@@ -74,13 +73,14 @@ const SchedulerEntries = <TData, TResource>({
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
+  controller: SchedulerController<TData, TResource>;
+  resource: TResource;
 }) => {
   const getDataId = useStringAccessor(dataIdAccessor);
-  const controller = useControllerContext();
 
   const { viewStartDate, viewEndDate, calculateDistancePercentage } =
     useSnapshot(controller);
-  const resource = useContext<TResource>(resourceContext);
+
   const filteredData = useMemo(
     () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
     [data, getDataResourceId, resourceId],
@@ -136,6 +136,9 @@ function SchedulerBodyRow<TData, TResource>({
 
   dataIdAccessor,
   entryComponent,
+  controller,
+  resource,
+
   tz,
 }: {
   data: TData[];
@@ -159,9 +162,11 @@ function SchedulerBodyRow<TData, TResource>({
   rowIndex: number;
 
   momentStyle?: MomentStyleFn<TData, TResource>;
+  controller: SchedulerController<TData, TResource>;
+  resource: TResource;
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const controller = useControllerContext();
+
   const { calculateDistancePercentage } = useSnapshot(controller);
 
   return (
@@ -179,6 +184,8 @@ function SchedulerBodyRow<TData, TResource>({
         getStartDate={getStartDate}
         resourceId={resourceId}
         entryComponent={entryComponent}
+        controller={controller}
+        resource={resource}
       />
       <SchedulerMoments
         resourceId={resourceId}
@@ -186,6 +193,8 @@ function SchedulerBodyRow<TData, TResource>({
         rowHeight={rowHeight}
         rowIndex={rowIndex}
         momentStyle={momentStyle}
+        resource={resource}
+        controller={controller}
       />
     </Flex>
   );
@@ -203,6 +212,7 @@ export function SchedulerBody<TData, TResource>({
   nowMarkerComponent,
 
   rowHeight,
+  controller,
   momentStyle,
   dataIdAccessor,
   enableVirtualizer,
@@ -325,26 +335,24 @@ export function SchedulerBody<TData, TResource>({
                   "--mantine-scheduler-grid-main-size": `span ${totalGridSize - gridLabelSize}`,
                 }}
               >
-                <schedulerEntryContext.Provider value={customSchedulerEntry}>
-                  <resourceContext.Provider value={resource}>
-                    <SchedulerBodyRow
-                      key={`row_content_${resourceId}`}
-                      rowIndex={rowIndex}
-                      customNowMarker={customNowMarker}
-                      data={data}
-                      entryComponent={customSchedulerEntry}
-                      getDataResourceId={getDataResourceId}
-                      getEndDate={getEndDate}
-                      getStartDate={getStartDate}
-                      resourceId={resourceId}
-                      rowHeight={rowHeight}
-                      momentStyle={momentStyle}
-                      resourcesCount={resources.length}
-                      dataIdAccessor={dataIdAccessor}
-                      tz={tz}
-                    />
-                  </resourceContext.Provider>
-                </schedulerEntryContext.Provider>
+                <SchedulerBodyRow
+                  key={`row_content_${resourceId}`}
+                  rowIndex={rowIndex}
+                  customNowMarker={customNowMarker}
+                  data={data}
+                  entryComponent={customSchedulerEntry}
+                  getDataResourceId={getDataResourceId}
+                  getEndDate={getEndDate}
+                  getStartDate={getStartDate}
+                  resourceId={resourceId}
+                  rowHeight={rowHeight}
+                  momentStyle={momentStyle}
+                  resourcesCount={resources.length}
+                  dataIdAccessor={dataIdAccessor}
+                  controller={controller}
+                  tz={tz}
+                  resource={resource}
+                />
               </Box>
             </Box>
           );

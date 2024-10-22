@@ -7,7 +7,7 @@ import {
   SchedulerHeader,
   SchedulerHeaderProps,
 } from "../SchedulerHeader/SchedulerHeader";
-import { controllerContext } from "../controller/controller";
+
 import gridClasses from "./SchedulerGrid.module.css";
 export interface SchedulerProps<TData, TResource>
   extends Omit<
@@ -67,27 +67,25 @@ export function Scheduler<TData, TResource>(
         zIndex: 0,
       }}
     >
-      <controllerContext.Provider value={props.controller}>
-        <Box
-          className={gridClasses.grid}
-          style={{
-            "--mantine-scheduler-grid-repeat": `repeat(${props.totalGridSize}, 1fr)`,
-          }}
-        >
-          <SchedulerHeader
-            controller={props.controller}
-            onClick={headerOnClick}
-            momentLabelComponent={momentLabelComponent}
-            momentStyle={props.momentStyle}
-            stickyHeader={stickyHeader}
-            stickyHeaderOffset={stickyHeaderOffset}
-            totalGridSize={props.totalGridSize}
-            gridLabelSize={props.gridLabelSize}
-          />
+      <Box
+        className={gridClasses.grid}
+        style={{
+          "--mantine-scheduler-grid-repeat": `repeat(${props.totalGridSize}, 1fr)`,
+        }}
+      >
+        <SchedulerHeader
+          controller={props.controller}
+          onClick={headerOnClick}
+          momentLabelComponent={momentLabelComponent}
+          momentStyle={props.momentStyle}
+          stickyHeader={stickyHeader}
+          stickyHeaderOffset={stickyHeaderOffset}
+          totalGridSize={props.totalGridSize}
+          gridLabelSize={props.gridLabelSize}
+        />
 
-          <SchedulerBody {...props} />
-        </Box>
-      </controllerContext.Provider>
+        <SchedulerBody {...props} />
+      </Box>
     </Paper>
   );
 }

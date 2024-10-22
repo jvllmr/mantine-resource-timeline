@@ -1,5 +1,5 @@
 import { Dayjs, ManipulateType, isDayjs } from "dayjs";
-import { createContext, useCallback } from "react";
+import { useCallback } from "react";
 import { SchedulerDisplayUnit } from "./controller/controller";
 
 export type DataFieldAccessor<T, TValue> =
@@ -90,15 +90,6 @@ export function timeFraction(
     case "hour":
       return [Math.floor(60 / div), "minute"];
   }
-}
-
-export function createComponentContextFactory<
-  TProps extends never,
-  TDefault extends React.FC<TProps>,
->(defaultComponent: TDefault) {
-  return <TInnerProps extends TProps>() => {
-    return createContext<React.FC<TInnerProps>>(defaultComponent);
-  };
 }
 
 export type KeysOfValue<T, TCondition> = {

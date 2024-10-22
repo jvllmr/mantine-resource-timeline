@@ -2,7 +2,7 @@ import dayjs, { Dayjs } from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import weekOfYear from "dayjs/plugin/weekOfYear";
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { proxy, subscribe } from "valtio";
 import { timeFraction } from "../utils";
 import {
@@ -346,21 +346,5 @@ export function useSchedulerController<TData, TResource>({
 
   useSchedulerSelect(controller, onSelect);
 
-  return controller;
-}
-
-export const controllerContext = createContext<SchedulerController<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any
-> | null>(null);
-
-export function useControllerContext() {
-  const controller = useContext(controllerContext);
-  if (!controller)
-    throw TypeError(
-      "Tried to render Scheduler related component outside of controller context",
-    );
   return controller;
 }
