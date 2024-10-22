@@ -91,10 +91,12 @@ const SchedulerEntries = <TData, TResource>({
       {filteredData.map((item) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
-        const startDistance = calculateDistancePercentage(startDate, "left");
-        const endDistance = calculateDistancePercentage(endDate, "right");
         const isOverlap =
           viewStartDate.isBefore(endDate) && viewEndDate.isAfter(startDate);
+        if (!isOverlap) return null;
+        const startDistance = calculateDistancePercentage(startDate, "left");
+        const endDistance = calculateDistancePercentage(endDate, "right");
+
         const display: MantineStyleProps["display"] = isOverlap
           ? undefined
           : "none";
