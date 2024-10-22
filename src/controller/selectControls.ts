@@ -52,9 +52,26 @@ export const useSchedulerSelect = <TData, TResource>(
               controller.selectedResourceId = resourceId;
             }
             const selection = controller.selectedMoments[resourceId] ?? {};
-            selection[moment.toISOString()] = { isSelected: true };
+
             if (!controller.selectedMoments[resourceId]) {
               controller.selectedMoments[resourceId] = selection;
+            }
+
+            // mark as selected
+            let isBetween = false;
+            for (const [subMoment] of controller.subbedMoments) {
+              if (subMoment.isSame(controller.firstSelectedMoment)) {
+                isBetween = true;
+              }
+              if (subMoment.isSame(nextMoment)) {
+                break;
+              }
+              if (
+                isBetween &&
+                !selection[subMoment.toISOString()]?.isSelected
+              ) {
+                selection[subMoment.toISOString()] = { isSelected: true };
+              }
             }
           }
         }
