@@ -19,6 +19,7 @@ import {
 } from "./NowMarker";
 import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 
+import { useSchedulerGestures } from "../controller/gestureControls";
 import {
   DefaultSchedulerEntry,
   SchedulerEntryProps,
@@ -51,6 +52,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   gridLabelSize: number;
   totalGridSize: number;
   tz?: string;
+  enableGestures?: boolean;
 }
 
 const SchedulerEntries = <TData, TResource>({
@@ -219,9 +221,10 @@ export function SchedulerBody<TData, TResource>({
   totalGridSize,
   gridLabelSize,
   tz,
+  enableGestures,
 }: SchedulerBodyProps<TData, TResource>) {
   const localBodyRef = useRef<HTMLDivElement | null>(null);
-
+  useSchedulerGestures(controller, localBodyRef, enableGestures);
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);

@@ -8,7 +8,7 @@ export type {
   SchedulerControllerParams,
   SchedulerDisplayUnit,
 } from "./controller/controller";
-export { useSchedulerGestures } from "./controller/gestureControls";
+
 export type { OnSelectFn } from "./controller/selectControls";
 export { Scheduler } from "./Scheduler/Scheduler";
 export type { SchedulerProps } from "./Scheduler/Scheduler";

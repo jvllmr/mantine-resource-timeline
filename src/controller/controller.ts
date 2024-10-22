@@ -45,7 +45,6 @@ export interface SchedulerController<TData, TResource> {
   firstSelectedMoment: Dayjs | null;
   lastSelectedMoment: Dayjs | null;
 
-  bodyRef: HTMLDivElement | null;
   selectedMoments: Record<
     string,
     Record<string, { isSelected: boolean } | undefined> | undefined
@@ -246,7 +245,6 @@ export function useSchedulerController<TData, TResource>({
 > {
   const controller = useRef(
     proxy<SchedulerController<TData, TResource>>({
-      bodyRef: null,
       calculateDistancePercentage: () => 0,
       displayUnit: "day",
       firstSelectedMoment: null,

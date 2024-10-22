@@ -1,9 +1,5 @@
 import dayjs from "dayjs";
-import {
-  Scheduler,
-  useSchedulerController,
-  useSchedulerGestures,
-} from "mantine-resource-timeline";
+import { Scheduler, useSchedulerController } from "mantine-resource-timeline";
 import { useMemo } from "react";
 
 export function GestureControls() {
@@ -27,7 +23,6 @@ export function GestureControls() {
     (typeof data)[number],
     (typeof resources)[number]
   >({});
-  useSchedulerGestures(controller);
 
   return (
     <Scheduler
@@ -39,7 +34,8 @@ export function GestureControls() {
       endDateAccessor="endDate"
       resourceIdAccessor="resourceId"
       startDateAccessor="startDate"
-    ></Scheduler>
+      enableGestures
+    />
   );
 }
 
