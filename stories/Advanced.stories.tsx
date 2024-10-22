@@ -64,7 +64,7 @@ const onSelect: OnSelectFn<
   );
 };
 
-const determineSubMomentCounts: DetermineSubMomentCountsFn = () => 2;
+const determineSubMomentsCount: DetermineSubMomentCountsFn = () => 2;
 
 function GermanMomentLabel(
   props: MomentLabelProps<(typeof data)[number], (typeof resources)[number]>,
@@ -106,6 +106,7 @@ function CustomNowMarker(props: NowMarkerProps) {
 export function AdvancedScheduler() {
   const controller = useSchedulerController({
     onSelect,
+    determineSubMomentsCount,
   });
 
   const snap = useSnapshot(controller);
@@ -146,7 +147,6 @@ export function AdvancedScheduler() {
         headerOnClick={headerOnClick}
         momentLabelComponent={GermanMomentLabel}
         momentStyle={momentStyle}
-        determineSubMomentCounts={determineSubMomentCounts}
         dataIdAccessor="id"
         tz="Europe/Berlin"
         nowMarkerComponent={CustomNowMarker}

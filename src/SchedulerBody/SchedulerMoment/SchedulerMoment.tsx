@@ -1,12 +1,10 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
-import { Dayjs } from "dayjs";
-import { DragEvent, useContext, useMemo, useState } from "react";
+import { DragEvent, useContext, useState } from "react";
 import { useSnapshot } from "valtio";
 import {
   SchedulerController,
   useControllerContext,
 } from "../../controller/controller";
-import { timeFraction } from "../../utils";
 import { resourceContext } from "../contexts";
 import classes from "./SchedulerMoment.module.css";
 import { MomentStyleFn } from "./momentStyling";
@@ -17,7 +15,7 @@ export interface SchedulerMomentsProps<TData, TResource> {
   rowHeight: MantineStyleProps["h"];
   momentStyle?: MomentStyleFn<TData, TResource>;
   resourcesCount: number;
-  subMomentCount: number;
+
   getResourceId: (resource: TResource) => string;
 }
 
@@ -26,7 +24,7 @@ export const SchedulerMoments = <TData, TResource>({
   rowHeight,
   rowIndex,
   momentStyle,
-  subMomentCount,
+
   resourcesCount,
   getResourceId,
 }: SchedulerMomentsProps<TData, TResource>) => {
@@ -35,69 +33,16 @@ export const SchedulerMoments = <TData, TResource>({
     useControllerContext();
   const snap = useSnapshot(controller);
 
-  const firstMomentLoss = useMemo(
-    () => (snap.momentWidths[0] / 100) * (snap.momentWidths.length - 1),
-    [snap.momentWidths],
-  );
-
-  const lastMomentLoss = useMemo(
-    () =>
-      (snap.momentWidths[snap.momentWidths.length - 1] / 100) *
-      (snap.momentWidths.length - 1),
-    [snap.momentWidths],
-  );
   const theme = useMantineTheme();
 
   const [draggingEnabled, setDraggingEnabled] = useState(false);
 
-  const zippedMoments = useMemo(
-    () =>
-      snap.moments.map((moment, index): [Dayjs, number] => [
-        moment,
-        snap.momentWidths[index],
-      ]),
-    [snap.momentWidths, snap.moments],
-  );
-  const subbedMoments = useMemo(
-    () =>
-      zippedMoments.flatMap(
-        ([moment, distance], momentIndex): [Dayjs, number][] => {
-          const loss =
-            momentIndex === 0
-              ? firstMomentLoss
-              : momentIndex === zippedMoments.length
-                ? lastMomentLoss
-                : 1;
-          const subMomentCountWithLoss = Math.ceil(subMomentCount * loss);
-          if (subMomentCountWithLoss < 2) return [[moment, distance]];
-          const newDistance = distance / subMomentCountWithLoss;
-          const newMoments = [moment];
-          let newestMoment = moment;
-          const fraction = timeFraction(
-            subMomentCountWithLoss,
-            snap.displayUnit,
-          );
-          for (let i = 1; i < subMomentCountWithLoss; i++) {
-            newestMoment = newestMoment.add(...fraction);
-            newMoments.push(newestMoment);
-          }
-          return newMoments.map((newMoment) => [newMoment, newDistance]);
-        },
-      ),
-    [
-      snap.displayUnit,
-      firstMomentLoss,
-      lastMomentLoss,
-      subMomentCount,
-      zippedMoments,
-    ],
-  );
   return (
     <>
-      {subbedMoments.map(([moment, distance], momentIndex) => {
+      {snap.subbedMoments.map(([moment, distance], momentIndex) => {
         const nextMoment =
-          momentIndex + 1 < subbedMoments.length
-            ? subbedMoments[momentIndex + 1][0]
+          momentIndex + 1 < snap.subbedMoments.length
+            ? snap.subbedMoments[momentIndex + 1][0]
             : moment;
         const isSelected =
           !!snap.selectedResource &&

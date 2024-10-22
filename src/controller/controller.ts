@@ -4,6 +4,7 @@ import timezone from "dayjs/plugin/timezone";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { proxy, subscribe } from "valtio";
+import { timeFraction } from "../utils";
 import {
   OnSelectFn,
   SchedulerMomentOnDragEndFn,
@@ -12,12 +13,14 @@ import {
   useSchedulerSelect,
 } from "./selectControls";
 export type SchedulerDisplayUnit = "year" | "month" | "week" | "day" | "hour";
-
+export type DetermineSubMomentCountsFn = (
+  displayUnit: SchedulerDisplayUnit,
+) => number;
 export interface SchedulerControllerParams<TData, TResource> {
   initialViewStartDate?: Dayjs;
   initialViewEndDate?: Dayjs;
   clip?: boolean;
-
+  determineSubMomentsCount?: DetermineSubMomentCountsFn;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
   onSelect?: OnSelectFn<TData, TResource>;
 }
@@ -30,7 +33,7 @@ export interface SchedulerController<TData, TResource> {
   viewStartDate: Dayjs;
   viewEndDate: Dayjs;
   displayUnit: SchedulerDisplayUnit;
-
+  subbedMoments: [Dayjs, number][];
   calculateDistancePercentage: (
     date: Dayjs,
     leftOrRight: "left" | "right",
@@ -181,12 +184,55 @@ function calculateMoments(
   };
 }
 
+function calculateSubMoments( // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controller: SchedulerController<any, any>,
+  determineSubMomentCounts?: DetermineSubMomentCountsFn,
+) {
+  const { momentWidths, moments } = controller;
+
+  const firstMomentLoss = (momentWidths[0] / 100) * (momentWidths.length - 1);
+  const lastMomentLoss =
+    (momentWidths[momentWidths.length - 1] / 100) * (momentWidths.length - 1);
+  const zippedMoments = moments.map((moment, index): [Dayjs, number] => [
+    moment,
+    momentWidths[index],
+  ]);
+  const subMomentCount =
+    determineSubMomentCounts?.(controller.displayUnit) ?? 0;
+  const subbedMoments = zippedMoments.flatMap(
+    ([moment, distance], momentIndex): [Dayjs, number][] => {
+      const loss =
+        momentIndex === 0
+          ? firstMomentLoss
+          : momentIndex === zippedMoments.length
+            ? lastMomentLoss
+            : 1;
+      const subMomentCountWithLoss = Math.ceil(subMomentCount * loss);
+      if (subMomentCountWithLoss < 2) return [[moment, distance]];
+      const newDistance = distance / subMomentCountWithLoss;
+      const newMoments = [moment];
+      let newestMoment = moment;
+      const fraction = timeFraction(
+        subMomentCountWithLoss,
+        controller.displayUnit,
+      );
+      for (let i = 1; i < subMomentCountWithLoss; i++) {
+        newestMoment = newestMoment.add(...fraction);
+        newMoments.push(newestMoment);
+      }
+      return newMoments.map((newMoment) => [newMoment, newDistance]);
+    },
+  );
+  controller.subbedMoments = subbedMoments;
+}
+
 export function useSchedulerController<TData, TResource>({
   initialViewEndDate,
   initialViewStartDate,
   clip,
 
   onSelect,
+  determineSubMomentsCount: determineSubMomentsCountParam,
 
   determineDisplayUnit: determineDisplayUnitParam,
 }: SchedulerControllerParams<TData, TResource>): SchedulerController<
@@ -203,7 +249,7 @@ export function useSchedulerController<TData, TResource>({
       moments: [],
       momentWidths: [],
       selectedResource: null,
-
+      subbedMoments: [],
       viewStartDate: dayjs().subtract(7, "days"),
       viewEndDate: dayjs().add(7, "days"),
     }),
@@ -268,7 +314,28 @@ export function useSchedulerController<TData, TResource>({
     return () => {
       unsubscribe();
     };
-  }, [clip, controller]);
+  }, [clip, controller, determineSubMomentsCountParam]);
+
+  useEffect(() => {
+    calculateSubMoments(controller, determineSubMomentsCountParam);
+    const unsubscribe = subscribe(controller, (ops) => {
+      if (
+        !ops.find(
+          // @ts-expect-error we only need key
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ([op, key]) =>
+            key[0] === "moments" ||
+            key[0] === "momentWidths" ||
+            key[0] === "displayUnit",
+        )
+      )
+        return;
+      calculateSubMoments(controller, determineSubMomentsCountParam);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [clip, controller, determineSubMomentsCountParam]);
 
   useSchedulerSelect(controller, onSelect);
 

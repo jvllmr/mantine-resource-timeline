@@ -5,7 +5,6 @@ import React, { useContext, useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
 import {
   SchedulerController,
-  SchedulerDisplayUnit,
   useControllerContext,
 } from "../controller/controller";
 import gridClasses from "../Scheduler/SchedulerGrid.module.css";
@@ -30,9 +29,7 @@ import {
 } from "./SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoments } from "./SchedulerMoment/SchedulerMoment";
-export type DetermineSubMomentCountsFn = (
-  displayUnit: SchedulerDisplayUnit,
-) => number;
+
 export interface SchedulerBodyProps<TData, TResource> {
   startDate?: Date;
   endDate?: Date;
@@ -51,7 +48,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   resourceLabelComponent?: React.FC<ResourceLabelProps<TResource>>;
   entryComponent?: React.FC<SchedulerEntryProps<TData, TResource>>;
   nowMarkerComponent?: React.FC<NowMarkerProps>;
-  determineSubMomentCounts?: DetermineSubMomentCountsFn;
+
   momentStyle?: MomentStyleFn<TData, TResource>;
   enableVirtualizer?: boolean;
   gridLabelSize: number;
@@ -71,7 +68,7 @@ function SchedulerBodyRow<TData, TResource>({
   rowHeight,
   rowIndex,
   momentStyle,
-  subMomentCount,
+
   dataIdAccessor,
   entryComponent,
   tz,
@@ -96,7 +93,7 @@ function SchedulerBodyRow<TData, TResource>({
   rowHeight: number;
 
   rowIndex: number;
-  subMomentCount: number;
+
   momentStyle?: MomentStyleFn<TData, TResource>;
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -157,7 +154,6 @@ function SchedulerBodyRow<TData, TResource>({
         rowIndex={rowIndex}
         momentStyle={momentStyle}
         getResourceId={getResourceId}
-        subMomentCount={subMomentCount}
       />
     </Flex>
   );
@@ -173,7 +169,7 @@ export function SchedulerBody<TData, TResource>({
   resourceLabelComponent,
   entryComponent,
   nowMarkerComponent,
-  determineSubMomentCounts,
+
   rowHeight,
   momentStyle,
   dataIdAccessor,
@@ -183,8 +179,7 @@ export function SchedulerBody<TData, TResource>({
   tz,
 }: SchedulerBodyProps<TData, TResource>) {
   const localBodyRef = useRef<HTMLDivElement | null>(null);
-  const controller = useControllerContext();
-  const snap = useSnapshot(controller);
+
   const getResourceId = useStringAccessor(resourceIdField);
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
@@ -201,11 +196,6 @@ export function SchedulerBody<TData, TResource>({
   const customNowMarker = useMemo(
     () => nowMarkerComponent ?? DefaultNowMarker,
     [nowMarkerComponent],
-  );
-
-  const subMomentCount = useMemo(
-    () => determineSubMomentCounts?.(snap.displayUnit) ?? 0,
-    [determineSubMomentCounts, snap.displayUnit],
   );
 
   const virtualizer = useWindowVirtualizer({
@@ -318,7 +308,6 @@ export function SchedulerBody<TData, TResource>({
                       rowHeight={rowHeight}
                       momentStyle={momentStyle}
                       resourcesCount={resources.length}
-                      subMomentCount={subMomentCount}
                       dataIdAccessor={dataIdAccessor}
                       getResourceId={getResourceId}
                       tz={tz}
