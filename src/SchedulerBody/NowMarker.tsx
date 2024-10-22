@@ -12,36 +12,34 @@ function getNow(tz?: string) {
   return now;
 }
 
-export const NowMarkerController = React.memo(
-  ({
-    markerComponent,
-    distanceCalculator,
-    tz,
-  }: {
-    markerComponent: React.FC<NowMarkerProps>;
-    distanceCalculator: UnknownSchedulerController["calculateDistancePercentage"];
-    tz?: string;
-  }) => {
-    const Marker = markerComponent;
-    const [now, setNow] = useState(getNow(tz));
+export const NowMarkerController = ({
+  markerComponent,
+  distanceCalculator,
+  tz,
+}: {
+  markerComponent: React.FC<NowMarkerProps>;
+  distanceCalculator: UnknownSchedulerController["calculateDistancePercentage"];
+  tz?: string;
+}) => {
+  const Marker = markerComponent;
+  const [now, setNow] = useState(getNow(tz));
 
-    const nowLeft = useMemo(() => {
-      const distance = distanceCalculator(now, "left");
-      if (!distance) return undefined;
-      return `${distance}%`;
-    }, [distanceCalculator, now]);
+  const nowLeft = useMemo(() => {
+    const distance = distanceCalculator(now, "left");
+    if (!distance) return undefined;
+    return `${distance}%`;
+  }, [distanceCalculator, now]);
 
-    useEffect(() => {
-      const timeout = setTimeout(() => setNow(getNow(tz)), 1000);
+  useEffect(() => {
+    const timeout = setTimeout(() => setNow(getNow(tz)), 1000);
 
-      return () => {
-        clearTimeout(timeout);
-      };
-    });
-    if (!nowLeft) return null;
-    return <Marker left={nowLeft} now={now} />;
-  },
-);
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
+  if (!nowLeft) return null;
+  return <Marker left={nowLeft} now={now} />;
+};
 
 export interface NowMarkerProps {
   left: MantineStyleProps["left"];

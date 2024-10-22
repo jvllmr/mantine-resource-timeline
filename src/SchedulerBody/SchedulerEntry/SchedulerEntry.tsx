@@ -37,15 +37,9 @@ interface SchedulerEntryRendererProps<TData, TResource>
   CustomSchedulerEntry: SchedulerEntryComponent<TData, TResource>;
 }
 
-function SchedulerEntryRenderer_<TData, TResource>({
+export function SchedulerEntryRenderer<TData, TResource>({
   CustomSchedulerEntry,
   ...props
 }: SchedulerEntryRendererProps<TData, TResource>) {
   return <CustomSchedulerEntry {...props} />;
 }
-
-export const SchedulerEntryRenderer = React.memo(
-  <TData, TResource>(props: SchedulerEntryRendererProps<TData, TResource>) => (
-    <SchedulerEntryRenderer_ {...props} />
-  ),
-);
