@@ -1,7 +1,7 @@
 import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
 import {
   SchedulerController,
@@ -208,28 +208,12 @@ export function SchedulerBody<TData, TResource>({
     [determineSubMomentCounts, snap.displayUnit],
   );
 
-  const [scrollMargin, setScrollMargin] = useState(
-    localBodyRef.current?.offsetTop ?? 0,
-  );
-
-  useEffect(() => {
-    const update = () => {
-      setScrollMargin(localBodyRef.current?.offsetTop ?? 0);
-    };
-    const observer = new ResizeObserver(update);
-    update();
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
     estimateSize: () => rowHeight,
     enabled: enableVirtualizer,
     overscan: 5,
-    scrollMargin,
+    scrollMargin: localBodyRef.current?.offsetTop ?? 0,
   });
   const virtualItems = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
