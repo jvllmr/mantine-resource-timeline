@@ -40,12 +40,17 @@ export interface SchedulerController<TData, TResource> {
   ) => number;
 
   momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
-  momentDragStartOver?: SchedulerMomentOnDragStartOverFactory<TResource>;
+  momentDragStartOver?: SchedulerMomentOnDragStartOverFactory;
   momentSelectClick?: SchedulerMomentSelectClickFnFactory<TResource>;
   firstSelectedMoment: Dayjs | null;
   lastSelectedMoment: Dayjs | null;
-  selectedResource: TResource | null;
+
   bodyRef: HTMLDivElement | null;
+  selectedMoments: Record<
+    string,
+    Record<string, { isSelected: boolean } | undefined> | undefined
+  >;
+  selectedResourceId: string | null;
 }
 export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
 
@@ -248,10 +253,12 @@ export function useSchedulerController<TData, TResource>({
       lastSelectedMoment: null,
       moments: [],
       momentWidths: [],
-      selectedResource: null,
+
       subbedMoments: [],
       viewStartDate: dayjs().subtract(7, "days"),
       viewEndDate: dayjs().add(7, "days"),
+      selectedMoments: {},
+      selectedResourceId: null,
     }),
   ).current;
   useMemo(() => {

@@ -1,7 +1,5 @@
 import { Dayjs } from "dayjs";
-import deepEqual from "fast-deep-equal";
 import { DragEvent, useEffect, useRef } from "react";
-import { snapshot } from "valtio";
 import { SchedulerController } from "./controller";
 export type OnSelectFn<TData, TResource> = (params: {
   firstMoment: Dayjs;
@@ -10,14 +8,15 @@ export type OnSelectFn<TData, TResource> = (params: {
   resource: TResource;
 }) => void;
 
-export type SchedulerMomentOnDragStartOverFactory<TResource> = (
+export type SchedulerMomentOnDragStartOverFactory = (
   moment: Dayjs,
   nextMoment: Dayjs,
-  resource: TResource,
+  resourceId: string,
 ) => (event: DragEvent<HTMLDivElement>) => void;
 export type SchedulerMomentOnDragEndFn<TResource> = (
   event: DragEvent<HTMLDivElement>,
   resource: TResource,
+  resourceId: string,
 ) => void;
 
 export type SchedulerMomentSelectClickFnFactory<TResource> = (
@@ -34,14 +33,11 @@ export const useSchedulerSelect = <TData, TResource>(
 
   useEffect(() => {
     controller.momentDragStartOver = onSelect
-      ? (moment: Dayjs, nextMoment: Dayjs, resource: TResource) => (event) => {
-          const selectedResource = controller.selectedResource
-            ? snapshot(controller.selectedResource)
-            : null;
-
+      ? (moment: Dayjs, nextMoment: Dayjs, resourceId: string) => (event) => {
           if (
             !event.ctrlKey &&
-            (deepEqual(resource, selectedResource) || selectedResource === null)
+            (controller.selectedResourceId === resourceId ||
+              controller.selectedResourceId === null)
           ) {
             event.dataTransfer.setDragImage(constantDiv, 0, 0);
             if (
@@ -52,8 +48,13 @@ export const useSchedulerSelect = <TData, TResource>(
             } else if (!controller.lastSelectedMoment?.isSame(nextMoment)) {
               controller.lastSelectedMoment = nextMoment;
             }
-            if (selectedResource !== resource) {
-              controller.selectedResource = resource;
+            if (!controller.selectedResourceId) {
+              controller.selectedResourceId = resourceId;
+            }
+            const selection = controller.selectedMoments[resourceId] ?? {};
+            selection[moment.toISOString()] = { isSelected: true };
+            if (!controller.selectedMoments[resourceId]) {
+              controller.selectedMoments[resourceId] = selection;
             }
           }
         }
@@ -62,7 +63,7 @@ export const useSchedulerSelect = <TData, TResource>(
 
   useEffect(() => {
     controller.momentDragEnd = onSelect
-      ? (event, resource) => {
+      ? (event, resource, resourceId) => {
           event.preventDefault();
           if (
             !event.ctrlKey &&
@@ -79,7 +80,8 @@ export const useSchedulerSelect = <TData, TResource>(
 
             controller.firstSelectedMoment = null;
             controller.lastSelectedMoment = null;
-            controller.selectedResource = null;
+            controller.selectedMoments[resourceId] = {};
+            controller.selectedResourceId = null;
           }
         }
       : undefined;

@@ -72,7 +72,6 @@ function SchedulerBodyRow<TData, TResource>({
   dataIdAccessor,
   entryComponent,
   tz,
-  getResourceId,
 }: {
   data: TData[];
   tz?: string;
@@ -147,13 +146,11 @@ function SchedulerBodyRow<TData, TResource>({
       })}
 
       <SchedulerMoments
-        key="scheduler_moments"
         resourceId={resourceId}
         resourcesCount={resourcesCount}
         rowHeight={rowHeight}
         rowIndex={rowIndex}
         momentStyle={momentStyle}
-        getResourceId={getResourceId}
       />
     </Flex>
   );

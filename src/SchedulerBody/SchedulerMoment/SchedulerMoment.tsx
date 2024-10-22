@@ -1,5 +1,6 @@
 import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
-import { DragEvent, useContext, useState } from "react";
+import { Dayjs } from "dayjs";
+import { DragEvent, useContext, useMemo, useState } from "react";
 import { useSnapshot } from "valtio";
 import {
   SchedulerController,
@@ -15,87 +16,132 @@ export interface SchedulerMomentsProps<TData, TResource> {
   rowHeight: MantineStyleProps["h"];
   momentStyle?: MomentStyleFn<TData, TResource>;
   resourcesCount: number;
-
-  getResourceId: (resource: TResource) => string;
 }
 
-export const SchedulerMoments = <TData, TResource>({
-  resourceId,
-  rowHeight,
-  rowIndex,
+const SchedulerMoment = <TData, TResource>({
   momentStyle,
-
   resourcesCount,
-  getResourceId,
-}: SchedulerMomentsProps<TData, TResource>) => {
+  momentIndex,
+  draggingEnabled,
+  setDraggingEnabled,
+  distance,
+  rowIndex,
+  rowHeight,
+  moment,
+  resourceId,
+}: SchedulerMomentsProps<TData, TResource> & {
+  distance: number;
+
+  moment: Dayjs;
+  draggingEnabled: boolean;
+  setDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  momentIndex: number;
+}) => {
   const resource: TResource = useContext(resourceContext);
+  const controller = useControllerContext();
+  const subbedMoments = useSnapshot(controller.subbedMoments);
+  const { momentSelectClick, momentDragEnd, momentDragStartOver } =
+    useSnapshot(controller);
+  const selectSnap = useSnapshot(controller.selectedMoments);
+  const isSelected = useMemo(
+    () => !!selectSnap[resourceId]?.[moment.toISOString()]?.isSelected,
+    [moment, resourceId, selectSnap],
+  );
+  const theme = useMantineTheme();
+  const nextMoment = useMemo(
+    () =>
+      momentIndex + 1 < subbedMoments.length
+        ? subbedMoments[momentIndex + 1][0]
+        : moment,
+    [moment, momentIndex, subbedMoments],
+  );
+  const onClick = useMemo(
+    () => momentSelectClick?.(resource, moment, nextMoment),
+
+    [moment, nextMoment, resource, momentSelectClick],
+  );
+
+  const onDragStartOver = useMemo(
+    () => momentDragStartOver?.(moment, nextMoment, resourceId),
+
+    [moment, momentDragStartOver, nextMoment, resourceId],
+  );
+  const onDragEnd = useMemo(
+    () =>
+      momentDragEnd
+        ? (event: DragEvent<HTMLDivElement>) =>
+            momentDragEnd?.(event, resource, resourceId)
+        : undefined,
+
+    [momentDragEnd, resource, resourceId],
+  );
+  const completeStyle = useMemo(
+    () => ({
+      ...momentStyle?.({
+        moment,
+        controller,
+        theme,
+        isSelected,
+      }),
+      borderTopWidth: rowIndex === 0 ? undefined : 0,
+      borderRightWidth: 0,
+
+      borderBottomWidth: rowIndex === resourcesCount - 1 ? 0 : undefined,
+    }),
+    [
+      controller,
+      isSelected,
+      moment,
+      momentStyle,
+      resourcesCount,
+      rowIndex,
+      theme,
+    ],
+  );
+
+  return (
+    <Paper
+      radius={0}
+      w={`${distance}%`}
+      h={rowHeight}
+      withBorder
+      style={completeStyle}
+      className={classes.schedulerMoment}
+      data-selected={isSelected}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragStartOver}
+      onDragStart={onDragStartOver}
+      onMouseDown={() => {
+        setDraggingEnabled(true);
+      }}
+      onMouseUp={() => setDraggingEnabled(false)}
+      draggable={draggingEnabled && !!(onDragEnd && onDragStartOver)}
+      onClick={onClick}
+    />
+  );
+};
+
+export const SchedulerMoments = <TData, TResource>({
+  ...props
+}: SchedulerMomentsProps<TData, TResource>) => {
   const controller: SchedulerController<TData, TResource> =
     useControllerContext();
-  const snap = useSnapshot(controller);
-
-  const theme = useMantineTheme();
+  const subbedMoments = useSnapshot(controller.subbedMoments);
 
   const [draggingEnabled, setDraggingEnabled] = useState(false);
 
   return (
     <>
-      {snap.subbedMoments.map(([moment, distance], momentIndex) => {
-        const nextMoment =
-          momentIndex + 1 < snap.subbedMoments.length
-            ? snap.subbedMoments[momentIndex + 1][0]
-            : moment;
-        const isSelected =
-          !!snap.selectedResource &&
-          // @ts-expect-error unrelated generic or something...
-          getResourceId(snap.selectedResource) === getResourceId(resource) && // resource correct
-          ((moment.isAfter(snap.firstSelectedMoment) &&
-            nextMoment.isBefore(snap.lastSelectedMoment)) ||
-            moment.isSame(snap.firstSelectedMoment) ||
-            nextMoment.isSame(snap.lastSelectedMoment));
-
-        const completeStyle = {
-          ...momentStyle?.({
-            moment,
-            controller,
-            theme,
-            isSelected,
-          }),
-          borderTopWidth: rowIndex === 0 ? undefined : 0,
-          borderRightWidth: 0,
-
-          borderBottomWidth: rowIndex === resourcesCount - 1 ? 0 : undefined,
-        };
-        const onDragStartOver = snap.momentDragStartOver?.(
-          moment,
-          nextMoment,
-          resource,
-        );
-        const onDragEnd = snap.momentDragEnd
-          ? (event: DragEvent<HTMLDivElement>) =>
-              snap.momentDragEnd?.(event, resource)
-          : undefined;
-
-        const onClick = snap.momentSelectClick?.(resource, moment, nextMoment);
-
+      {subbedMoments.map(([moment, distance], momentIndex) => {
         return (
-          <Paper
-            key={`moment_${resourceId}_${momentIndex}`}
-            radius={0}
-            w={`${distance}%`}
-            h={rowHeight}
-            withBorder
-            style={completeStyle}
-            className={classes.schedulerMoment}
-            data-selected={isSelected}
-            onDragEnd={onDragEnd}
-            onDragOver={onDragStartOver}
-            onDragStart={onDragStartOver}
-            onMouseDown={() => {
-              setDraggingEnabled(true);
-            }}
-            onMouseUp={() => setDraggingEnabled(false)}
-            draggable={draggingEnabled && !!(onDragEnd && onDragStartOver)}
-            onClick={onClick}
+          <SchedulerMoment
+            key={`moment_${props.resourceId}_${momentIndex}`}
+            {...props}
+            distance={distance}
+            draggingEnabled={draggingEnabled}
+            setDraggingEnabled={setDraggingEnabled}
+            moment={moment}
+            momentIndex={momentIndex}
           />
         );
       })}
