@@ -56,6 +56,69 @@ export interface SchedulerBodyProps<TData, TResource> {
   tz?: string;
 }
 
+const SchedulerEntries = <TData, TResource>({
+  data,
+  dataIdAccessor,
+  getDataResourceId,
+  entryComponent,
+  resourceId,
+  getEndDate,
+  getStartDate,
+}: {
+  data: TData[];
+  dataIdAccessor: DataFieldAccessor<TData, string | number>;
+  getDataResourceId: (dataItem: TData) => string[];
+  resourceId: string;
+  getEndDate: (dataItem: TData) => Dayjs;
+  getStartDate: (dataItem: TData) => Dayjs;
+  entryComponent: NonNullable<
+    SchedulerBodyProps<TData, TResource>["entryComponent"]
+  >;
+}) => {
+  const getDataId = useStringAccessor(dataIdAccessor);
+  const controller = useControllerContext();
+
+  const { viewStartDate, viewEndDate, calculateDistancePercentage } =
+    useSnapshot(controller);
+  const resource = useContext<TResource>(resourceContext);
+  const filteredData = useMemo(
+    () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
+    [data, getDataResourceId, resourceId],
+  );
+
+  return (
+    <>
+      {filteredData.map((item) => {
+        const startDate = getStartDate(item);
+        const endDate = getEndDate(item);
+        const startDistance = calculateDistancePercentage(startDate, "left");
+        const endDistance = calculateDistancePercentage(endDate, "right");
+        const isOverlap =
+          viewStartDate.isBefore(endDate) && viewEndDate.isAfter(startDate);
+        const display: MantineStyleProps["display"] = isOverlap
+          ? undefined
+          : "none";
+        const entryId = getDataId(item);
+
+        return (
+          <SchedulerEntryRenderer
+            CustomSchedulerEntry={entryComponent}
+            key={`entry_${entryId}`}
+            pos="absolute"
+            data={item}
+            top="10%"
+            left={`${startDistance}%`}
+            h="80%"
+            right={`${endDistance}%`}
+            display={display}
+            resource={resource}
+          />
+        );
+      })}
+    </>
+  );
+};
+
 function SchedulerBodyRow<TData, TResource>({
   data,
   customNowMarker,
@@ -83,7 +146,7 @@ function SchedulerBodyRow<TData, TResource>({
   getDataResourceId: (dataItem: TData) => string[];
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
-  getResourceId: (resource: TResource) => string;
+
   resourceId: string;
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
@@ -97,54 +160,24 @@ function SchedulerBodyRow<TData, TResource>({
 }) {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const controller = useControllerContext();
-  const snap = useSnapshot(controller);
-  const getDataId = useStringAccessor(dataIdAccessor);
-  const resource = useContext<TResource>(resourceContext);
-  const filteredData = useMemo(
-    () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
-    [data, getDataResourceId, resourceId],
-  );
+  const { calculateDistancePercentage } = useSnapshot(controller);
+
   return (
     <Flex pos="relative" ref={rowRef} style={{ touchAction: "pan-y" }}>
       <NowMarkerController
-        distanceCalculator={snap.calculateDistancePercentage}
+        distanceCalculator={calculateDistancePercentage}
         markerComponent={customNowMarker}
         tz={tz}
       />
-
-      {filteredData.map((item) => {
-        const startDate = getStartDate(item);
-        const endDate = getEndDate(item);
-        const startDistance = snap.calculateDistancePercentage(
-          startDate,
-          "left",
-        );
-        const endDistance = snap.calculateDistancePercentage(endDate, "right");
-        const isOverlap =
-          snap.viewStartDate.isBefore(endDate) &&
-          snap.viewEndDate.isAfter(startDate);
-        const display: MantineStyleProps["display"] = isOverlap
-          ? undefined
-          : "none";
-        const entryId = getDataId(item);
-
-        return (
-          <SchedulerEntryRenderer
-            // @ts-expect-error unkown generics
-            CustomSchedulerEntry={entryComponent}
-            key={`entry_${entryId}`}
-            pos="absolute"
-            data={item}
-            top="10%"
-            left={`${startDistance}%`}
-            h="80%"
-            right={`${endDistance}%`}
-            display={display}
-            resource={resource}
-          />
-        );
-      })}
-
+      <SchedulerEntries
+        data={data}
+        dataIdAccessor={dataIdAccessor}
+        getDataResourceId={getDataResourceId}
+        getEndDate={getEndDate}
+        getStartDate={getStartDate}
+        resourceId={resourceId}
+        entryComponent={entryComponent}
+      />
       <SchedulerMoments
         resourceId={resourceId}
         resourcesCount={resourcesCount}
@@ -306,7 +339,6 @@ export function SchedulerBody<TData, TResource>({
                       momentStyle={momentStyle}
                       resourcesCount={resources.length}
                       dataIdAccessor={dataIdAccessor}
-                      getResourceId={getResourceId}
                       tz={tz}
                     />
                   </resourceContext.Provider>
