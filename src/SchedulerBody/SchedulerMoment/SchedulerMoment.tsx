@@ -35,6 +35,7 @@ const SchedulerMoment = <TData, TResource>({
   resourceId,
   controller,
   resource,
+  onDragEnd,
 }: SchedulerMomentsProps<TData, TResource> & {
   distance: number;
 
@@ -42,9 +43,9 @@ const SchedulerMoment = <TData, TResource>({
   draggingEnabled: boolean;
   setDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   nextMoment: Dayjs;
+  onDragEnd?: React.DragEventHandler<HTMLDivElement>;
 }) => {
-  const { momentSelectClick, momentDragEnd, momentDragStartOver } =
-    useSnapshot(controller);
+  const { momentSelectClick, momentDragStartOver } = useSnapshot(controller);
   const selectSnap = useSnapshot(controller.selectedMoments);
   const isSelected = useMemo(
     () => !!selectSnap[resourceId]?.[moment.toISOString()]?.isSelected,
@@ -54,7 +55,6 @@ const SchedulerMoment = <TData, TResource>({
 
   const onClick = useMemo(
     () => momentSelectClick?.(resource, moment, nextMoment),
-
     [moment, nextMoment, resource, momentSelectClick],
   );
 
@@ -63,15 +63,7 @@ const SchedulerMoment = <TData, TResource>({
 
     [moment, momentDragStartOver, nextMoment, resourceId],
   );
-  const onDragEnd = useMemo(
-    () =>
-      momentDragEnd
-        ? (event: DragEvent<HTMLDivElement>) =>
-            momentDragEnd?.(event, resource, resourceId)
-        : undefined,
 
-    [momentDragEnd, resource, resourceId],
-  );
   const completeStyle: MantineStyleProp = useMemo(
     () => ({
       ...momentStyle?.({
@@ -120,11 +112,22 @@ const SchedulerMoment = <TData, TResource>({
 
 export const SchedulerMoments = <TData, TResource>({
   controller,
+
   ...props
 }: SchedulerMomentsProps<TData, TResource>) => {
   const subbedMoments = useSnapshot(controller.subbedMoments);
-
+  const { momentDragEnd } = useSnapshot(controller);
   const [draggingEnabled, setDraggingEnabled] = useState(false);
+
+  const onDragEnd = useMemo(
+    () =>
+      momentDragEnd
+        ? (event: DragEvent<HTMLDivElement>) =>
+            momentDragEnd?.(event, props.resource, props.resourceId)
+        : undefined,
+
+    [momentDragEnd, props.resource, props.resourceId],
+  );
 
   return (
     <>
@@ -143,6 +146,7 @@ export const SchedulerMoments = <TData, TResource>({
                 : moment
             }
             controller={controller}
+            onDragEnd={onDragEnd}
           />
         );
       })}
