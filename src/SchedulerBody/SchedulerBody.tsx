@@ -107,14 +107,16 @@ const SchedulerEntries = <TData, TResource>({
         return (
           <SchedulerEntryRenderer
             CustomSchedulerEntry={entryComponent}
+            style={{
+              display,
+              position: "absolute",
+              top: "10%",
+              left: `${startDistance}%`,
+              height: "80%",
+              right: `${endDistance}%`,
+            }}
             key={`entry_${entryId}`}
-            pos="absolute"
             data={item}
-            top="10%"
-            left={`${startDistance}%`}
-            h="80%"
-            right={`${endDistance}%`}
-            display={display}
             resource={resource}
           />
         );

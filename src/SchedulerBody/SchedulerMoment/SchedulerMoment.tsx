@@ -1,4 +1,9 @@
-import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
+import {
+  CSSProperties,
+  MantineStyleProp,
+  Paper,
+  useMantineTheme,
+} from "@mantine/core";
 import { Dayjs } from "dayjs";
 import { DragEvent, useMemo, useState } from "react";
 import { useSnapshot } from "valtio";
@@ -10,7 +15,7 @@ import { MomentStyleFn } from "./momentStyling";
 export interface SchedulerMomentsProps<TData, TResource> {
   resourceId: string;
   rowIndex: number;
-  rowHeight: MantineStyleProps["h"];
+  rowHeight: CSSProperties["height"];
   momentStyle?: MomentStyleFn<TData, TResource>;
   resourcesCount: number;
   controller: SchedulerController<TData, TResource>;
@@ -74,7 +79,7 @@ const SchedulerMoment = <TData, TResource>({
 
     [momentDragEnd, resource, resourceId],
   );
-  const completeStyle = useMemo(
+  const completeStyle: MantineStyleProp = useMemo(
     () => ({
       ...momentStyle?.({
         moment,

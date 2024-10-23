@@ -1,14 +1,10 @@
-import { MantineStyleProps, Paper, useMantineTheme } from "@mantine/core";
+import { Paper, useMantineTheme } from "@mantine/core";
 import React from "react";
 export interface SchedulerEntryProps<TData, TResource> {
-  top: NonNullable<MantineStyleProps["top"]>;
-  left: NonNullable<MantineStyleProps["left"]>;
-  h: NonNullable<MantineStyleProps["h"]>;
-  right: NonNullable<MantineStyleProps["right"]>;
-  pos: NonNullable<MantineStyleProps["pos"]>;
   data: TData;
   resource: TResource;
-  display: MantineStyleProps["display"];
+
+  style: React.CSSProperties;
 }
 
 export type SchedulerEntryComponent<TData, TResource> = React.FC<
@@ -19,13 +15,17 @@ export type SchedulerEntryComponent<TData, TResource> = React.FC<
 export const DefaultSchedulerEntry: SchedulerEntryComponent<any, any> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data,
-
+  style,
   ...props
 }) => {
   const theme = useMantineTheme();
 
   return (
-    <Paper bg={theme.primaryColor} style={{ overflow: "hidden" }} {...props}>
+    <Paper
+      bg={theme.primaryColor}
+      style={{ ...style, overflow: "hidden" }}
+      {...props}
+    >
       Pass your own component to entryComponent prop to render your own thing
       here
     </Paper>
