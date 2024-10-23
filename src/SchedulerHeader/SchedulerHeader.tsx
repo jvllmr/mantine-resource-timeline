@@ -4,8 +4,8 @@ import {
   Center,
   Flex,
   MantineStyleProps,
+  MantineTheme,
   Paper,
-  useMantineTheme,
 } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import React, { useMemo } from "react";
@@ -36,6 +36,7 @@ export interface SchedulerHeaderProps<TData, TResource> {
   stickyHeaderOffset?: MantineStyleProps["top"];
   gridLabelSize: number;
   totalGridSize: number;
+  theme: MantineTheme;
 }
 
 interface TopLabelProps {
@@ -85,12 +86,14 @@ interface BottomLabelProps<TData, TResource> {
   onClick?: SchedulerHeaderOnClickFn<TData, TResource>;
   momentStyle?: MomentStyleFn<TData, TResource>;
   controller: SchedulerController<TData, TResource>;
+  theme: MantineTheme;
 }
 
 const BottomLabel = <TData, TResource>({
   onClick,
   moment,
   momentLabelComponent,
+  theme,
   momentStyle,
   controller,
 }: BottomLabelProps<TData, TResource>) => {
@@ -102,7 +105,7 @@ const BottomLabel = <TData, TResource>({
     () => momentLabelComponent ?? DefaultMomentLabel,
     [momentLabelComponent],
   );
-  const theme = useMantineTheme();
+
   const resolvedStyle = useMemo(
     () => ({
       ...momentStyle?.({ moment, controller, theme }),
@@ -143,6 +146,7 @@ export function SchedulerHeader<TData, TResource>({
   stickyHeaderOffset,
   totalGridSize,
   gridLabelSize,
+  theme,
 }: SchedulerHeaderProps<TData, TResource>) {
   const snap = useSnapshot(controller);
   const resolvedOnClick = useMemo(
@@ -230,6 +234,7 @@ export function SchedulerHeader<TData, TResource>({
                       momentLabelComponent={momentLabelComponent}
                       momentStyle={momentStyle}
                       controller={controller}
+                      theme={theme}
                     />
                   </Paper>
                 );

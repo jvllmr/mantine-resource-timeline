@@ -1,4 +1,10 @@
-import { Box, Flex, MantineStyleProps, Paper } from "@mantine/core";
+import {
+  Box,
+  Flex,
+  MantineStyleProps,
+  MantineTheme,
+  Paper,
+} from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Dayjs } from "dayjs";
 import React, { useMemo, useRef } from "react";
@@ -53,6 +59,7 @@ export interface SchedulerBodyProps<TData, TResource> {
   totalGridSize: number;
   tz?: string;
   enableGestures?: boolean;
+  theme: MantineTheme;
 }
 
 const SchedulerEntries = <TData, TResource>({
@@ -142,7 +149,7 @@ function SchedulerBodyRow<TData, TResource>({
   entryComponent,
   controller,
   resource,
-
+  theme,
   tz,
 }: {
   data: TData[];
@@ -160,7 +167,7 @@ function SchedulerBodyRow<TData, TResource>({
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
-
+  theme: MantineTheme;
   rowHeight: number;
 
   rowIndex: number;
@@ -199,6 +206,7 @@ function SchedulerBodyRow<TData, TResource>({
         momentStyle={momentStyle}
         resource={resource}
         controller={controller}
+        theme={theme}
       />
     </Flex>
   );
@@ -224,6 +232,7 @@ export function SchedulerBody<TData, TResource>({
   gridLabelSize,
   tz,
   enableGestures,
+  theme,
 }: SchedulerBodyProps<TData, TResource>) {
   const localBodyRef = useRef<HTMLDivElement | null>(null);
   useSchedulerGestures(controller, localBodyRef, enableGestures);
@@ -357,6 +366,7 @@ export function SchedulerBody<TData, TResource>({
                   controller={controller}
                   tz={tz}
                   resource={resource}
+                  theme={theme}
                 />
               </Box>
             </Box>

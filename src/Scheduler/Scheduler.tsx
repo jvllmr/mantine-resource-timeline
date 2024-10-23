@@ -1,4 +1,10 @@
-import { Box, MantineStyleProps, Paper, useProps } from "@mantine/core";
+import {
+  Box,
+  MantineStyleProps,
+  Paper,
+  useMantineTheme,
+  useProps,
+} from "@mantine/core";
 import {
   SchedulerBody,
   SchedulerBodyProps,
@@ -12,7 +18,7 @@ import gridClasses from "./SchedulerGrid.module.css";
 export interface SchedulerProps<TData, TResource>
   extends Omit<
     SchedulerBodyProps<TData, TResource>,
-    "rowHeight" | "gridLabelSize" | "totalGridSize"
+    "rowHeight" | "gridLabelSize" | "totalGridSize" | "theme"
   > {
   width?: MantineStyleProps["w"];
   height?: MantineStyleProps["h"];
@@ -56,7 +62,7 @@ export function Scheduler<TData, TResource>(
     defaultProps,
     inputProps,
   );
-
+  const theme = useMantineTheme();
   return (
     <Paper
       withBorder
@@ -82,9 +88,10 @@ export function Scheduler<TData, TResource>(
           stickyHeaderOffset={stickyHeaderOffset}
           totalGridSize={props.totalGridSize}
           gridLabelSize={props.gridLabelSize}
+          theme={theme}
         />
 
-        <SchedulerBody {...props} />
+        <SchedulerBody {...props} theme={theme} />
       </Box>
     </Paper>
   );

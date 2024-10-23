@@ -1,8 +1,8 @@
 import {
   CSSProperties,
   MantineStyleProp,
+  MantineTheme,
   Paper,
-  useMantineTheme,
 } from "@mantine/core";
 import { Dayjs } from "dayjs";
 import { DragEvent, useMemo, useState } from "react";
@@ -20,6 +20,7 @@ export interface SchedulerMomentsProps<TData, TResource> {
   resourcesCount: number;
   controller: SchedulerController<TData, TResource>;
   resource: TResource;
+  theme: MantineTheme;
 }
 
 const SchedulerMoment = <TData, TResource>({
@@ -36,6 +37,7 @@ const SchedulerMoment = <TData, TResource>({
   controller,
   resource,
   onDragEnd,
+  theme,
 }: SchedulerMomentsProps<TData, TResource> & {
   distance: number;
 
@@ -51,7 +53,6 @@ const SchedulerMoment = <TData, TResource>({
     () => !!selectSnap[resourceId]?.[moment.toISOString()]?.isSelected,
     [moment, resourceId, selectSnap],
   );
-  const theme = useMantineTheme();
 
   const onClick = useMemo(
     () => momentSelectClick?.(resource, moment, nextMoment),
