@@ -25,7 +25,7 @@ export interface SchedulerMomentsProps<TData, TResource> {
 const SchedulerMoment = <TData, TResource>({
   momentStyle,
   resourcesCount,
-  momentIndex,
+  nextMoment,
   draggingEnabled,
   setDraggingEnabled,
   distance,
@@ -41,9 +41,8 @@ const SchedulerMoment = <TData, TResource>({
   moment: Dayjs;
   draggingEnabled: boolean;
   setDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  momentIndex: number;
+  nextMoment: Dayjs;
 }) => {
-  const subbedMoments = useSnapshot(controller.subbedMoments);
   const { momentSelectClick, momentDragEnd, momentDragStartOver } =
     useSnapshot(controller);
   const selectSnap = useSnapshot(controller.selectedMoments);
@@ -52,13 +51,7 @@ const SchedulerMoment = <TData, TResource>({
     [moment, resourceId, selectSnap],
   );
   const theme = useMantineTheme();
-  const nextMoment = useMemo(
-    () =>
-      momentIndex + 1 < subbedMoments.length
-        ? subbedMoments[momentIndex + 1][0]
-        : moment,
-    [moment, momentIndex, subbedMoments],
-  );
+
   const onClick = useMemo(
     () => momentSelectClick?.(resource, moment, nextMoment),
 
@@ -144,7 +137,11 @@ export const SchedulerMoments = <TData, TResource>({
             draggingEnabled={draggingEnabled}
             setDraggingEnabled={setDraggingEnabled}
             moment={moment}
-            momentIndex={momentIndex}
+            nextMoment={
+              momentIndex + 1 < subbedMoments.length
+                ? subbedMoments[momentIndex + 1][0]
+                : moment
+            }
             controller={controller}
           />
         );
