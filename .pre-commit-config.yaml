@@ -1,6 +1,7 @@
 ci:
   skip:
     - prettier
+    - eslint
 repos:
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
@@ -9,3 +10,10 @@ repos:
         additional_dependencies:
           - prettier@latest
           - prettier-plugin-organize-imports@latest
+  - repo: local
+    hooks:
+      - id: eslint
+        name: Lint with eslint
+        pass_filenames: false
+        language: system
+        entry: pnpm lint

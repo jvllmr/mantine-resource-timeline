@@ -104,7 +104,6 @@ function clipStartViewDate(date: Dayjs, displayUnit: SchedulerDisplayUnit) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function calculateDisplayUnit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller: SchedulerController<any, any>,
