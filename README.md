@@ -4,7 +4,7 @@
 
 A simple but customizable resource scheduler/timeline component built with mantine.
 
-## Compatibility:
+## Compatibility
 
 This library uses subgrids, which is a rather new browser feature.
 
