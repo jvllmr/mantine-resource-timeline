@@ -24,7 +24,7 @@ jobs:
         run: git checkout release
 
       - name: Merge dev into release
-        run: git merge dev
+        run: git merge origin/dev --allow-unrelated-histories
 
       - name: Push changes
         run: git push origin release
