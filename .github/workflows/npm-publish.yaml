@@ -12,15 +12,24 @@ jobs:
   sync-release-branch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Merge dev -> release
-        uses: devmasx/merge-branch@v1.4.0
-        with:
-          type: now
-          from_branch: dev
-          target_branch: release
-          message: Merge into release
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      - name: Fetch all branches
+        run: git fetch origin
+      - name: Checkout release branch
+        run: git checkout release
+
+      - name: Merge dev into release
+        run: git merge dev
+
+      - name: Push changes
+        run: git push origin release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
