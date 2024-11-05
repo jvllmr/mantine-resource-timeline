@@ -1,6 +1,8 @@
 # mantine-resource-timeline
 
-A simple but customizable resource scheduler/timeline built with mantine
+[![NPM Downloads](https://img.shields.io/npm/dw/mantine-resource-timeline)](https://www.npmjs.com/package/mantine-resource-timeline)
+
+A simple but customizable resource scheduler/timeline component built with mantine.
 
 ## Compatibility:
 
