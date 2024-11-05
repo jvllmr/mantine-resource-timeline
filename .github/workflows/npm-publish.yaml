@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - run: pnpm install
+      - run: pnpm install --frozen-lock
       - run: pnpm build
 
   publish-npm:
@@ -36,7 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - run: pnpm install
-      - run: pnpm publish --publish-branch dev --access public
+      - uses: actions/setup-node@v4
+      - run: pnpm install --frozen-lock
+      - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
