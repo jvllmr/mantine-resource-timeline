@@ -29,7 +29,7 @@ export const useSchedulerSelect = <TData, TResource>(
   controller: SchedulerController<TData, TResource>,
   onSelect?: OnSelectFn<TData, TResource>,
 ) => {
-  const constantDiv = useRef(document.createElement("div")).current;
+  const constantDiv = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     controller.momentDragStartOver = onSelect
@@ -39,7 +39,10 @@ export const useSchedulerSelect = <TData, TResource>(
             (controller.selectedResourceId === resourceId ||
               controller.selectedResourceId === null)
           ) {
-            event.dataTransfer.setDragImage(constantDiv, 0, 0);
+            if (!constantDiv.current) {
+              constantDiv.current = document.createElement("div");
+            }
+            event.dataTransfer.setDragImage(constantDiv.current, 0, 0);
             if (
               !controller.firstSelectedMoment ||
               moment.isBefore(controller.firstSelectedMoment)
