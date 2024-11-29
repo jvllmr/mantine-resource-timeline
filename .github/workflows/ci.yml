@@ -12,3 +12,10 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lock
       - run: pnpm build
+  build-storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lock
+      - run: pnpm build-storybook
