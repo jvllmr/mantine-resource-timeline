@@ -51,4 +51,4 @@ export function Overlaps() {
   );
 }
 
-export default { title: "Overlapping entries" };
+export default { title: "Overlaps" };
