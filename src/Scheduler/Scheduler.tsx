@@ -63,6 +63,7 @@ export function Scheduler<TData, TResource>(
     inputProps,
   );
   const theme = useMantineTheme();
+
   return (
     <Paper
       withBorder

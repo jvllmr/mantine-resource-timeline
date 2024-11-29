@@ -103,7 +103,7 @@ function CustomNowMarker(props: NowMarkerProps) {
   return <DefaultNowMarker {...props} format="DD.MM.YYYY HH:mm:ss [Uhr] Z" />;
 }
 
-export function AdvancedScheduler() {
+export function Advanced() {
   const controller = useSchedulerController({
     onSelect,
     determineSubMomentsCount,

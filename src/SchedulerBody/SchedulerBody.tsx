@@ -64,40 +64,33 @@ export interface SchedulerBodyProps<TData, TResource> {
 
 const SchedulerEntries = <TData, TResource>({
   data,
-  dataIdAccessor,
-  getDataResourceId,
+  rowHeight,
+  getDataId,
   entryComponent,
-  resourceId,
+  entryOffsets,
   getEndDate,
   getStartDate,
   controller,
   resource,
 }: {
   data: TData[];
-  dataIdAccessor: DataFieldAccessor<TData, string | number>;
-  getDataResourceId: (dataItem: TData) => string[];
-  resourceId: string;
+  getDataId: (dataItem: TData) => string;
+  entryOffsets: Record<string, number | undefined>;
   getEndDate: (dataItem: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
+  rowHeight: number;
   controller: SchedulerController<TData, TResource>;
   resource: TResource;
 }) => {
-  const getDataId = useStringAccessor(dataIdAccessor);
-
   const { viewStartDate, viewEndDate, calculateDistancePercentage } =
     useSnapshot(controller);
-
-  const filteredData = useMemo(
-    () => data.filter((item) => getDataResourceId(item).includes(resourceId)),
-    [data, getDataResourceId, resourceId],
-  );
-
+  const entryHeight = rowHeight * 0.8;
   return (
     <>
-      {filteredData.map((item) => {
+      {data.map((item) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
         const isOverlap =
@@ -110,16 +103,18 @@ const SchedulerEntries = <TData, TResource>({
           ? undefined
           : "none";
         const entryId = getDataId(item);
-
+        const offsetMultiplier = entryOffsets[entryId] ?? 0;
+        const top = rowHeight * offsetMultiplier + 0.1 * rowHeight;
+        console.log(offsetMultiplier, top, entryHeight);
         return (
           <SchedulerEntryRenderer
             CustomSchedulerEntry={entryComponent}
             style={{
               display,
               position: "absolute",
-              top: "10%",
+              top,
               left: `${startDistance}%`,
-              height: "80%",
+              height: entryHeight,
               right: `${endDistance}%`,
             }}
             key={`entry_${entryId}`}
@@ -133,24 +128,23 @@ const SchedulerEntries = <TData, TResource>({
 };
 
 function SchedulerBodyRow<TData, TResource>({
-  data,
   customNowMarker,
-
-  getDataResourceId,
+  data,
   resourceId,
   getEndDate,
   getStartDate,
   resourcesCount,
-  rowHeight,
+  multipliedRowHeight,
   rowIndex,
   momentStyle,
-
-  dataIdAccessor,
+  rowHeight,
+  getDataId,
   entryComponent,
   controller,
   resource,
   theme,
   tz,
+  entryOffsets,
 }: {
   data: TData[];
   tz?: string;
@@ -158,9 +152,9 @@ function SchedulerBodyRow<TData, TResource>({
   customNowMarker: NonNullable<
     SchedulerBodyProps<TData, TResource>["nowMarkerComponent"]
   >;
-  dataIdAccessor: DataFieldAccessor<TData, string | number>;
-  getDataResourceId: (dataItem: TData) => string[];
-  getEndDate: (dataItem: TData) => Dayjs;
+  getDataId: (dataItem: TData) => string;
+  entryOffsets: Record<string, number | undefined>;
+  getEndDate: (dataItems: TData) => Dayjs;
   getStartDate: (dataItem: TData) => Dayjs;
 
   resourceId: string;
@@ -168,8 +162,8 @@ function SchedulerBodyRow<TData, TResource>({
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
   theme: MantineTheme;
+  multipliedRowHeight: number;
   rowHeight: number;
-
   rowIndex: number;
 
   momentStyle?: MomentStyleFn<TData, TResource>;
@@ -189,19 +183,19 @@ function SchedulerBodyRow<TData, TResource>({
       />
       <SchedulerEntries
         data={data}
-        dataIdAccessor={dataIdAccessor}
-        getDataResourceId={getDataResourceId}
         getEndDate={getEndDate}
         getStartDate={getStartDate}
-        resourceId={resourceId}
         entryComponent={entryComponent}
         controller={controller}
+        getDataId={getDataId}
         resource={resource}
+        entryOffsets={entryOffsets}
+        rowHeight={rowHeight}
       />
       <SchedulerMoments
         resourceId={resourceId}
         resourcesCount={resourcesCount}
-        rowHeight={rowHeight}
+        rowHeight={multipliedRowHeight}
         rowIndex={rowIndex}
         momentStyle={momentStyle}
         resource={resource}
@@ -240,7 +234,7 @@ export function SchedulerBody<TData, TResource>({
   const getDataResourceId = useStringArrayAccessor(dataResourceIdField);
   const getStartDate = useDateAccessor(startDateField);
   const getEndDate = useDateAccessor(endDateField);
-
+  const getDataId = useStringAccessor(dataIdAccessor);
   const CustomResourceLabel = useMemo(
     () => resourceLabelComponent ?? DefaultResourceLabel,
     [resourceLabelComponent],
@@ -253,10 +247,79 @@ export function SchedulerBody<TData, TResource>({
     () => nowMarkerComponent ?? DefaultNowMarker,
     [nowMarkerComponent],
   );
+  const groupedData = useMemo(() => {
+    const res: Record<string, TData[] | undefined> = {};
+
+    for (const entry of data) {
+      const resourceIds = getDataResourceId(entry);
+      for (const resourceId of resourceIds) {
+        const existingData = res[resourceId];
+        if (!existingData) {
+          res[resourceId] = [entry];
+        } else {
+          existingData.push(entry);
+        }
+      }
+    }
+    return res;
+  }, [data, getDataResourceId]);
+
+  const [rowMultipliers, entryPosMultipliers] = useMemo(() => {
+    const rows: Record<string, number | undefined> = {};
+    const entries: Record<string, number | undefined> = {};
+    for (const resource of resources) {
+      const resourceId = getResourceId(resource);
+      const resourceData = groupedData[resourceId] ?? [];
+      let rowMultiplier = 1;
+      for (let i = 0; i < resourceData.length; i++) {
+        const entry1 = resourceData[i];
+        const entryId1 = getDataId(entry1);
+
+        const startDate1 = getStartDate(entry1);
+        const endDate1 = getEndDate(entry1);
+
+        const entry1Offset = entries[entryId1] ?? 0;
+
+        let entryCollisions = 1;
+        for (let j = i + 1; j < resourceData.length; j++) {
+          const entry2 = resourceData[j];
+          const startDate2 = getStartDate(entry2);
+          const endDate2 = getEndDate(entry2);
+          const entryId2 = getDataId(entry2);
+          const entry2Offset = entries[entryId2];
+          if (startDate1.isBefore(endDate2) && endDate1.isAfter(startDate2)) {
+            entryCollisions += 1;
+            if (!entry2Offset) {
+              entries[entryId2] = entry1Offset + entryCollisions - 1;
+            }
+          }
+        }
+        if (entryCollisions > rowMultiplier) {
+          rowMultiplier = entryCollisions;
+        }
+      }
+
+      rows[resourceId] = rowMultiplier;
+    }
+
+    return [rows, entries];
+  }, [
+    getDataId,
+    getEndDate,
+    getResourceId,
+    getStartDate,
+    groupedData,
+    resources,
+  ]);
 
   const virtualizer = useWindowVirtualizer({
     count: resources.length,
-    estimateSize: () => rowHeight,
+    estimateSize: (index) => {
+      const resource = resources[index];
+      const resourceId = getResourceId(resource);
+      const multiplier = rowMultipliers[resourceId] ?? 1;
+      return rowHeight * multiplier;
+    },
     enabled: enableVirtualizer,
     overscan: 5,
     scrollMargin: localBodyRef.current?.offsetTop ?? 0,
@@ -312,6 +375,9 @@ export function SchedulerBody<TData, TResource>({
         {virtualItems.map((virtualItem, rowIndex) => {
           const resource = resources[virtualItem.index];
           const resourceId = getResourceId(resource);
+
+          const multipliedRowHeight =
+            rowHeight * (rowMultipliers[resourceId] ?? 1);
           return (
             <Box
               key={`resource_row_${virtualItem.key}`}
@@ -330,7 +396,7 @@ export function SchedulerBody<TData, TResource>({
                   withBorder
                   radius={0}
                   w="100%"
-                  mah={rowHeight}
+                  mah={multipliedRowHeight}
                   style={{
                     borderLeftWidth: 0,
                     borderBottomWidth: 0,
@@ -353,17 +419,18 @@ export function SchedulerBody<TData, TResource>({
                   key={`row_content_${resourceId}`}
                   rowIndex={rowIndex}
                   customNowMarker={customNowMarker}
-                  data={data}
+                  data={groupedData[resourceId] ?? []}
                   entryComponent={customSchedulerEntry}
-                  getDataResourceId={getDataResourceId}
                   getEndDate={getEndDate}
                   getStartDate={getStartDate}
                   resourceId={resourceId}
                   rowHeight={rowHeight}
+                  multipliedRowHeight={multipliedRowHeight}
                   momentStyle={momentStyle}
+                  getDataId={getDataId}
                   resourcesCount={resources.length}
-                  dataIdAccessor={dataIdAccessor}
                   controller={controller}
+                  entryOffsets={entryPosMultipliers}
                   tz={tz}
                   resource={resource}
                   theme={theme}
