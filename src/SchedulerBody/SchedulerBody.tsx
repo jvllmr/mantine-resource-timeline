@@ -247,35 +247,6 @@ export function SchedulerBody<TData, TResource>({
     () => nowMarkerComponent ?? DefaultNowMarker,
     [nowMarkerComponent],
   );
-
-  const virtualizer = useWindowVirtualizer({
-    count: resources.length,
-    estimateSize: () => rowHeight,
-    enabled: enableVirtualizer,
-    overscan: 5,
-    scrollMargin: localBodyRef.current?.offsetTop ?? 0,
-  });
-  const virtualItems = virtualizer.getVirtualItems();
-  const totalSize = virtualizer.getTotalSize();
-  const paddingTop = useMemo(
-    () =>
-      virtualItems.length > 0
-        ? virtualItems?.[0]?.start
-          ? virtualItems?.[0]?.start - (localBodyRef.current?.offsetTop ?? 0)
-          : 0
-        : 0,
-    [virtualItems],
-  );
-  const paddingBottom = useMemo(
-    () =>
-      virtualItems.length > 0
-        ? totalSize -
-          (virtualItems?.[virtualItems.length - 1]?.end || 0) +
-          (localBodyRef.current?.offsetTop ?? 0)
-        : 0,
-    [totalSize, virtualItems],
-  );
-
   const groupedData = useMemo(() => {
     const res: Record<string, TData[] | undefined> = {};
 
@@ -340,6 +311,39 @@ export function SchedulerBody<TData, TResource>({
     groupedData,
     resources,
   ]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: resources.length,
+    estimateSize: (index) => {
+      const resource = resources[index];
+      const resourceId = getResourceId(resource);
+      const multiplier = rowMultipliers[resourceId] ?? 1;
+      return rowHeight * multiplier;
+    },
+    enabled: enableVirtualizer,
+    overscan: 5,
+    scrollMargin: localBodyRef.current?.offsetTop ?? 0,
+  });
+  const virtualItems = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+  const paddingTop = useMemo(
+    () =>
+      virtualItems.length > 0
+        ? virtualItems?.[0]?.start
+          ? virtualItems?.[0]?.start - (localBodyRef.current?.offsetTop ?? 0)
+          : 0
+        : 0,
+    [virtualItems],
+  );
+  const paddingBottom = useMemo(
+    () =>
+      virtualItems.length > 0
+        ? totalSize -
+          (virtualItems?.[virtualItems.length - 1]?.end || 0) +
+          (localBodyRef.current?.offsetTop ?? 0)
+        : 0,
+    [totalSize, virtualItems],
+  );
 
   return (
     <Box
