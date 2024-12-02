@@ -28,43 +28,43 @@ importers:
         specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)
       '@mantine/core':
-        specifier: ^7.14.2
+        specifier: ^7.14.3
         version: 7.14.3(@mantine/hooks@7.14.3(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mantine/dates':
-        specifier: ^7.14.2
+        specifier: ^7.14.3
         version: 7.14.3(@mantine/core@7.14.3(@mantine/hooks@7.14.3(react@18.3.1))(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@mantine/hooks@7.14.3(react@18.3.1))(dayjs@1.11.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mantine/hooks':
-        specifier: ^7.14.2
+        specifier: ^7.14.3
         version: 7.14.3(react@18.3.1)
       '@storybook/addon-docs':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(@types/react@18.3.12)(storybook@8.4.6(prettier@3.4.1))
       '@storybook/addon-essentials':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(@types/react@18.3.12)(storybook@8.4.6(prettier@3.4.1))
       '@storybook/addon-interactions':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(storybook@8.4.6(prettier@3.4.1))
       '@storybook/addon-storysource':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(storybook@8.4.6(prettier@3.4.1))
       '@storybook/addon-themes':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(storybook@8.4.6(prettier@3.4.1))
       '@storybook/blocks':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.6(prettier@3.4.1))
       '@storybook/preview-api':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(storybook@8.4.6(prettier@3.4.1))
       '@storybook/react':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(@storybook/test@8.4.6(storybook@8.4.6(prettier@3.4.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.6(prettier@3.4.1))(typescript@5.7.2)
       '@storybook/react-vite':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(@storybook/test@8.4.6(storybook@8.4.6(prettier@3.4.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.28.0)(storybook@8.4.6(prettier@3.4.1))(typescript@5.7.2)(vite@5.4.11(sugarss@4.0.1(postcss@8.4.49)))
       '@storybook/test':
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(storybook@8.4.6(prettier@3.4.1))
       '@types/react':
         specifier: ^18.3.12
@@ -79,7 +79,7 @@ importers:
         specifier: ^7.18.0
         version: 7.18.0(eslint@8.57.1)(typescript@5.7.2)
       '@vitejs/plugin-react':
-        specifier: ^4.3.3
+        specifier: ^4.3.4
         version: 4.3.4(vite@5.4.11(sugarss@4.0.1(postcss@8.4.49)))
       dayjs:
         specifier: ^1.11.13
@@ -112,7 +112,7 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1(postcss@8.4.49)
       prettier:
-        specifier: ^3.3.3
+        specifier: ^3.4.1
         version: 3.4.1
       prettier-plugin-organize-imports:
         specifier: ^4.1.0
@@ -127,7 +127,7 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       storybook:
-        specifier: ^8.4.5
+        specifier: ^8.4.6
         version: 8.4.6(prettier@3.4.1)
       storybook-addon-mantine:
         specifier: ^4.0.2
