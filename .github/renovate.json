@@ -5,7 +5,6 @@
     "config:recommended",
     "group:allNonMajor",
     "schedule:weekly",
-    ":approveMajorUpdates",
     ":automergeMinor",
     ":disablePeerDependencies",
     ":maintainLockFilesMonthly",

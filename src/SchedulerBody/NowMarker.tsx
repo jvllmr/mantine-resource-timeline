@@ -55,3 +55,5 @@ export const DefaultNowMarker = React.memo(
     );
   },
 );
+
+DefaultNowMarker.displayName = "DefaultNowMarker";
