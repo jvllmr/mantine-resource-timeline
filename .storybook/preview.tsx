@@ -18,7 +18,7 @@ const allColorThemes: MantineTheme[] = Object.keys(DEFAULT_THEME.colors)
   .map((primaryColor) => ({ ...DEFAULT_THEME, primaryColor }));
 
 const channel = addons.getChannel();
-
+// eslint-disable-next-line react-refresh/only-export-components
 function ColorSchemeWrapper({ children }: { children: React.ReactNode }) {
   const { setColorScheme } = useMantineColorScheme();
   const handleColorScheme = (value: boolean) =>

@@ -109,6 +109,8 @@ const SchedulerMoment = React.memo(
   },
 );
 
+SchedulerMoment.displayName = "SchedulerMoment";
+
 export const SchedulerMoments = <TData, TResource>({
   controller,
   resourceId,

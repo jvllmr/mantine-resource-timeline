@@ -77,6 +77,8 @@ const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
   return null;
 });
 
+TopLabel.displayName = "TopLabel";
+
 interface BottomLabelProps<TData, TResource> {
   moment: Dayjs;
   momentLabelComponent?: SchedulerHeaderProps<

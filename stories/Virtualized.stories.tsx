@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 import { Scheduler, useSchedulerController } from "mantine-resource-timeline";
 import { useMemo } from "react";
-
 export function Virtualized() {
   const resources = useMemo(
     () => [...Array(10_000).keys()].map((resourceId) => ({ resourceId })),
