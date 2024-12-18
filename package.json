@@ -60,8 +60,8 @@
     "@storybook/react": "^8.4.7",
     "@storybook/react-vite": "^8.4.7",
     "@storybook/test": "^8.4.7",
-    "@types/react": "^18.3.16",
-    "@types/react-dom": "^18.3.5",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.3.4",
@@ -78,8 +78,8 @@
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "publint": "^0.2.12",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "storybook": "^8.4.7",
     "storybook-addon-mantine": "^4.0.2",
     "storybook-dark-mode": "^4.0.2",
@@ -103,8 +103,8 @@
     "@tanstack/react-virtual": "^3.9.0",
     "@use-gesture/react": "^10.3.1",
     "dayjs": "^1.11.11",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0",
     "valtio": "^2.1.0"
   }
 }
