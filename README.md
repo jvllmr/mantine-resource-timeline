@@ -83,7 +83,7 @@ The controller object allows us to control multiple components state, such as th
 
 ## Future development
 
-I have mostly achieved what I initially wanted to achieve with this component library. This means I most likely won't re-iterate on it because I have lost mostly lost my interest in this project.
+I have mostly achieved what I initially wanted to achieve with this component library. This means I most likely won't re-iterate on it because I have lost my interest in this project.
 I'm still eager to answer questions via issues or review Pull Requests to this project though. Feel free to contribute anything you'd like as long as it's within the scope of this project. Especially if it includes documentation/tests.
 
 ## Contributing
