@@ -96,7 +96,7 @@
     "component",
     "react"
   ],
-  "packageManager": "pnpm@9.15.5",
+  "packageManager": "pnpm@10.3.0",
   "peerDependencies": {
     "@mantine/core": "^7.10.2",
     "@mantine/hooks": "^7.10.2",
