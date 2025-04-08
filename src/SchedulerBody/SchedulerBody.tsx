@@ -105,7 +105,6 @@ const SchedulerEntries = <TData, TResource>({
         const entryId = getDataId(item);
         const offsetMultiplier = entryOffsets[entryId] ?? 0;
         const top = rowHeight * offsetMultiplier + 0.1 * rowHeight;
-        console.log(offsetMultiplier, top, entryHeight);
         return (
           <SchedulerEntryRenderer
             CustomSchedulerEntry={entryComponent}
