@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { useGesture } from "@use-gesture/react";
 import { SchedulerController } from "./controller";
 
