@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { Dayjs } from "dayjs";
 import { DragEvent, useEffect, useRef } from "react";
 import { SchedulerController } from "./controller";

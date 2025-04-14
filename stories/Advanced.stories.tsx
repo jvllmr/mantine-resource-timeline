@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { alpha, Box, getThemeColor, Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import dayjs from "dayjs";
