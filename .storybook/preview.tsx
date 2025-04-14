@@ -11,7 +11,7 @@ import "@mantine/dates/styles.layer.css";
 import { withThemeFromJSXProvider } from "@storybook/addon-themes";
 import { addons } from "@storybook/preview-api";
 import type { Preview, ReactRenderer } from "@storybook/react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { DARK_MODE_EVENT_NAME } from "storybook-dark-mode";
 const allColorThemes: MantineTheme[] = Object.keys(DEFAULT_THEME.colors)
   .sort()

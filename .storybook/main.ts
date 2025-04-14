@@ -1,5 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-// @ts-expect-error hate those esModuleInterop errors...
+
 import path from "path";
 const config: StorybookConfig = {
   stories: [
@@ -7,7 +7,6 @@ const config: StorybookConfig = {
     "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
-    "@storybook/addon-interactions",
     "storybook-dark-mode",
 
     {
@@ -38,9 +37,11 @@ const config: StorybookConfig = {
       options: { docs: false, backgrounds: false },
     },
     "@storybook/addon-themes",
+    "@storybook/addon-interactions",
+    "storybook-addon-rslib",
   ],
   framework: {
-    name: "@storybook/react-vite",
+    name: "storybook-react-rsbuild",
     options: {},
   },
 };

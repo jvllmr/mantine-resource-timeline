@@ -24,6 +24,6 @@
       "mantine-resource-timeline": ["./src", "./build"]
     }
   },
-  "include": ["src/**/*", "stories/**/*"],
+  "include": ["src/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

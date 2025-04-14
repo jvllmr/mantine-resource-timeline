@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "composite": true,
     "skipLibCheck": true,
     "module": "ESNext",
@@ -8,5 +9,10 @@
     "strict": true,
     "esModuleInterop": true
   },
-  "include": ["vite.config.ts", "eslint.config.mjs", ".storybook/**/*"]
+  "include": [
+    "vite.config.ts",
+    "eslint.config.mjs",
+    "rslib.config.ts",
+    ".storybook/**/*"
+  ]
 }
