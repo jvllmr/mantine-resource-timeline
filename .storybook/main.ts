@@ -1,6 +1,5 @@
-import type { StorybookConfig } from "@storybook/react-vite";
-
 import path from "path";
+import { StorybookConfig } from "storybook-react-rsbuild";
 const config: StorybookConfig = {
   stories: [
     "../stories/**/*.mdx",
