@@ -22,7 +22,7 @@
     "test:build": "publint --strict",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "rslib build && storybook build",
     "format": "prettier -w ."
   },
   "files": [
