@@ -21,7 +21,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "mantine-resource-timeline": ["./src", "./build"]
+      "mantine-resource-timeline": ["./src"]
     }
   },
   "include": ["src/**/*.{tsx,ts}"],
