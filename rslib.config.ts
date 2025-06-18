@@ -1,7 +1,6 @@
 import { pluginBabel } from "@rsbuild/plugin-babel";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { defineConfig } from "@rslib/core";
-
 const excludeFileNames: string[] = ["gestureControls", "selectControls"];
 
 const ReactCompilerConfig = {
@@ -50,6 +49,9 @@ export default defineConfig({
       },
     }),
   ],
-
-  // source: { entry: { index: "src/index.ts" }, exclude: "stories/**/*.tsx" },
+  resolve: {
+    alias: {
+      "mantine-resource-timeline": "./src",
+    },
+  },
 });
