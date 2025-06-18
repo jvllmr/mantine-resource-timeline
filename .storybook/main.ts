@@ -1,4 +1,3 @@
-import path from "path";
 import { StorybookConfig } from "storybook-react-rsbuild";
 const config: StorybookConfig = {
   stories: [
@@ -8,33 +7,6 @@ const config: StorybookConfig = {
   addons: [
     "storybook-dark-mode",
 
-    {
-      name: "@storybook/addon-storysource",
-      options: {
-        rule: {
-          // test: [/\.stories\.jsx?$/], This is default
-          include: [path.resolve(__dirname, "../src")], // You can specify directories
-        },
-        loaderOptions: {
-          prettierConfig: { singleQuote: false },
-          injectStoryParameters: false,
-        },
-      },
-    },
-    {
-      name: "@storybook/addon-docs",
-      options: {
-        csfPluginOptions: null,
-        mdxPluginOptions: {},
-        sourceLoaderOptions: {
-          injectStoryParameters: false,
-        },
-      },
-    },
-    {
-      name: "@storybook/addon-essentials",
-      options: { docs: false, backgrounds: false },
-    },
     "@storybook/addon-themes",
     "@storybook/addon-interactions",
     "storybook-addon-rslib",
