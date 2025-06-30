@@ -4,7 +4,7 @@ ci:
     - eslint
 repos:
   - repo: https://github.com/jvllmr/pre-commit-prettier
-    rev: v3.5.2
+    rev: v3.6.2
     hooks:
       - id: prettier
         additional_dependencies:
