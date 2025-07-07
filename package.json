@@ -82,7 +82,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "storybook": "^9.0.15",
-    "storybook-addon-mantine": "^5.0.0",
+    "storybook-addon-mantine": "^6.0.0",
     "storybook-addon-rslib": "^2.0.2",
     "storybook-dark-mode": "^4.0.2",
     "storybook-react-rsbuild": "^2.0.2",
