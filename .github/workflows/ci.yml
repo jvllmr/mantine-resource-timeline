@@ -11,10 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-      - name: Publish
-        run: npx pkg-pr-new publish
+      - run: corepack enable
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lock
+
+      - run: pnpm dlx pkg-pr-new publish
   lint:
     runs-on: ubuntu-latest
     steps:
