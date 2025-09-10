@@ -101,8 +101,8 @@
   ],
   "packageManager": "pnpm@10.15.1",
   "peerDependencies": {
-    "@mantine/core": "^7.10.2",
-    "@mantine/hooks": "^7.10.2",
+    "@mantine/core": "^8.2.8",
+    "@mantine/hooks": "^8.2.8",
     "@tanstack/react-virtual": "^3.9.0",
     "@use-gesture/react": "^10.3.1",
     "dayjs": "^1.11.11",
