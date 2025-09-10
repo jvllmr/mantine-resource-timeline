@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lock
 
+      - name: Prepublish
+        run: pnpm prepublish
+
       - run: pnpm dlx pkg-pr-new publish
   lint:
     runs-on: ubuntu-latest
