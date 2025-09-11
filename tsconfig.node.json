@@ -2,6 +2,7 @@
   "compilerOptions": {
     "jsx": "react",
     "composite": true,
+    "declarationDir": "./dist/types",
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",

@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 
 import {
   DefaultMomentLabel,
+  DefaultNowMarker,
   DetermineSubMomentCountsFn,
   MomentLabelProps,
   type MomentStyleFn,
@@ -15,7 +16,7 @@ import {
   useSchedulerController,
 } from "mantine-resource-timeline";
 import { useSnapshot } from "valtio";
-import { DefaultNowMarker } from "../src/SchedulerBody/NowMarker";
+
 export default { title: "Advanced" };
 
 const resources = [
