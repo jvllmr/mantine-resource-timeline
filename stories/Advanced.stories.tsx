@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler */
 import { alpha, Box, getThemeColor, Grid, Stack } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import dayjs from "dayjs";
+import { addHours, formatDate, getDay, subDays } from "date-fns";
 
 import {
   DefaultMomentLabel,
@@ -38,8 +38,8 @@ const data = [
   {
     id: 1,
     resourceId: "b",
-    startDate: dayjs().subtract(4, "days"),
-    endDate: dayjs().add(5, "hours"),
+    startDate: subDays(new Date(), 4),
+    endDate: addHours(new Date(), 5),
   },
 ];
 
@@ -73,11 +73,11 @@ function GermanMomentLabel(
 ) {
   const snap = useSnapshot(props.controller);
   if (snap.displayUnit === "day") {
-    const dayStr = props.moment.format("DD.MM.");
-    if (props.moment.day() === 1) {
+    const dayStr = formatDate(props.moment, "dd.MM.");
+    if (getDay(props.moment) === 1) {
       return (
         <Stack gap={2}>
-          <Box>KW {props.moment.week()}</Box>
+          <Box>KW {formatDate(props.moment, "w")}</Box>
           <Box>{dayStr}</Box>
         </Stack>
       );
@@ -91,7 +91,7 @@ const momentStyle: MomentStyleFn<
   (typeof data)[number],
   (typeof resources)[number]
 > = ({ moment, theme, isSelected }) => {
-  const momentDay = moment.day();
+  const momentDay = getDay(moment);
 
   if (!isSelected && (momentDay === 0 || momentDay === 6)) {
     const bgColor = alpha(getThemeColor(`${theme.primaryColor}.1`, theme), 0.3);
@@ -102,7 +102,9 @@ const momentStyle: MomentStyleFn<
 };
 
 function CustomNowMarker(props: NowMarkerProps) {
-  return <DefaultNowMarker {...props} format="DD.MM.YYYY HH:mm:ss [Uhr] Z" />;
+  return (
+    <DefaultNowMarker {...props} format="dd.MM.yyyy HH:mm:ss 'Uhr' OOOO" />
+  );
 }
 
 export function Advanced() {
@@ -118,20 +120,20 @@ export function Advanced() {
         <Grid.Col span={6}>
           <DateTimePicker
             label="Start"
-            value={snap.viewStartDate.toDate()}
+            value={snap.viewStartDate}
             onChange={(value) => {
               if (!value) return;
-              controller.viewStartDate = dayjs(value);
+              controller.viewStartDate = new Date(value);
             }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
           <DateTimePicker
             label="End"
-            value={snap.viewEndDate.toDate()}
+            value={snap.viewEndDate}
             onChange={(value) => {
               if (!value) return;
-              controller.viewEndDate = dayjs(value);
+              controller.viewEndDate = new Date(value);
             }}
           />
         </Grid.Col>

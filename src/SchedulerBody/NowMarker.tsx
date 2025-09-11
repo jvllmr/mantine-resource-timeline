@@ -1,17 +1,8 @@
+import { TZDate } from "@date-fns/tz";
 import { Box, MantineStyleProps, Tooltip } from "@mantine/core";
-import dayjs, { Dayjs } from "dayjs";
+import { formatDate } from "date-fns";
 import React, { useEffect, useMemo, useState } from "react";
 import { UnknownSchedulerController } from "../controller/controller";
-
-function getNow(tz?: string) {
-  let now = dayjs();
-  if (tz) {
-    now = now.tz(tz);
-  }
-
-  return now;
-}
-
 export const NowMarkerController = ({
   markerComponent,
   distanceCalculator,
@@ -22,7 +13,7 @@ export const NowMarkerController = ({
   tz?: string;
 }) => {
   const Marker = markerComponent;
-  const [now, setNow] = useState(getNow(tz));
+  const [now, setNow] = useState(TZDate.tz(tz ?? "UTC"));
 
   const nowLeft = useMemo(() => {
     const distance = distanceCalculator(now, "left");
@@ -31,7 +22,7 @@ export const NowMarkerController = ({
   }, [distanceCalculator, now]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setNow(getNow(tz)), 1000);
+    const timeout = setTimeout(() => setNow(TZDate.tz(tz ?? "UTC")), 1000);
 
     return () => {
       clearTimeout(timeout);
@@ -43,13 +34,13 @@ export const NowMarkerController = ({
 
 export interface NowMarkerProps {
   left: MantineStyleProps["left"];
-  now: Dayjs;
+  now: Date;
 }
 
 export const DefaultNowMarker = React.memo(
   ({ left, now, format }: NowMarkerProps & { format?: string }) => {
     return (
-      <Tooltip.Floating label={now.format(format)}>
+      <Tooltip.Floating label={formatDate(now, format ?? "pppp", {})}>
         <Box pos="absolute" left={left} bg="yellow" h="100%" w={1} />
       </Tooltip.Floating>
     );

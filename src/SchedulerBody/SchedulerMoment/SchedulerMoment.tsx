@@ -4,7 +4,7 @@ import {
   MantineTheme,
   Paper,
 } from "@mantine/core";
-import { Dayjs } from "dayjs";
+
 import { DragEvent, useState } from "react";
 import { useSnapshot } from "valtio";
 import { SchedulerController } from "../../controller/controller";
@@ -52,10 +52,10 @@ const SchedulerMoment = React.memo(
   }: SchedulerMomentsProps<any, any> & {
     distance: number;
 
-    moment: Dayjs;
+    moment: Date;
     draggingEnabled: boolean;
     setDraggingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    nextMoment: Dayjs;
+    nextMoment: Date;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     momentDragEnd?: SchedulerMomentOnDragEndFn<any>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { addDays, addWeeks, subDays, subHours, subWeeks } from "date-fns";
 import { Scheduler, useSchedulerController } from "mantine-resource-timeline";
 import { useMemo } from "react";
 
@@ -12,20 +12,20 @@ export function Overlaps() {
       {
         id: 1,
         resourceId: 3,
-        startDate: dayjs().subtract(8, "hours"),
-        endDate: dayjs().add(1, "week"),
+        startDate: subHours(new Date(), 8),
+        endDate: addWeeks(new Date(), 1),
       },
       {
         id: 2,
         resourceId: 3,
-        startDate: dayjs().subtract(2, "weeks"),
-        endDate: dayjs().add(1, "day"),
+        startDate: subWeeks(new Date(), 2),
+        endDate: addDays(new Date(), 1),
       },
       {
         id: 3,
         resourceId: 3,
-        startDate: dayjs().subtract(1, "day"),
-        endDate: dayjs().add(1, "day"),
+        startDate: subDays(new Date(), 1),
+        endDate: addDays(new Date(), 1),
       },
     ],
     [],

@@ -1,8 +1,22 @@
-import dayjs, { Dayjs } from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import timezone from "dayjs/plugin/timezone";
-import weekOfYear from "dayjs/plugin/weekOfYear";
-import { useEffect, useMemo, useRef } from "react";
+import {
+  addDays,
+  addHours,
+  addMonths,
+  addWeeks,
+  addYears,
+  differenceInHours,
+  differenceInMinutes,
+  isAfter,
+  isBefore,
+  isEqual,
+  startOfDay,
+  startOfHour,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  subDays,
+} from "date-fns";
+import { useEffect, useRef } from "react";
 import { proxy, subscribe } from "valtio";
 import { timeFraction } from "../utils";
 import {
@@ -17,8 +31,8 @@ export type DetermineSubMomentCountsFn = (
   displayUnit: SchedulerDisplayUnit,
 ) => number;
 export interface SchedulerControllerParams<TData, TResource> {
-  initialViewStartDate?: Dayjs;
-  initialViewEndDate?: Dayjs;
+  initialViewStartDate?: Date;
+  initialViewEndDate?: Date;
   clip?: boolean;
   determineSubMomentsCount?: DetermineSubMomentCountsFn;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
@@ -28,22 +42,22 @@ export interface SchedulerControllerParams<TData, TResource> {
 // @ts-expect-error TData is unused for now
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface SchedulerController<TData, TResource> {
-  moments: Dayjs[];
+  moments: Date[];
   momentWidths: number[];
-  viewStartDate: Dayjs;
-  viewEndDate: Dayjs;
+  viewStartDate: Date;
+  viewEndDate: Date;
   displayUnit: SchedulerDisplayUnit;
-  subbedMoments: [Dayjs, number][];
+  subbedMoments: [Date, number][];
   calculateDistancePercentage: (
-    date: Dayjs,
+    date: Date,
     leftOrRight: "left" | "right",
   ) => number;
 
   momentDragEnd?: SchedulerMomentOnDragEndFn<TResource>;
   momentDragStartOver?: SchedulerMomentOnDragStartOverFactory;
   momentSelectClick?: SchedulerMomentSelectClickFnFactory<TResource>;
-  firstSelectedMoment: Dayjs | null;
-  lastSelectedMoment: Dayjs | null;
+  firstSelectedMoment: Date | null;
+  lastSelectedMoment: Date | null;
 
   selectedMoments: Record<
     string,
@@ -53,54 +67,38 @@ export interface SchedulerController<TData, TResource> {
 }
 export type UnknownSchedulerController = SchedulerController<unknown, unknown>;
 
-export function determineDisplayUnit(daysDiff: number): SchedulerDisplayUnit {
-  if (daysDiff > 365) return "year";
-  if (daysDiff > 25) return "month";
+const hoursInYearThreshold = 365 * 24;
+const hoursInMonthThreshold = 25 * 24;
 
-  if (daysDiff > 1) return "day";
+export function determineDisplayUnit(hoursDiff: number): SchedulerDisplayUnit {
+  if (hoursDiff > hoursInYearThreshold) return "year";
+  if (hoursDiff > hoursInMonthThreshold) return "month";
+
+  if (hoursDiff > 24) return "day";
 
   return "hour";
 }
 
-const getNextMoment: Record<SchedulerDisplayUnit, (moment: Dayjs) => Dayjs> = {
-  day: (moment) => {
-    return moment.add(1, "day").hour(0).minute(0).second(0).millisecond(0);
-  },
-  hour: (moment) => moment.add(1, "hour").minute(0).second(0).millisecond(0),
-  week: (moment) =>
-    moment.add(1, "week").day(1).hour(0).minute(0).second(0).millisecond(0),
-  month: (moment) => {
-    return moment
-      .add(1, "month")
-      .date(1)
-      .hour(0)
-      .minute(0)
-      .second(0)
-      .millisecond(0);
-  },
-  year: (moment) =>
-    moment
-      .add(1, "year")
-      .month(0)
-      .date(1)
-      .hour(0)
-      .minute(0)
-      .second(0)
-      .millisecond(0),
+const getNextMoment: Record<SchedulerDisplayUnit, (moment: Date) => Date> = {
+  day: (moment) => startOfDay(addDays(moment, 1)),
+  hour: (moment) => startOfHour(addHours(moment, 1)),
+  week: (moment) => startOfWeek(addWeeks(moment, 1)),
+  month: (moment) => startOfMonth(addMonths(moment, 1)),
+  year: (moment) => startOfYear(addYears(moment, 1)),
 };
 
-function clipStartViewDate(date: Dayjs, displayUnit: SchedulerDisplayUnit) {
+function clipStartViewDate(date: Date, displayUnit: SchedulerDisplayUnit) {
   switch (displayUnit) {
     case "year":
-      return date.month(0).date(1).hour(0).minute(0).second(0).millisecond(0);
+      return startOfYear(date);
     case "month":
-      return date.date(1).hour(0).minute(0).second(0).millisecond(0);
+      return startOfMonth(date);
     case "week":
-      return date.day(1).hour(0).minute(0).second(0).millisecond(0);
+      return startOfWeek(date);
     case "day":
-      return date.hour(0).minute(0).second(0).millisecond(0);
+      return startOfDay(date);
     case "hour":
-      return date.minute(0).second(0).millisecond(0);
+      return startOfHour(date);
   }
 }
 
@@ -109,15 +107,33 @@ function calculateDisplayUnit(
   controller: SchedulerController<any, any>,
   calcFn?: (diff: number) => SchedulerDisplayUnit,
 ) {
-  const daysDiff = Math.abs(
-    controller.viewStartDate.diff(controller.viewEndDate, "days", true),
+  const daysDiff = differenceInHours(
+    controller.viewEndDate,
+    controller.viewStartDate,
   );
+
   const customDetermineDisplayUnit = calcFn ?? determineDisplayUnit;
   const newDisplayUnit = customDetermineDisplayUnit(daysDiff);
   if (newDisplayUnit !== controller.displayUnit) {
     controller.displayUnit = newDisplayUnit;
   }
 }
+
+const displayUnitDiffFuncs: Record<
+  SchedulerDisplayUnit,
+  (laterDate: Date, earlierDate: Date) => number
+> = {
+  hour: (laterDate, earlierDate) =>
+    differenceInMinutes(laterDate, earlierDate) / 60,
+  day: (laterDate, earlierDate) =>
+    differenceInMinutes(laterDate, earlierDate) / (60 * 24),
+  week: (laterDate, earlierDate) =>
+    differenceInMinutes(laterDate, earlierDate) / (60 * 24 * 7),
+  month: (laterDate, earlierDate) =>
+    differenceInMinutes(laterDate, earlierDate) / (60 * 24 * 28),
+  year: (laterDate, earlierDate) =>
+    differenceInMinutes(laterDate, earlierDate) / (60 * 24 * 365),
+};
 
 function calculateMoments(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,21 +147,18 @@ function calculateMoments(
     ? getNextMoment[controller.displayUnit](controller.viewEndDate)
     : controller.viewEndDate;
 
+  const displayUnitDiffFunc = displayUnitDiffFuncs[controller.displayUnit];
   const displayUnitDiff = Math.abs(
-    maybeClippedViewStartDate.diff(
-      maybeClippedViewEndDate,
-      controller.displayUnit,
-      true,
-    ),
+    displayUnitDiffFunc(maybeClippedViewEndDate, maybeClippedViewStartDate),
   );
 
   let diff = displayUnitDiff;
-  const moments: Dayjs[] = [maybeClippedViewStartDate];
+  const moments: Date[] = [maybeClippedViewStartDate];
   let latestAddition = maybeClippedViewStartDate;
   while (diff >= 1) {
     diff -= 1;
     const newMoment = getNextMoment[controller.displayUnit](latestAddition);
-    if (newMoment.isSame(maybeClippedViewEndDate)) break;
+    if (isEqual(newMoment, maybeClippedViewEndDate)) break;
     moments.push(newMoment);
     latestAddition = newMoment;
   }
@@ -153,10 +166,8 @@ function calculateMoments(
   const momentWidths = moments.map((moment, index, array) => {
     const distance =
       index < array.length - 1
-        ? Math.abs(moment.diff(array[index + 1], controller.displayUnit, true))
-        : Math.abs(
-            moment.diff(maybeClippedViewEndDate, controller.displayUnit, true),
-          );
+        ? Math.abs(displayUnitDiffFunc(array[index + 1], moment))
+        : Math.abs(displayUnitDiffFunc(maybeClippedViewEndDate, moment));
 
     return (distance / (moments.length - 1)) * 100;
   });
@@ -164,12 +175,12 @@ function calculateMoments(
   controller.momentWidths = momentWidths;
 
   controller.calculateDistancePercentage = (
-    date: Dayjs,
+    date: Date,
     leftOrRight: "left" | "right",
   ) => {
     if (
-      date.isBefore(maybeClippedViewStartDate) ||
-      date.isAfter(maybeClippedViewEndDate)
+      isBefore(date, maybeClippedViewStartDate) ||
+      isAfter(date, maybeClippedViewEndDate)
     )
       return 0;
 
@@ -181,9 +192,7 @@ function calculateMoments(
       right = maybeClippedViewEndDate;
     }
 
-    return (
-      (right.diff(left, controller.displayUnit, true) / displayUnitDiff) * 100
-    );
+    return (displayUnitDiffFunc(right, left) / displayUnitDiff) * 100;
   };
 }
 
@@ -196,14 +205,14 @@ function calculateSubMoments( // eslint-disable-next-line @typescript-eslint/no-
   const firstMomentLoss = (momentWidths[0] / 100) * (momentWidths.length - 1);
   const lastMomentLoss =
     (momentWidths[momentWidths.length - 1] / 100) * (momentWidths.length - 1);
-  const zippedMoments = moments.map((moment, index): [Dayjs, number] => [
+  const zippedMoments = moments.map((moment, index): [Date, number] => [
     moment,
     momentWidths[index],
   ]);
   const subMomentCount =
     determineSubMomentCounts?.(controller.displayUnit) ?? 0;
   const subbedMoments = zippedMoments.flatMap(
-    ([moment, distance], momentIndex): [Dayjs, number][] => {
+    ([moment, distance], momentIndex): [Date, number][] => {
       const loss =
         momentIndex === 0
           ? firstMomentLoss
@@ -215,12 +224,12 @@ function calculateSubMoments( // eslint-disable-next-line @typescript-eslint/no-
       const newDistance = distance / subMomentCountWithLoss;
       const newMoments = [moment];
       let newestMoment = moment;
-      const fraction = timeFraction(
+      const [fractionValue, addFraction] = timeFraction(
         subMomentCountWithLoss,
         controller.displayUnit,
       );
       for (let i = 1; i < subMomentCountWithLoss; i++) {
-        newestMoment = newestMoment.add(...fraction);
+        newestMoment = addFraction(newestMoment, fractionValue);
         newMoments.push(newestMoment);
       }
       return newMoments.map((newMoment) => [newMoment, newDistance]);
@@ -252,28 +261,23 @@ export function useSchedulerController<TData, TResource>({
       momentWidths: [],
 
       subbedMoments: [],
-      viewStartDate: dayjs().subtract(7, "days"),
-      viewEndDate: dayjs().add(7, "days"),
+      viewStartDate: subDays(new Date(), 7),
+      viewEndDate: addDays(new Date(), 7),
       selectedMoments: {},
       selectedResourceId: null,
     }),
   ).current;
-  useMemo(() => {
-    dayjs.extend(weekOfYear);
-    dayjs.extend(localizedFormat);
-    dayjs.extend(timezone);
-  }, []);
 
   useEffect(() => {
     if (
       initialViewStartDate &&
-      !initialViewStartDate.isSame(controller.viewStartDate)
+      !isEqual(initialViewStartDate, controller.viewStartDate)
     ) {
       controller.viewStartDate = initialViewStartDate;
     }
     if (
       initialViewEndDate &&
-      !initialViewEndDate.isSame(controller.viewEndDate)
+      !isEqual(initialViewEndDate, controller.viewEndDate)
     ) {
       controller.viewEndDate = initialViewEndDate;
     }

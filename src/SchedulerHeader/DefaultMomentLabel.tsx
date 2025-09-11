@@ -1,10 +1,10 @@
 import { Box, Flex } from "@mantine/core";
-import { Dayjs } from "dayjs";
+import { formatDate } from "date-fns";
 import { useSnapshot } from "valtio";
 import { SchedulerController } from "../controller/controller";
 
 export type MomentLabelProps<TData, TResource> = {
-  moment: Dayjs;
+  moment: Date;
   controller: SchedulerController<TData, TResource>;
 };
 
@@ -15,19 +15,19 @@ export function DefaultMomentLabel<TData, TResource>({
   const snap = useSnapshot(controller);
   switch (snap.displayUnit) {
     case "year":
-      return String(moment.year());
+      return formatDate(moment, "yyyy");
     case "month":
-      return moment.format("MMMM");
+      return formatDate(moment, "MMMM");
     case "week":
-      return String(moment.week());
+      return formatDate(moment, "w");
     case "day":
       return (
         <Flex direction="column">
-          <Box>{moment.format("dddd")}</Box>
-          <Box>{moment.format("D MMMM")}</Box>
+          <Box>{formatDate(moment, "EEEE")}</Box>
+          <Box>{formatDate(moment, "d MMMM")}</Box>
         </Flex>
       );
     case "hour":
-      return moment.format("LT");
+      return formatDate(moment, "HH:mm aaa");
   }
 }
