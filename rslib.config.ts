@@ -4,6 +4,7 @@ import { defineConfig } from "@rslib/core";
 import path from "node:path";
 const excludeFileNames: string[] = ["gestureControls", "selectControls"];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ReactCompilerConfig = {
   sources: (filename: string): boolean => {
     for (const testName of excludeFileNames) {
@@ -68,11 +69,12 @@ export default defineConfig({
     pluginReact(),
     pluginBabel({
       include: /\.(?:jsx|tsx)$/,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       babelLoaderOptions(opts) {
-        opts.plugins?.unshift([
-          "babel-plugin-react-compiler",
-          ReactCompilerConfig,
-        ]);
+        //opts.plugins?.unshift([
+        //  "babel-plugin-react-compiler",
+        //  ReactCompilerConfig,
+        //]);
       },
     }),
   ],
