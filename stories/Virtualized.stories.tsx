@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { addWeeks, subHours } from "date-fns";
 import { Scheduler, useSchedulerController } from "mantine-resource-timeline";
 import { useMemo } from "react";
 export function Virtualized() {
@@ -11,8 +11,8 @@ export function Virtualized() {
       {
         id: 1,
         resourceId: 3,
-        startDate: dayjs().subtract(8, "hours"),
-        endDate: dayjs().add(1, "week"),
+        startDate: subHours(new Date(), 8),
+        endDate: addWeeks(new Date(), 1),
       },
     ],
     [],

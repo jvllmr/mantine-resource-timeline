@@ -1,4 +1,17 @@
-import { Dayjs, ManipulateType, isDayjs } from "dayjs";
+import {
+  addDays,
+  addHours,
+  addMinutes,
+  addMonths,
+  addWeeks,
+  addYears,
+  isDate,
+  subDays,
+  subHours,
+  subMonths,
+  subWeeks,
+  subYears,
+} from "date-fns";
 import { useCallback } from "react";
 import { SchedulerDisplayUnit } from "./controller/controller";
 
@@ -30,13 +43,13 @@ export function useStringAccessor<T>(field: DataFieldAccessor<T, any>) {
   );
 }
 
-export function useDateAccessor<T>(field: DataFieldAccessor<T, Dayjs>) {
+export function useDateAccessor<T>(field: DataFieldAccessor<T, Date>) {
   const getValue = useAccessor(field);
 
   return useCallback(
     (obj: T) => {
       const value = getValue(obj);
-      if (isDayjs(value)) return value;
+      if (isDate(value)) return value;
       throw TypeError(`Expected date value Received: ${value}`);
     },
     [getValue],
@@ -77,21 +90,51 @@ export function useStringArrayAccessor<T>(
 export function timeFraction(
   div: number,
   displayUnit: SchedulerDisplayUnit,
-): [number, ManipulateType] {
+): [number, (date: Date, amount: number) => Date] {
   switch (displayUnit) {
     case "year":
-      return [Math.floor(12 / div), "month"];
+      return [Math.floor(12 / div), addMonths];
     case "month":
-      return [Math.floor(30 / div), "day"];
+      return [Math.floor(30 / div), addDays];
     case "week":
-      return [Math.floor(168 / div), "hour"];
+      return [Math.floor(168 / div), addHours];
     case "day":
-      return [Math.floor(24 / div), "hour"];
+      return [Math.floor(24 / div), addHours];
     case "hour":
-      return [Math.floor(60 / div), "minute"];
+      return [Math.floor(60 / div), addMinutes];
   }
 }
 
 export type KeysOfValue<T, TCondition> = {
   [K in keyof T]: T[K] extends TCondition ? K : never;
 }[keyof T];
+
+const displayUnitAddFuncs: Record<
+  SchedulerDisplayUnit,
+  (date: Date, amount: number) => Date
+> = {
+  year: addYears,
+  month: addMonths,
+  week: addWeeks,
+  day: addDays,
+  hour: addHours,
+};
+
+export function displayUnitAddFunc(displayUnit: SchedulerDisplayUnit) {
+  return displayUnitAddFuncs[displayUnit];
+}
+
+const displayUnitSubFuncs: Record<
+  SchedulerDisplayUnit,
+  (date: Date, amount: number) => Date
+> = {
+  year: subYears,
+  month: subMonths,
+  week: subWeeks,
+  day: subDays,
+  hour: subHours,
+};
+
+export function displayUnitSubFunc(displayUnit: SchedulerDisplayUnit) {
+  return displayUnitSubFuncs[displayUnit];
+}

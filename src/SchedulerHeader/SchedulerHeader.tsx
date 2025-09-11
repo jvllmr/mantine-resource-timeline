@@ -7,10 +7,11 @@ import {
   MantineTheme,
   Paper,
 } from "@mantine/core";
-import { Dayjs } from "dayjs";
+
 import React, { useMemo } from "react";
 import { useSnapshot } from "valtio";
 
+import { formatDate, getDate, getYear } from "date-fns";
 import {
   SchedulerController,
   SchedulerDisplayUnit,
@@ -19,7 +20,7 @@ import gridClasses from "../Scheduler/SchedulerGrid.module.css";
 import { MomentStyleFn } from "../SchedulerBody/SchedulerMoment/momentStyling";
 import { DefaultMomentLabel, MomentLabelProps } from "./DefaultMomentLabel";
 export type SchedulerHeaderOnClickFn<TData, TResource> = (params: {
-  moment: Dayjs;
+  moment: Date;
   controller: SchedulerController<TData, TResource>;
 }) => void;
 
@@ -41,7 +42,7 @@ export interface SchedulerHeaderProps<TData, TResource> {
 
 interface TopLabelProps {
   displayUnit: SchedulerDisplayUnit;
-  moments: Dayjs[];
+  moments: Date[];
 }
 const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
   if (moments.length < 2) return null;
@@ -50,28 +51,42 @@ const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
   switch (displayUnit) {
     case "year":
       return null;
-    case "month":
-      if (firstMoment.year() === lastMoment.year())
-        return String(lastMoment.year());
-      return `${firstMoment.year()} - ${lastMoment.year()}`;
+    case "month": {
+      const firstMomentYear = getYear(firstMoment);
+      const lastMomentYear = getYear(lastMoment);
+      if (firstMomentYear === lastMomentYear) return lastMomentYear;
+      return `${firstMomentYear} - ${lastMomentYear}`;
+    }
     case "week":
       return null;
-    case "day":
+    case "day": {
+      const firstMomentMonth = getYear(firstMoment);
+      const lastMomentMonth = getYear(lastMoment);
+      const firstMomentYear = getYear(firstMoment);
+      const lastMomentYear = getYear(lastMoment);
       if (
-        firstMoment.year() === lastMoment.year() &&
-        firstMoment.month() === lastMoment.month()
+        firstMomentMonth === lastMomentMonth &&
+        firstMomentYear === lastMomentYear
       )
-        return lastMoment.format("MMMM YYYY");
-      return `${firstMoment.format("MMMM YYYY")} - ${lastMoment.format("MMMM YYYY")}`;
-    case "hour":
+        return formatDate(lastMoment, "MMMM yyyy");
+      return `${formatDate(firstMoment, "MMMM yyyy")} - ${formatDate(lastMoment, "MMMM yyyy")}`;
+    }
+    case "hour": {
+      const firstMomentDate = getDate(firstMoment);
+      const lastMomentDate = getDate(lastMoment);
+      const firstMomentMonth = getYear(firstMoment);
+      const lastMomentMonth = getYear(lastMoment);
+      const firstMomentYear = getYear(firstMoment);
+      const lastMomentYear = getYear(lastMoment);
       if (
-        firstMoment.year() === lastMoment.year() &&
-        firstMoment.month() === lastMoment.month() &&
-        firstMoment.date() === lastMoment.date()
+        firstMomentDate === lastMomentDate &&
+        firstMomentMonth === lastMomentMonth &&
+        firstMomentYear === lastMomentYear
       )
-        return lastMoment.format("dddd MMMM YYYY");
+        return formatDate(lastMoment, "dd MMMM yyyy");
 
-      return `${firstMoment.format("dddd MMMM YYYY")} - ${lastMoment.format("dddd MMMM YYYY")}`;
+      return `${formatDate(firstMoment, "dd MMMM yyyy")} - ${formatDate(lastMoment, "dd MMMM yyyy")}`;
+    }
   }
 
   return null;
@@ -80,7 +95,7 @@ const TopLabel = React.memo(({ displayUnit, moments }: TopLabelProps) => {
 TopLabel.displayName = "TopLabel";
 
 interface BottomLabelProps<TData, TResource> {
-  moment: Dayjs;
+  moment: Date;
   momentLabelComponent?: SchedulerHeaderProps<
     TData,
     TResource
@@ -210,7 +225,7 @@ export function SchedulerHeader<TData, TResource>({
           </Paper>
           <Flex w="100%">
             {snap.moments
-              .map((moment, index): [Dayjs, number] => [
+              .map((moment, index): [Date, number] => [
                 moment,
                 snap.momentWidths[index],
               ])

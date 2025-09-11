@@ -6,7 +6,7 @@ import {
   Paper,
 } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { Dayjs } from "dayjs";
+
 import React, { useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
 import { SchedulerController } from "../controller/controller";
@@ -25,6 +25,7 @@ import {
 } from "./NowMarker";
 import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 
+import { isAfter, isBefore } from "date-fns";
 import { useSchedulerGestures } from "../controller/gestureControls";
 import {
   DefaultSchedulerEntry,
@@ -39,8 +40,8 @@ export interface SchedulerBodyProps<TData, TResource> {
   endDate?: Date;
   data: TData[];
   resources: TResource[];
-  startDateAccessor: DataFieldAccessor<TData, Dayjs>;
-  endDateAccessor: DataFieldAccessor<TData, Dayjs>;
+  startDateAccessor: DataFieldAccessor<TData, Date>;
+  endDateAccessor: DataFieldAccessor<TData, Date>;
   dataIdAccessor: DataFieldAccessor<TData, string | number>;
   dataResourceIdAccessor: DataFieldAccessor<
     TData,
@@ -76,8 +77,8 @@ const SchedulerEntries = <TData, TResource>({
   data: TData[];
   getDataId: (dataItem: TData) => string;
   entryOffsets: Record<string, number | undefined>;
-  getEndDate: (dataItem: TData) => Dayjs;
-  getStartDate: (dataItem: TData) => Dayjs;
+  getEndDate: (dataItem: TData) => Date;
+  getStartDate: (dataItem: TData) => Date;
   entryComponent: NonNullable<
     SchedulerBodyProps<TData, TResource>["entryComponent"]
   >;
@@ -94,7 +95,8 @@ const SchedulerEntries = <TData, TResource>({
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
         const isOverlap =
-          viewStartDate.isBefore(endDate) && viewEndDate.isAfter(startDate);
+          isBefore(viewStartDate, endDate) && isAfter(viewEndDate, startDate);
+
         if (!isOverlap) return null;
         const startDistance = calculateDistancePercentage(startDate, "left");
         const endDistance = calculateDistancePercentage(endDate, "right");
@@ -153,8 +155,8 @@ function SchedulerBodyRow<TData, TResource>({
   >;
   getDataId: (dataItem: TData) => string;
   entryOffsets: Record<string, number | undefined>;
-  getEndDate: (dataItems: TData) => Dayjs;
-  getStartDate: (dataItem: TData) => Dayjs;
+  getEndDate: (dataItems: TData) => Date;
+  getStartDate: (dataItem: TData) => Date;
 
   resourceId: string;
   entryComponent: NonNullable<
@@ -286,7 +288,7 @@ export function SchedulerBody<TData, TResource>({
           const endDate2 = getEndDate(entry2);
           const entryId2 = getDataId(entry2);
           const entry2Offset = entries[entryId2];
-          if (startDate1.isBefore(endDate2) && endDate1.isAfter(startDate2)) {
+          if (isBefore(startDate1, endDate2) && isAfter(endDate1, startDate2)) {
             entryCollisions += 1;
             if (!entry2Offset) {
               entries[entryId2] = entry1Offset + entryCollisions - 1;

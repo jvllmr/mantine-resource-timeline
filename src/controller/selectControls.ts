@@ -1,17 +1,17 @@
 /* eslint-disable react-compiler/react-compiler */
-import { Dayjs } from "dayjs";
+import { isBefore, isEqual } from "date-fns";
 import { DragEvent, useEffect, useRef } from "react";
 import { SchedulerController } from "./controller";
 export type OnSelectFn<TData, TResource> = (params: {
-  firstMoment: Dayjs;
-  lastMoment: Dayjs;
+  firstMoment: Date;
+  lastMoment: Date;
   controller: SchedulerController<TData, TResource>;
   resource: TResource;
 }) => void;
 
 export type SchedulerMomentOnDragStartOverFactory = (
-  moment: Dayjs,
-  nextMoment: Dayjs,
+  moment: Date,
+  nextMoment: Date,
   resourceId: string,
 ) => (event: DragEvent<HTMLDivElement>) => void;
 export type SchedulerMomentOnDragEndFn<TResource> = (
@@ -22,8 +22,8 @@ export type SchedulerMomentOnDragEndFn<TResource> = (
 
 export type SchedulerMomentSelectClickFnFactory<TResource> = (
   resource: TResource,
-  moment: Dayjs,
-  nextMoment: Dayjs,
+  moment: Date,
+  nextMoment: Date,
 ) => (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 
 export const useSchedulerSelect = <TData, TResource>(
@@ -34,7 +34,7 @@ export const useSchedulerSelect = <TData, TResource>(
 
   useEffect(() => {
     controller.momentDragStartOver = onSelect
-      ? (moment: Dayjs, nextMoment: Dayjs, resourceId: string) => (event) => {
+      ? (moment: Date, nextMoment: Date, resourceId: string) => (event) => {
           if (
             !event.ctrlKey &&
             (controller.selectedResourceId === resourceId ||
@@ -46,10 +46,13 @@ export const useSchedulerSelect = <TData, TResource>(
             event.dataTransfer.setDragImage(constantDiv.current, 0, 0);
             if (
               !controller.firstSelectedMoment ||
-              moment.isBefore(controller.firstSelectedMoment)
+              isBefore(moment, controller.firstSelectedMoment)
             ) {
               controller.firstSelectedMoment = moment;
-            } else if (!controller.lastSelectedMoment?.isSame(nextMoment)) {
+            } else if (
+              !controller.lastSelectedMoment ||
+              !isEqual(controller.lastSelectedMoment, nextMoment)
+            ) {
               controller.lastSelectedMoment = nextMoment;
             }
             if (!controller.selectedResourceId) {
@@ -64,10 +67,10 @@ export const useSchedulerSelect = <TData, TResource>(
             // mark as selected
             let isBetween = false;
             for (const [subMoment] of controller.subbedMoments) {
-              if (subMoment.isSame(controller.firstSelectedMoment)) {
+              if (isEqual(subMoment, controller.firstSelectedMoment)) {
                 isBetween = true;
               }
-              if (subMoment.isSame(nextMoment)) {
+              if (isEqual(subMoment, nextMoment)) {
                 break;
               }
               if (

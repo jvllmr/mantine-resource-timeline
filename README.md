@@ -12,7 +12,7 @@ This library uses subgrids, which is a rather new browser feature.
 
 - `@mantine/hooks` for @mantine/core
 - `@mantine/core` for styling
-- `dayjs` for handling of dates
+- `date-fns` for handling of dates
 - `@tanstack/react-virtual` for virtualization of bigger timelines
 - `valtio` for more granular render control
 - `@use-gesture/react` for panning and zoom gestures when holding CTRL
@@ -20,7 +20,7 @@ This library uses subgrids, which is a rather new browser feature.
 ## Minimal usage
 
 ```tsx
-import { type Dayjs } from "dayjs";
+import { addHours } from "date-fns";
 import { useSchedulerController, Scheduler } from "mantine-resource-timeline";
 
 interface MyDataType {
@@ -40,8 +40,8 @@ const data: MyDataType[] = [
     id: "appointment-1",
     title: "Bob & Alice Meet",
     resourceId: [1, 2],
-    startDate: Dayjs,
-    endDate: Dayjs,
+    startDate: new Date(),
+    endDate: addHours(new Date(), 2),
   },
 ];
 

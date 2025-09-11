@@ -1,11 +1,13 @@
 /* eslint-disable react-compiler/react-compiler */
 import { useGesture } from "@use-gesture/react";
+import { isBefore } from "date-fns";
+import { displayUnitAddFunc, displayUnitSubFunc } from "../utils";
 import { SchedulerController } from "./controller";
 
 export const useSchedulerGestures = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller: SchedulerController<any, any>,
-  bodyRef: React.MutableRefObject<HTMLDivElement | null>,
+  bodyRef: React.RefObject<HTMLDivElement | null>,
   enabled?: boolean,
 ) => {
   useGesture(
@@ -16,17 +18,15 @@ export const useSchedulerGestures = (
         if (ctrlKey) {
           event.preventDefault();
 
-          const newStartDate = controller.viewStartDate.subtract(
+          const subDisplayUnit = displayUnitSubFunc(controller.displayUnit);
+          const newStartDate = subDisplayUnit(
+            controller.viewStartDate,
             y / 420,
-            controller.displayUnit,
           );
+          const addDisplayUnit = displayUnitAddFunc(controller.displayUnit);
+          const newEndDate = addDisplayUnit(controller.viewEndDate, y / 420);
 
-          const newEndDate = controller.viewEndDate.add(
-            y / 420,
-            controller.displayUnit,
-          );
-
-          if (newStartDate.isBefore(newEndDate)) {
+          if (isBefore(newStartDate, newEndDate)) {
             controller.viewStartDate = newStartDate;
             controller.viewEndDate = newEndDate;
           }
@@ -36,16 +36,13 @@ export const useSchedulerGestures = (
         if (ctrlKey && pressed) {
           event.preventDefault();
           const movement = x / 7;
-
-          const newStartDate = controller.viewStartDate.subtract(
+          const subDisplayUnit = displayUnitSubFunc(controller.displayUnit);
+          const newStartDate = subDisplayUnit(
+            controller.viewStartDate,
             movement,
-            controller.displayUnit,
           );
 
-          const newEndDate = controller.viewEndDate.subtract(
-            movement,
-            controller.displayUnit,
-          );
+          const newEndDate = subDisplayUnit(controller.viewEndDate, movement);
           controller.viewStartDate = newStartDate;
           controller.viewEndDate = newEndDate;
         }
