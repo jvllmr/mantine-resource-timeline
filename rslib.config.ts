@@ -1,6 +1,7 @@
 import { pluginBabel } from "@rsbuild/plugin-babel";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { defineConfig } from "@rslib/core";
+import path from "node:path";
 const excludeFileNames: string[] = ["gestureControls", "selectControls"];
 
 const ReactCompilerConfig = {
@@ -15,24 +16,50 @@ const ReactCompilerConfig = {
 };
 
 export default defineConfig({
+  source: {
+    tsconfigPath: "./tsconfig.lib.json",
+  },
   lib: [
     {
       format: "esm",
       syntax: "es2020",
       bundle: false,
-      dts: true,
+      dts: {
+        bundle: false,
+        distPath: "./dist/types",
+        build: true,
+      },
+      output: {
+        filename: {
+          js: "[name].mjs",
+        },
+        distPath: {
+          root: "./dist/es",
+        },
+        cleanDistPath: true,
+      },
     },
     {
       format: "cjs",
       syntax: "es2020",
       bundle: false,
-      dts: true,
+      dts: {
+        bundle: false,
+        //distPath: "./dist/types",
+        //build: true,
+      },
+      output: {
+        cleanDistPath: true,
+        filename: {
+          js: "[name].cjs",
+        },
+        distPath: {
+          root: "./dist/lib",
+        },
+      },
     },
   ],
   output: {
-    distPath: {
-      root: "build",
-    },
     minify: false,
     sourceMap: true,
     target: "web",
@@ -51,7 +78,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "mantine-resource-timeline": "./src",
+      "mantine-resource-timeline": path.resolve(__dirname, "/src"),
     },
   },
 });

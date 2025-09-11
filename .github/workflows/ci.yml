@@ -7,6 +7,23 @@ on:
       - dev
 
 jobs:
+  publish-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: corepack enable
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lock
+
+      - name: Prepublish
+        run: pnpm prepublish
+
+      - run: pnpm dlx pkg-pr-new publish
   lint:
     runs-on: ubuntu-latest
     steps:
