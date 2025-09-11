@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lock
       - name: Build storybook
-        run: pnpm build-storybook
+        run: pnpm storybook:build
       - name: Add .nojekyll
         run: touch storybook-static/.nojekyll
       - name: Upload artifact
