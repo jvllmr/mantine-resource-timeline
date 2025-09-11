@@ -111,8 +111,5 @@
     "react": " ^19.0.0",
     "react-dom": " ^19.0.0",
     "valtio": "^2.1.0"
-  },
-  "dependencies": {
-    "@storybook/addon-interactions": "^8.6.14"
   }
 }
