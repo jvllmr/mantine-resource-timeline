@@ -31,8 +31,8 @@ export type DetermineSubMomentCountsFn = (
   displayUnit: SchedulerDisplayUnit,
 ) => number;
 export interface SchedulerControllerParams<TData, TResource> {
-  initialViewStartDate?: Date;
-  initialViewEndDate?: Date;
+  viewStartDate?: Date;
+  viewEndDate?: Date;
   clip?: boolean;
   determineSubMomentsCount?: DetermineSubMomentCountsFn;
   determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
@@ -239,8 +239,8 @@ function calculateSubMoments( // eslint-disable-next-line @typescript-eslint/no-
 }
 
 export function useSchedulerController<TData, TResource>({
-  initialViewEndDate,
-  initialViewStartDate,
+  viewEndDate: viewEndDateInput,
+  viewStartDate: viewViewStartDateInput,
   clip,
 
   onSelect,
@@ -270,18 +270,18 @@ export function useSchedulerController<TData, TResource>({
 
   useEffect(() => {
     if (
-      initialViewStartDate &&
-      !isEqual(initialViewStartDate, controller.viewStartDate)
+      viewViewStartDateInput &&
+      !isEqual(viewViewStartDateInput, controller.viewStartDate)
     ) {
-      controller.viewStartDate = initialViewStartDate;
+      controller.viewStartDate = viewViewStartDateInput;
     }
     if (
-      initialViewEndDate &&
-      !isEqual(initialViewEndDate, controller.viewEndDate)
+      viewEndDateInput &&
+      !isEqual(viewEndDateInput, controller.viewEndDate)
     ) {
-      controller.viewEndDate = initialViewEndDate;
+      controller.viewEndDate = viewEndDateInput;
     }
-  }, [controller, initialViewEndDate, initialViewStartDate]);
+  }, [controller, viewEndDateInput, viewViewStartDateInput]);
 
   useEffect(() => {
     calculateDisplayUnit(controller, determineDisplayUnitParam);
