@@ -6,7 +6,7 @@ const config: StorybookConfig = {
   ],
   addons: [
     "storybook-dark-mode",
-
+    "@storybook/addon-docs",
     "@storybook/addon-themes",
     "@storybook/addon-interactions",
     "storybook-addon-rslib",

@@ -4,6 +4,7 @@
     "formulahendry.auto-close-tag",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-    "vunguyentuan.vscode-postcss"
+    "vunguyentuan.vscode-postcss",
+    "unifiedjs.vscode-mdx"
   ]
 }
