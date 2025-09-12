@@ -8,7 +8,7 @@
     "url": "git+https://github.com/jvllmr/mantine-resource-timeline.git",
     "type": "git"
   },
-  "homepage": "https://jvllmr.github.io/mantine-resource-timeline",
+  "homepage": "https://mantine-resource-timeline.vercel.app",
   "main": "./dist/lib/index.cjs",
   "module": "./dist/es/index.mjs",
   "types": "./dist/types/index.d.ts",
