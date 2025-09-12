@@ -15,5 +15,10 @@ const config: StorybookConfig = {
     name: "storybook-react-rsbuild",
     options: {},
   },
+  rsbuildFinal: (config) => {
+    config.output ||= {};
+    config.output.assetPrefix = "/mantine-resource-timeline/";
+    return config;
+  },
 };
 export default config;
