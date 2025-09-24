@@ -35,7 +35,7 @@ export interface SchedulerControllerParams<TData, TResource> {
   viewEndDate?: Date;
   clip?: boolean;
   determineSubMomentsCount?: DetermineSubMomentCountsFn;
-  determineDisplayUnit?: (daysDiff: number) => SchedulerDisplayUnit;
+  determineDisplayUnit?: (hoursDiff: number) => SchedulerDisplayUnit;
   onSelect?: OnSelectFn<TData, TResource>;
 }
 
@@ -105,15 +105,15 @@ function clipStartViewDate(date: Date, displayUnit: SchedulerDisplayUnit) {
 function calculateDisplayUnit(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller: SchedulerController<any, any>,
-  calcFn?: (diff: number) => SchedulerDisplayUnit,
+  calcFn?: (hoursDiff: number) => SchedulerDisplayUnit,
 ) {
-  const daysDiff = differenceInHours(
+  const hoursDiff = differenceInHours(
     controller.viewEndDate,
     controller.viewStartDate,
   );
 
   const customDetermineDisplayUnit = calcFn ?? determineDisplayUnit;
-  const newDisplayUnit = customDetermineDisplayUnit(daysDiff);
+  const newDisplayUnit = customDetermineDisplayUnit(hoursDiff);
   if (newDisplayUnit !== controller.displayUnit) {
     controller.displayUnit = newDisplayUnit;
   }
