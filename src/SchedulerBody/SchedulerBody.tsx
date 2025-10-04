@@ -1,10 +1,4 @@
-import {
-  Box,
-  Flex,
-  MantineStyleProps,
-  MantineTheme,
-  Paper,
-} from "@mantine/core";
+import { Box, Flex, MantineTheme, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 import React, { useMemo, useRef } from "react";
@@ -26,6 +20,7 @@ import {
 import { DefaultResourceLabel, ResourceLabelProps } from "./ResourceLabel";
 
 import { isAfter, isBefore } from "date-fns";
+import { Activity } from "react";
 import { useSchedulerGestures } from "../controller/gestureControls";
 import {
   DefaultSchedulerEntry,
@@ -34,7 +29,6 @@ import {
 } from "./SchedulerEntry/SchedulerEntry";
 import { MomentStyleFn } from "./SchedulerMoment/momentStyling";
 import { SchedulerMoments } from "./SchedulerMoment/SchedulerMoment";
-
 export interface SchedulerBodyProps<TData, TResource> {
   startDate?: Date;
   endDate?: Date;
@@ -94,34 +88,33 @@ const SchedulerEntries = <TData, TResource>({
       {data.map((item) => {
         const startDate = getStartDate(item);
         const endDate = getEndDate(item);
-        const isOverlap =
+        const isVisible =
           isBefore(viewStartDate, endDate) && isAfter(viewEndDate, startDate);
 
-        if (!isOverlap) return null;
         const startDistance = calculateDistancePercentage(startDate, "left");
         const endDistance = calculateDistancePercentage(endDate, "right");
 
-        const display: MantineStyleProps["display"] = isOverlap
-          ? undefined
-          : "none";
         const entryId = getDataId(item);
         const offsetMultiplier = entryOffsets[entryId] ?? 0;
         const top = rowHeight * offsetMultiplier + 0.1 * rowHeight;
         return (
-          <SchedulerEntryRenderer
-            CustomSchedulerEntry={entryComponent}
-            style={{
-              display,
-              position: "absolute",
-              top,
-              left: `${startDistance}%`,
-              height: entryHeight,
-              right: `${endDistance}%`,
-            }}
+          <Activity
             key={`entry_${entryId}`}
-            data={item}
-            resource={resource}
-          />
+            mode={isVisible ? "visible" : "hidden"}
+          >
+            <SchedulerEntryRenderer
+              CustomSchedulerEntry={entryComponent}
+              style={{
+                position: "absolute",
+                top,
+                left: `${startDistance}%`,
+                height: entryHeight,
+                right: `${endDistance}%`,
+              }}
+              data={item}
+              resource={resource}
+            />
+          </Activity>
         );
       })}
     </>
