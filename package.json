@@ -102,7 +102,7 @@
     "component",
     "react"
   ],
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.26.0",
   "peerDependencies": {
     "@date-fns/tz": "^1.4.1",
     "@mantine/core": "^8.2.8",
