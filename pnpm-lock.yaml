@@ -148,8 +148,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(@mantine/core@8.3.10(@mantine/hooks@8.3.10(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@mantine/hooks@8.3.10(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))
       storybook-addon-rslib:
-        specifier: ^2.1.6
-        version: 2.1.6(@rsbuild/core@1.6.15)(@rslib/core@0.18.4(@microsoft/api-extractor@7.55.2(@types/node@24.9.2))(typescript@5.9.3))(storybook-builder-rsbuild@2.1.6(@rsbuild/core@1.6.15)(@rspack/core@1.6.8(@swc/helpers@0.5.17))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^3.2.0
+        version: 3.2.0(@rsbuild/core@1.6.15)(@rslib/core@0.18.4(@microsoft/api-extractor@7.55.2(@types/node@24.9.2))(typescript@5.9.3))(storybook-builder-rsbuild@2.1.6(@rsbuild/core@1.6.15)(@rspack/core@1.6.8(@swc/helpers@0.5.17))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))(typescript@5.9.3))(typescript@5.9.3)
       storybook-dark-mode:
         specifier: ^4.0.2
         version: 4.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))
@@ -2954,8 +2954,8 @@ packages:
       react-dom: ^19.0.0
       storybook: ^9.0.0
 
-  storybook-addon-rslib@2.1.6:
-    resolution: {integrity: sha512-QvmRMGgVQdD6jK6yyGQUUuqvRZ2/aq2dn0IMox/ivrg0zmwA9LEc48LgmzIwykjCsRmu2h/6Pz5Fjps9j5BANg==}
+  storybook-addon-rslib@3.2.0:
+    resolution: {integrity: sha512-Fc6JtiozCCGQQ/cAK/sdeOAmAaiONxzE9+OPw7S+2gZgfao5M2jPlkONAVYIdb4a1fwP/7TTvESpMVODpQsekw==}
     peerDependencies:
       '@rsbuild/core': ^1.5.0
       '@rslib/core': '>= 0.1.1 || >= 0.2'
@@ -6519,7 +6519,7 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       storybook: 9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4)
 
-  storybook-addon-rslib@2.1.6(@rsbuild/core@1.6.15)(@rslib/core@0.18.4(@microsoft/api-extractor@7.55.2(@types/node@24.9.2))(typescript@5.9.3))(storybook-builder-rsbuild@2.1.6(@rsbuild/core@1.6.15)(@rspack/core@1.6.8(@swc/helpers@0.5.17))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))(typescript@5.9.3))(typescript@5.9.3):
+  storybook-addon-rslib@3.2.0(@rsbuild/core@1.6.15)(@rslib/core@0.18.4(@microsoft/api-extractor@7.55.2(@types/node@24.9.2))(typescript@5.9.3))(storybook-builder-rsbuild@2.1.6(@rsbuild/core@1.6.15)(@rspack/core@1.6.8(@swc/helpers@0.5.17))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(storybook@9.1.17(@testing-library/dom@10.4.0)(prettier@3.7.4))(typescript@5.9.3))(typescript@5.9.3):
     dependencies:
       '@rsbuild/core': 1.6.15
       '@rslib/core': 0.18.4(@microsoft/api-extractor@7.55.2(@types/node@24.9.2))(typescript@5.9.3)
