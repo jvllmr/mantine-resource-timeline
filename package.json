@@ -89,7 +89,7 @@
     "storybook-addon-mantine": "^6.0.0",
     "storybook-addon-rslib": "^2.1.6",
     "storybook-dark-mode": "^4.0.2",
-    "storybook-react-rsbuild": "^2.1.6",
+    "storybook-react-rsbuild": "^3.2.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0"
   },
