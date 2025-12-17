@@ -50,7 +50,7 @@ const preview: Preview = {
 
     (Story) => {
       return (
-        <MantineProvider>
+        <MantineProvider defaultColorScheme="auto">
           <Story />
         </MantineProvider>
       );
