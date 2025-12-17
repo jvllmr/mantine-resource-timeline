@@ -8,11 +8,12 @@ import {
 import "@mantine/core/styles.css";
 import "@mantine/core/styles.layer.css";
 import "@mantine/dates/styles.layer.css";
+import { DARK_MODE_EVENT_NAME } from "@storybook-community/storybook-dark-mode";
+import { DarkModeDocsContainer } from "@storybook-community/storybook-dark-mode/docs";
 import { withThemeFromJSXProvider } from "@storybook/addon-themes";
 import { addons } from "@storybook/preview-api";
 import type { Preview, ReactRenderer } from "@storybook/react";
 import React, { useEffect } from "react";
-import { DARK_MODE_EVENT_NAME } from "storybook-dark-mode";
 const allColorThemes: MantineTheme[] = Object.keys(DEFAULT_THEME.colors)
   .sort()
   .map((primaryColor) => ({ ...DEFAULT_THEME, primaryColor }));
@@ -31,7 +32,13 @@ function ColorSchemeWrapper({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
 const preview: Preview = {
+  parameters: {
+    docs: {
+      container: DarkModeDocsContainer,
+    },
+  },
   decorators: [
     (Story) => {
       return (
@@ -43,7 +50,7 @@ const preview: Preview = {
 
     (Story) => {
       return (
-        <MantineProvider>
+        <MantineProvider defaultColorScheme="auto">
           <Story />
         </MantineProvider>
       );
