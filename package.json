@@ -84,14 +84,15 @@
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "publint": "^0.3.17",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "storybook": "^10.2.0",
     "storybook-addon-mantine": "^6.0.0",
     "storybook-addon-rslib": "^3.2.2",
     "storybook-react-rsbuild": "^3.2.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.1"
+    "typescript-eslint": "^8.53.1",
+    "valtio": "^2.3.0"
   },
   "keywords": [
     "mantine",
@@ -112,6 +113,6 @@
     "date-fns": "^4.1.0",
     "react": " ^19.2.0",
     "react-dom": " ^19.2.0",
-    "valtio": "^2.1.0"
+    "valtio": "^2.3.0"
   }
 }
