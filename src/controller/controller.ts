@@ -18,6 +18,7 @@ import {
 } from "date-fns";
 import { useEffect, useRef } from "react";
 import { proxy, subscribe } from "valtio";
+import { unstable_enableOp } from "valtio/vanilla";
 import { timeFraction } from "../utils";
 import {
   OnSelectFn,
@@ -251,6 +252,10 @@ export function useSchedulerController<TData, TResource>({
   TData,
   TResource
 > {
+  useEffect(() => {
+    unstable_enableOp(true);
+  }, []);
+
   const controller = useRef(
     proxy<SchedulerController<TData, TResource>>({
       calculateDistancePercentage: () => 0,
