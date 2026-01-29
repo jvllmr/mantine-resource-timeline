@@ -1,10 +1,4 @@
-import {
-  Box,
-  Flex,
-  MantineStyleProps,
-  MantineTheme,
-  Paper,
-} from "@mantine/core";
+import { Box, Flex, MantineTheme, Paper } from "@mantine/core";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 
 import React, { useMemo, useRef } from "react";
@@ -100,10 +94,6 @@ const SchedulerEntries = <TData, TResource>({
         const startDistance = calculateDistancePercentage(startDate, "left");
         const endDistance = calculateDistancePercentage(endDate, "right");
 
-        const display: MantineStyleProps["display"] = isVisible
-          ? undefined
-          : "none";
-
         const entryId = getDataId(item);
         const offsetMultiplier = entryOffsets[entryId] ?? 0;
         const top = rowHeight * offsetMultiplier + 0.1 * rowHeight;
@@ -115,7 +105,6 @@ const SchedulerEntries = <TData, TResource>({
             <SchedulerEntryRenderer
               CustomSchedulerEntry={entryComponent}
               style={{
-                display,
                 position: "absolute",
                 top,
                 left: `${startDistance}%`,
